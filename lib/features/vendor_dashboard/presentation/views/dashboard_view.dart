@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import '../controllers/dashboard_controller.dart';
 import '../widgets/stat_card.dart';
+import 'package:ecom_app/app/widgets/custom_button.dart';
 
 class DashboardView extends GetView<DashboardController> {
   const DashboardView({super.key});
@@ -16,25 +17,20 @@ class DashboardView extends GetView<DashboardController> {
       backgroundColor: AppColors.offWhite,
       appBar: _buildAppBar(sw),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          sw * 0.042,
-          sw * 0.032,
-          sw * 0.042,
-          sw * 0.06,
-        ),
+        padding: .fromLTRB(sw * 0.042, sw * 0.032, sw * 0.042, sw * 0.06),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             _buildHeader(sw),
-            SizedBox(height: sw * 0.038),
+            SizedBox(height: sw * 0.025),
             _buildQuickBadges(sw),
-            SizedBox(height: sw * 0.042),
+            SizedBox(height: sw * 0.035),
             _buildSectionLabel('Overview', sw),
-            SizedBox(height: sw * 0.022),
+            SizedBox(height: sw * 0.015),
             _buildStatsGrid(sw),
-            SizedBox(height: sw * 0.048),
+            SizedBox(height: sw * 0.035),
             _buildSectionLabel('Recent Activity', sw),
-            SizedBox(height: sw * 0.022),
+            SizedBox(height: sw * 0.015),
             _buildRecentActivity(sw),
           ],
         ),
@@ -67,8 +63,11 @@ class DashboardView extends GetView<DashboardController> {
               ),
               borderRadius: BorderRadius.circular(sw * 0.02),
             ),
-            child: Icon(Icons.storefront_rounded,
-                color: AppColors.white, size: sw * 0.038),
+            child: Icon(
+              Icons.storefront_rounded,
+              color: AppColors.white,
+              size: sw * 0.038,
+            ),
           ),
           SizedBox(width: sw * 0.025),
           Column(
@@ -104,8 +103,11 @@ class DashboardView extends GetView<DashboardController> {
             children: [
               IconButton(
                 onPressed: () {},
-                icon: Icon(Icons.notifications_outlined,
-                    size: sw * 0.052, color: AppColors.ink),
+                icon: Icon(
+                  Icons.notifications_outlined,
+                  size: sw * 0.052,
+                  color: AppColors.ink,
+                ),
                 tooltip: 'Notifications',
               ),
               Positioned(
@@ -123,36 +125,15 @@ class DashboardView extends GetView<DashboardController> {
             ],
           ),
         ),
-        // logout
         Container(
           margin: EdgeInsets.only(right: sw * 0.025),
-          child: Material(
-            color: AppColors.greySubtle,
-            borderRadius: BorderRadius.circular(sw * 0.02),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(sw * 0.02),
-              onTap: () => Get.offAllNamed('/home'),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: sw * 0.026, vertical: sw * 0.016),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.logout_rounded,
-                        size: sw * 0.04, color: AppColors.ink),
-                    SizedBox(width: sw * 0.012),
-                    Text(
-                      'Exit',
-                      style: GoogleFonts.outfit(
-                        fontSize: sw * 0.029,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          child: CustomButton(
+            text: 'Exit',
+            onPressed: () => Get.offAllNamed('/home'),
+            variant: ButtonVariant.outlined,
+            icon: Icons.logout_rounded,
+            width: sw * 0.22,
+            height: sw * 0.09,
           ),
         ),
       ],
@@ -256,7 +237,9 @@ class DashboardView extends GetView<DashboardController> {
         final icon = b['icon'] as IconData;
         return Container(
           padding: EdgeInsets.symmetric(
-              horizontal: sw * 0.028, vertical: sw * 0.014),
+            horizontal: sw * 0.028,
+            vertical: sw * 0.014,
+          ),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(sw * 0.02),
@@ -322,9 +305,9 @@ class DashboardView extends GetView<DashboardController> {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: sw * 0.028,
-          mainAxisSpacing: sw * 0.028,
-          childAspectRatio: 1.28,
+          crossAxisSpacing: sw * 0.024,
+          mainAxisSpacing: sw * 0.024,
+          childAspectRatio: 1.75,
         ),
         itemCount: controller.stats.length,
         itemBuilder: (context, index) {
@@ -372,14 +355,14 @@ class DashboardView extends GetView<DashboardController> {
               final Color dotColor = isPositive
                   ? AppColors.success
                   : isNeutral
-                      ? AppColors.camel
-                      : AppColors.error;
+                  ? AppColors.camel
+                  : AppColors.error;
 
               final IconData iconData = isPositive
                   ? Icons.trending_up_rounded
                   : isNeutral
-                      ? Icons.inventory_2_outlined
-                      : Icons.trending_down_rounded;
+                  ? Icons.inventory_2_outlined
+                  : Icons.trending_down_rounded;
 
               return Padding(
                 padding: EdgeInsets.symmetric(
@@ -396,8 +379,7 @@ class DashboardView extends GetView<DashboardController> {
                         color: dotColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(sw * 0.024),
                       ),
-                      child: Icon(iconData,
-                          size: sw * 0.04, color: dotColor),
+                      child: Icon(iconData, size: sw * 0.04, color: dotColor),
                     ),
                     SizedBox(width: sw * 0.028),
 

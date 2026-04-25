@@ -1,6 +1,6 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
-import 'package:ecom_app/features/onboarding/presentation/widgets/auth_screen.dart';
+import 'package:ecom_app/features/auth/presentation/screens/auth_gateway_screen.dart';
 import 'package:ecom_app/features/onboarding/presentation/widgets/carousel_screen.dart';
 import 'package:ecom_app/features/onboarding/presentation/widgets/personalization_screen.dart';
 import 'package:ecom_app/features/onboarding/presentation/widgets/role_selection_screen.dart';
@@ -23,7 +23,7 @@ class OnboardingView extends GetView<OnboardingController> {
           CarouselScreen(),
           RoleSelectionScreen(),
           PersonalizationScreen(),
-          AuthScreen(),
+          AuthGatewayScreen(),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:ecom_app/features/onboarding/presentation/widgets/onboarding_progress_bar.dart';
+import 'package:ecom_app/features/onboarding/presentation/widgets/category_chip.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +12,7 @@ class PersonalizationScreen extends GetView<OnboardingController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final w = size.width;
     final h = size.height;
@@ -22,7 +24,7 @@ class PersonalizationScreen extends GetView<OnboardingController> {
           children: [
             // ── Back + Progress ────────────────────────────────────────────
             Padding(
-              padding: EdgeInsets.fromLTRB(w * 0.03, h * 0.015, w * 0.05, 0),
+              padding: .fromLTRB(w * 0.03, h * 0.015, w * 0.05, 0),
               child: Row(
                 children: [
                   IconButton(
@@ -40,53 +42,44 @@ class PersonalizationScreen extends GetView<OnboardingController> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  w * 0.07,
-                  h * 0.03,
-                  w * 0.07,
-                  h * 0.03,
-                ),
+                padding: .fromLTRB(w * 0.07, h * 0.01, w * 0.07, h * 0.01),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: .start,
                   children: [
-                    // ── Step label ──────────────────────────────────────────
+                    // ── Step1 label ──────────────────────────────────────────
                     Container(
-                      padding: EdgeInsets.symmetric(
+                      padding: .symmetric(
                         horizontal: w * 0.03,
                         vertical: h * 0.006,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.camelLight,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: .circular(4),
                       ),
                       child: Text(
                         'STEP 2 OF 3',
                         style: GoogleFonts.outfit(
-                          fontSize: w * 0.028,
-                          fontWeight: FontWeight.w700,
+                          fontSize: w * 0.025,
+                          fontWeight: .w700,
                           color: AppColors.camel,
                           letterSpacing: 1.1,
                         ),
                       ),
                     ),
 
-                    SizedBox(height: h * 0.02),
+                    SizedBox(height: h * 0.01),
 
                     Text(
-                      'Personalize\nYour Style',
-                      style: GoogleFonts.cormorantGaramond(
-                        fontSize: w * 0.1,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.charcoal,
-                        height: 1.1,
-                        letterSpacing: -0.3,
+                      'Personalize Your Style',
+                      style: theme.textTheme.displayMedium?.copyWith(
+                        fontSize: w * 0.08,
                       ),
                     ),
 
                     SizedBox(height: h * 0.01),
 
                     Text(
-                      'Tell us your style so we can surface the\nbest products and predict your perfect fit.',
+                      'Tell us your style so we can surface the best products and predict your perfect fit.',
                       style: GoogleFonts.outfit(
                         fontSize: w * 0.036,
                         color: AppColors.grey,
@@ -94,47 +87,45 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                       ),
                     ),
 
-                    SizedBox(height: h * 0.04),
+                    SizedBox(height: h * 0.01),
 
                     // ── Category Section ────────────────────────────────────
                     _SectionLabel(label: 'What are you shopping for?', w: w),
-                    SizedBox(height: h * 0.016),
+                    SizedBox(height: h * 0.01),
 
                     Obx(
                       () => Wrap(
-                        spacing: w * 0.025,
-                        runSpacing: h * 0.012,
+                        spacing: w * 0.015,
+                        runSpacing: h * 0.01,
                         children: controller.categories.map((cat) {
                           final label = cat['label'] as String;
                           final icon = cat['icon'] as IconData;
                           final isSelected = controller.selectedCategories
                               .contains(label);
-                          return _CategoryChip(
+                          return CategoryChip(
                             label: label,
                             icon: icon,
                             selected: isSelected,
                             onTap: () => controller.toggleCategory(label),
-                            w: w,
-                            h: h,
                           );
                         }).toList(),
                       ),
                     ),
 
-                    SizedBox(height: h * 0.04),
+                    SizedBox(height: h * 0.02),
 
                     // ── AI Size Section ────────────────────────────────────
                     _SectionLabel(label: 'Calibrate Your AI Size', w: w),
-                    SizedBox(height: h * 0.008),
+                    SizedBox(height: w * 0.01),
                     Text(
-                      'Approximate values work great — you can always refine later.',
+                      'Approximate values work great, you can always refine later.',
                       style: GoogleFonts.outfit(
                         fontSize: w * 0.032,
                         color: AppColors.grey,
                       ),
                     ),
 
-                    SizedBox(height: h * 0.01),
+                    SizedBox(height: w * 0.01),
 
                     // Height Slider
                     _MeasurementSlider(
@@ -148,7 +139,7 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                       h: h,
                     ),
 
-                    SizedBox(height: h * 0.018),
+                    SizedBox(height: w * 0.02),
 
                     // Weight Slider
                     _MeasurementSlider(
@@ -162,11 +153,11 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                       h: h,
                     ),
 
-                    SizedBox(height: h * 0.034),
+                    SizedBox(height: w * 0.02),
 
                     // ── Fit Preference ──────────────────────────────────────
                     _SectionLabel(label: 'Preferred Fit', w: w),
-                    SizedBox(height: h * 0.016),
+                    SizedBox(height: w * 0.02),
 
                     Obx(
                       () => Row(
@@ -174,38 +165,18 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                           final isSelected =
                               controller.selectedFit.value == fit;
                           return Expanded(
-                            child: GestureDetector(
-                              onTap: () => controller.selectFit(fit),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 220),
-                                margin: .only(
-                                  right: fit != controller.fitOptions.last
-                                      ? w * 0.02
-                                      : 0,
-                                ),
-                                padding: .symmetric(vertical: h * 0.01),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.camel
-                                      : AppColors.greySubtle,
-                                  borderRadius: BorderRadius.circular(w * 0.03),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? AppColors.camel
-                                        : Colors.transparent,
-                                  ),
-                                ),
-                                child: Text(
-                                  fit,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: w * 0.036,
-                                    fontWeight: FontWeight.w600,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : AppColors.ink,
-                                  ),
-                                ),
+                            child: Padding(
+                              padding: .only(
+                                right: fit != controller.fitOptions.last
+                                    ? w * 0.02
+                                    : 0,
+                              ),
+                              child: CustomButton(
+                                text: fit,
+                                variant: isSelected ? .primary : .secondary,
+                                onPressed: () => controller.selectFit(fit),
+                                height: w * 0.1,
+                                borderRadius: w * 0.03,
                               ),
                             ),
                           );
@@ -213,7 +184,7 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                       ),
                     ),
 
-                    SizedBox(height: h * 0.045),
+                    SizedBox(height: h * 0.04),
 
                     // ── CTA ─────────────────────────────────────────────────
                     CustomButton(
@@ -221,7 +192,7 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                       onPressed: controller.nextPage,
                     ),
 
-                    SizedBox(height: h * 0.014),
+                    SizedBox(height: h * 0.01),
 
                     Center(
                       child: GestureDetector(
@@ -229,9 +200,9 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                         child: Text(
                           'Skip for now',
                           style: GoogleFonts.outfit(
-                            fontSize: w * 0.033,
+                            fontSize: w * 0.03,
                             color: AppColors.grey,
-                            decoration: TextDecoration.underline,
+                            decoration: .underline,
                             decorationColor: AppColors.grey,
                           ),
                         ),
@@ -263,79 +234,8 @@ class _SectionLabel extends StatelessWidget {
       label,
       style: GoogleFonts.outfit(
         fontSize: w * 0.04,
-        fontWeight: FontWeight.w700,
+        fontWeight: .w700,
         color: AppColors.charcoal,
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Category Chip
-// ─────────────────────────────────────────────────────────────────────────────
-class _CategoryChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-  final double w;
-  final double h;
-
-  const _CategoryChip({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-    required this.w,
-    required this.h,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        padding: EdgeInsets.symmetric(
-          horizontal: w * 0.04,
-          vertical: h * 0.013,
-        ),
-        decoration: BoxDecoration(
-          color: selected ? AppColors.camelLight : AppColors.greySubtle,
-          borderRadius: BorderRadius.circular(w * 0.025),
-          border: Border.all(
-            color: selected ? AppColors.camel : Colors.transparent,
-            width: 1.5,
-          ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppColors.camel.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: w * 0.042,
-              color: selected ? AppColors.camel : AppColors.grey,
-            ),
-            SizedBox(width: w * 0.018),
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                fontSize: w * 0.034,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected ? AppColors.camel : AppColors.ink,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -368,7 +268,7 @@ class _MeasurementSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: .symmetric(horizontal: w * 0.025, vertical: h * 0.01),
+      padding: .symmetric(horizontal: w * 0.025, vertical: h * 0.005),
       decoration: BoxDecoration(
         color: const Color(0xFFFAF9F6),
         borderRadius: .circular(w * 0.04),
@@ -392,11 +292,11 @@ class _MeasurementSlider extends StatelessWidget {
                 () => Container(
                   padding: .symmetric(
                     horizontal: w * 0.03,
-                    vertical: h * 0.005,
+                    vertical: h * 0.001,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.camelLight,
-                    borderRadius: .circular(6),
+                    borderRadius: .circular(w * 0.03),
                   ),
                   child: Text(
                     '${value.value.round()} $unit',
@@ -410,7 +310,6 @@ class _MeasurementSlider extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: w * 0.005),
           Obx(
             () => SliderTheme(
               data: SliderThemeData(
@@ -418,7 +317,9 @@ class _MeasurementSlider extends StatelessWidget {
                 inactiveTrackColor: AppColors.greyLight,
                 thumbColor: AppColors.camel,
                 overlayColor: AppColors.camel.withValues(alpha: 0.12),
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                thumbShape: RoundSliderThumbShape(
+                  enabledThumbRadius: w * 0.018,
+                ),
                 trackHeight: 3,
               ),
               child: Slider(

@@ -23,7 +23,11 @@ class CustomTextField extends StatelessWidget {
   final int? maxLength;
   final EdgeInsetsGeometry? contentPadding;
   final bool readOnly;
+  final double? borderRadius;
+  final EdgeInsetsGeometry? margin;
+  final Color? fillColor;
   final String? errorText;
+  final TextStyle? style;
 
   const CustomTextField({
     super.key,
@@ -46,7 +50,11 @@ class CustomTextField extends StatelessWidget {
     this.maxLength,
     this.contentPadding,
     this.readOnly = false,
+    this.borderRadius,
+    this.margin,
+    this.fillColor,
     this.errorText,
+    this.style,
   });
 
   @override
@@ -56,7 +64,7 @@ class CustomTextField extends StatelessWidget {
     final height = size.height;
 
     return Container(
-      margin: .only(bottom: height * 0.012),
+      margin: margin ?? .only(bottom: height * 0.012),
       child: Column(
         crossAxisAlignment: .start,
         children: [
@@ -84,10 +92,10 @@ class CustomTextField extends StatelessWidget {
                   if (icon != null) SizedBox(width: width * 0.02),
                   Text(
                     label!,
-                    style: GoogleFonts.poppins(
+                    style: GoogleFonts.outfit(
                       fontSize: width * 0.035,
                       fontWeight: .w600,
-                      color: const Color(0xFF374151),
+                      color: AppColors.ink,
                       letterSpacing: 0.2,
                     ),
                   ),
@@ -118,23 +126,25 @@ class CustomTextField extends StatelessWidget {
             cursorHeight: height * 0.022,
             cursorWidth: 2,
             cursorColor: focusColor,
-            style: GoogleFonts.interTight(
-              fontSize: width * 0.038,
-              color: const Color(0xFF1F2937),
-              fontWeight: .w500,
-              height: 1.3,
-            ),
+            style:
+                style ??
+                GoogleFonts.poppins(
+                  fontSize: width * 0.035,
+                  color: const Color(0xFF1F2937),
+                  fontWeight: .w500,
+                  height: 1.3,
+                ),
             onChanged: onChanged,
             decoration: InputDecoration(
               counterText: "",
               filled: true,
-              fillColor: const Color(0xFFF8FAFC),
+              fillColor: fillColor ?? const Color(0xFFF8FAFC),
               hintText: hinttext,
               suffixIcon: suffixIcon,
               errorText: errorText,
 
               enabledBorder: OutlineInputBorder(
-                borderRadius: .circular(width * 0.03),
+                borderRadius: .circular(borderRadius ?? width * 0.03),
                 borderSide: BorderSide(
                   color: hasError
                       ? AppColors.error
@@ -144,7 +154,7 @@ class CustomTextField extends StatelessWidget {
               ),
 
               focusedBorder: OutlineInputBorder(
-                borderRadius: .circular(width * 0.03),
+                borderRadius: .circular(borderRadius ?? width * 0.03),
                 borderSide: BorderSide(
                   color: focusColor ?? AppColors.camel,
                   width: 1.8,
@@ -152,14 +162,14 @@ class CustomTextField extends StatelessWidget {
               ),
 
               errorBorder: OutlineInputBorder(
-                borderRadius: .circular(width * 0.03),
+                borderRadius: .circular(borderRadius ?? width * 0.03),
                 borderSide: const BorderSide(
                   color: Color(0xFFEF4444),
                   width: 1.2,
                 ),
               ),
               focusedErrorBorder: OutlineInputBorder(
-                borderRadius: .circular(width * 0.03),
+                borderRadius: .circular(borderRadius ?? width * 0.03),
                 borderSide: const BorderSide(
                   color: Color(0xFFEF4444),
                   width: 1.8,

@@ -29,7 +29,10 @@ class AuthScreen extends GetView<OnboardingController> {
                 children: [
                   IconButton(
                     onPressed: controller.prevPage,
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 18,
+                    ),
                     color: AppColors.charcoal,
                   ),
                   Expanded(child: OnboardingProgressBar(step: 4, total: 4)),
@@ -39,7 +42,7 @@ class AuthScreen extends GetView<OnboardingController> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: .fromLTRB(w * 0.07, h * 0.03, w * 0.07, h * 0.03),
+                padding: .fromLTRB(w * 0.07, h * 0.01, w * 0.07, h * 0.01),
                 child: Column(
                   crossAxisAlignment: .start,
                   children: [
@@ -57,7 +60,7 @@ class AuthScreen extends GetView<OnboardingController> {
                         'STEP 3 OF 3',
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: AppColors.camel,
-                          fontSize: w * 0.028,
+                          fontSize: w * 0.025,
                         ),
                       ),
                     ),
@@ -65,16 +68,16 @@ class AuthScreen extends GetView<OnboardingController> {
                     SizedBox(height: h * 0.02),
 
                     Text(
-                      'Initialize\nAccount',
+                      'Initialize Account',
                       style: theme.textTheme.displayLarge?.copyWith(
-                        fontSize: w * 0.1,
+                        fontSize: w * 0.08,
                       ),
                     ),
 
                     SizedBox(height: h * 0.01),
 
                     Text(
-                      'Join our global community of brands and\nshoppers on a unified platform.',
+                      'Join our global community of brands and shoppers on a unified platform.',
                       style: theme.textTheme.bodyLarge?.copyWith(
                         fontSize: w * 0.035,
                         color: AppColors.grey,
@@ -105,7 +108,9 @@ class AuthScreen extends GetView<OnboardingController> {
                     // ── Divider ─────────────────────────────────────────────
                     Row(
                       children: [
-                        const Expanded(child: Divider(color: AppColors.greyLight)),
+                        const Expanded(
+                          child: Divider(color: AppColors.greyLight),
+                        ),
                         Padding(
                           padding: .symmetric(horizontal: w * 0.04),
                           child: Text(
@@ -116,21 +121,25 @@ class AuthScreen extends GetView<OnboardingController> {
                             ),
                           ),
                         ),
-                        const Expanded(child: Divider(color: AppColors.greyLight)),
+                        const Expanded(
+                          child: Divider(color: AppColors.greyLight),
+                        ),
                       ],
                     ),
 
                     SizedBox(height: h * 0.035),
 
                     // ── Interactive Auth Flow ────────────────────────────────
-                    Obx(() => AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 450),
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      child: controller.showOtpField.value 
-                        ? _buildOtpState(context, w, h) 
-                        : _buildPhoneState(context, w, h),
-                    )),
+                    Obx(
+                      () => AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 450),
+                        switchInCurve: Curves.easeOutCubic,
+                        switchOutCurve: Curves.easeInCubic,
+                        child: controller.showOtpField.value
+                            ? _buildOtpState(context, w, h)
+                            : _buildPhoneState(context, w, h),
+                      ),
+                    ),
 
                     SizedBox(height: h * 0.04),
 
@@ -146,7 +155,9 @@ class AuthScreen extends GetView<OnboardingController> {
                               height: 1.6,
                             ),
                             children: [
-                              const TextSpan(text: 'By continuing, you agree to our '),
+                              const TextSpan(
+                                text: 'By continuing, you agree to our ',
+                              ),
                               TextSpan(
                                 text: 'Terms',
                                 style: TextStyle(
@@ -192,20 +203,33 @@ class AuthScreen extends GetView<OnboardingController> {
           decoration: BoxDecoration(
             color: const Color(0xFFF8FAFC),
             borderRadius: .circular(w * 0.03),
-            border: .all(color: AppColors.grey.withValues(alpha: 0.2), width: 1.2),
+            border: .all(
+              color: AppColors.grey.withValues(alpha: 0.2),
+              width: 1.2,
+            ),
           ),
           child: Row(
             children: [
               Container(
                 padding: .symmetric(horizontal: w * 0.04, vertical: h * 0.018),
                 decoration: BoxDecoration(
-                  border: Border(right: BorderSide(color: AppColors.grey.withValues(alpha: 0.15))),
+                  border: Border(
+                    right: BorderSide(
+                      color: AppColors.grey.withValues(alpha: 0.15),
+                    ),
+                  ),
                 ),
                 child: Row(
                   children: [
                     Text('🇵🇰', style: TextStyle(fontSize: w * 0.045)),
                     SizedBox(width: w * 0.015),
-                    Text('+92', style: theme.textTheme.titleLarge?.copyWith(fontSize: w * 0.038, fontWeight: .w700)),
+                    Text(
+                      '+92',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontSize: w * 0.038,
+                        fontWeight: .w700,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -213,12 +237,15 @@ class AuthScreen extends GetView<OnboardingController> {
                 child: TextField(
                   controller: controller.phoneController,
                   keyboardType: .phone,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
                   style: theme.textTheme.bodyLarge?.copyWith(fontWeight: .w600),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: '3XX XXXXXXX',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    border: .none,
+                    contentPadding: .symmetric(horizontal: w * 0.03),
                   ),
                 ),
               ),
@@ -255,18 +282,18 @@ class AuthScreen extends GetView<OnboardingController> {
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: AppColors.camel,
                   fontSize: w * 0.028,
-                  decoration: TextDecoration.underline,
+                  decoration: .underline,
                 ),
               ),
             ),
           ],
         ),
-        SizedBox(height: h * 0.012),
+        SizedBox(height: h * 0.01),
         PinInputField(
           controller: controller.otpController,
           onCompleted: (v) => controller.verifyOtp(),
         ),
-        SizedBox(height: h * 0.025),
+        SizedBox(height: h * 0.02),
         Row(
           mainAxisAlignment: .center,
           children: [
@@ -287,7 +314,7 @@ class AuthScreen extends GetView<OnboardingController> {
             ),
           ],
         ),
-        SizedBox(height: h * 0.035),
+        SizedBox(height: h * 0.03),
         CustomButton(
           text: 'Verify & Initialize',
           onPressed: controller.isLoading.value ? null : controller.verifyOtp,
@@ -336,7 +363,10 @@ class _GhostSocialButtonState extends State<_GhostSocialButton> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: .circular(widget.w * 0.03),
-            border: Border.all(color: AppColors.grey.withValues(alpha: 0.15), width: 1.2),
+            border: Border.all(
+              color: AppColors.grey.withValues(alpha: 0.15),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
                 color: AppColors.charcoal.withValues(alpha: 0.03),
@@ -348,7 +378,11 @@ class _GhostSocialButtonState extends State<_GhostSocialButton> {
           child: Row(
             mainAxisAlignment: .center,
             children: [
-              Icon(widget.icon, size: widget.w * 0.06, color: AppColors.charcoal),
+              Icon(
+                widget.icon,
+                size: widget.w * 0.06,
+                color: AppColors.charcoal,
+              ),
               const SizedBox(width: 12),
               Text(
                 widget.label,

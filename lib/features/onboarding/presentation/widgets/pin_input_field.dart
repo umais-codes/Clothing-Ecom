@@ -1,6 +1,6 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class PinInputField extends StatefulWidget {
   final int length;
@@ -27,9 +27,11 @@ class _PinInputFieldState extends State<PinInputField> {
     super.initState();
     _focusNodes = List.generate(widget.length, (_) => FocusNode());
     _controllers = List.generate(widget.length, (_) => TextEditingController());
-    
-    // Listen to changes in sub-controllers to update the main controller
+
     for (int i = 0; i < widget.length; i++) {
+      // Rebuild when focus changes to update border color
+      _focusNodes[i].addListener(() => setState(() {}));
+
       _controllers[i].addListener(() {
         final pin = _controllers.map((c) => c.text).join();
         widget.controller.text = pin;
@@ -69,46 +71,26 @@ class _PinInputFieldState extends State<PinInputField> {
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: List.generate(widget.length, (index) {
-        return Container(
+        return SizedBox(
           width: sw * 0.12,
-          height: sw * 0.14,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(sw * 0.03),
-            border: Border.all(
-              color: _focusNodes[index].hasFocus 
-                  ? AppColors.camel 
-                  : AppColors.grey.withValues(alpha: 0.2),
-              width: _focusNodes[index].hasFocus ? 2 : 1.2,
-            ),
-            boxShadow: _focusNodes[index].hasFocus 
-              ? [BoxShadow(
-                  color: AppColors.camel.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                )]
-              : [],
-          ),
-          child: Center(
-            child: TextField(
-              controller: _controllers[index],
-              focusNode: _focusNodes[index],
-              onChanged: (v) => _onChanged(v, index),
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              maxLength: 1,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.charcoal,
-              ),
-              decoration: const InputDecoration(
-                counterText: "",
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
+          height: sw * 0.12,
+          child: CustomTextField(
+            controller: _controllers[index],
+            focusNode: _focusNodes[index],
+            onChanged: (v) => _onChanged(v, index),
+            keyboardType: .number,
+            textAlign: .center,
+            maxLength: 1,
+            margin: .zero,
+            contentPadding: .zero,
+            fillColor: AppColors.white,
+            borderRadius: sw * 0.02,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: .w700,
+              color: AppColors.charcoal,
+              fontSize: sw * 0.035,
             ),
           ),
         );

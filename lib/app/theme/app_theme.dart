@@ -102,28 +102,12 @@ class AppTheme {
         ),
       ),
 
-      // Button Themes
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.charcoal,
-          foregroundColor: AppColors.white,
-          minimumSize: const Size(.infinity, 50),
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: .circular(12)),
-          textStyle: GoogleFonts.outfit(
-            fontSize: 14,
-            fontWeight: .w600,
-            letterSpacing: 0.8,
-          ),
-        ),
-      ),
-
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.greySubtle,
         side: BorderSide.none,
         shape: RoundedRectangleBorder(borderRadius: .circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const .symmetric(horizontal: 12, vertical: 6),
         labelStyle: GoogleFonts.poppins(fontSize: 12, color: AppColors.ink),
       ),
 

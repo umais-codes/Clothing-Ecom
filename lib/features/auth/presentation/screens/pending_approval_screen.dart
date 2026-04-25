@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class PendingApprovalScreen extends StatelessWidget {
   const PendingApprovalScreen({super.key});
@@ -25,23 +28,26 @@ class PendingApprovalScreen extends StatelessWidget {
                 width: w * 0.3,
                 height: w * 0.3,
                 decoration: BoxDecoration(
-                  color: AppColors.camelLight.withValues(alpha: 0.3),
+                  color: AppColors.camel.withValues(alpha: 0.12),
                   shape: .circle,
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(
-                    Icons.hourglass_empty_rounded,
-                    size: 48,
+                    Icons.hourglass_top_rounded,
+                    size: w * 0.15,
                     color: AppColors.camel,
                   ),
                 ),
               ),
-              SizedBox(height: h * 0.025),
+              SizedBox(height: w * 0.01),
 
               Text(
                 'Application Received',
-                style: theme.textTheme.displaySmall?.copyWith(
+                style: GoogleFonts.outfit(
+                  fontSize: w * 0.05,
+                  fontWeight: .w600,
                   color: AppColors.charcoal,
+                  letterSpacing: 0.2,
                 ),
                 textAlign: .center,
               ),
@@ -49,20 +55,22 @@ class PendingApprovalScreen extends StatelessWidget {
 
               Text(
                 'Thank you for applying to be an Aura Partner. Our team will review your KYC documents and get back to you within 24-48 hours.',
-                style: theme.textTheme.bodyLarge?.copyWith(
+                style: GoogleFonts.outfit(
+                  fontSize: w * 0.032,
                   color: AppColors.grey,
-                  height: 1.6,
+                  fontWeight: .w400,
+                  height: 1.3,
                 ),
-                textAlign: TextAlign.center,
+                textAlign: .center,
               ),
 
               const Spacer(),
-
               CustomButton(
                 text: 'Return to Home',
                 onPressed: () {
-                  // Get.offAllNamed('/home');
+                  Get.offAllNamed('/home');
                 },
+                icon: Icons.house,
               ),
               SizedBox(height: h * 0.04),
             ],

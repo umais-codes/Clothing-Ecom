@@ -1,0 +1,146 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/theme/app_colors.dart';
+
+class AppTheme {
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: .light,
+      primaryColor: AppColors.charcoal,
+      scaffoldBackgroundColor: AppColors.white,
+
+      // Color Scheme
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.charcoal,
+        secondary: AppColors.camel,
+        surface: AppColors.offWhite,
+        error: AppColors.error,
+        onPrimary: AppColors.white,
+        onSecondary: AppColors.white,
+        onSurface: AppColors.charcoal,
+      ),
+
+      // AppBar Theme
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: AppColors.charcoal),
+        titleTextStyle: GoogleFonts.poppins(
+          color: AppColors.charcoal,
+          fontSize: 16,
+          fontWeight: .w700,
+          letterSpacing: 0.5,
+        ),
+      ),
+
+      // TabBar Theme
+      tabBarTheme: TabBarThemeData(
+        labelColor: AppColors.charcoal,
+        unselectedLabelColor: AppColors.grey,
+        indicatorSize: .label,
+        labelStyle: GoogleFonts.poppins(fontWeight: .w600, fontSize: 13),
+        unselectedLabelStyle: GoogleFonts.poppins(
+          fontWeight: .w400,
+          fontSize: 13,
+        ),
+      ),
+
+      textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+        displayLarge: GoogleFonts.cormorantGaramond(
+          fontSize: 36,
+          fontWeight: .w700,
+          color: AppColors.charcoal,
+          letterSpacing: -0.5,
+          height: 1.1,
+        ),
+        displayMedium: GoogleFonts.cormorantGaramond(
+          fontSize: 30,
+          fontWeight: .w700,
+          color: AppColors.charcoal,
+          letterSpacing: -0.3,
+          height: 1.1,
+        ),
+        displaySmall: GoogleFonts.cormorantGaramond(
+          fontSize: 24,
+          fontWeight: .w600,
+          color: AppColors.charcoal,
+          letterSpacing: -0.2,
+        ),
+        headlineMedium: GoogleFonts.cormorantGaramond(
+          fontSize: 20,
+          fontWeight: .w600,
+          color: AppColors.charcoal,
+        ),
+        titleLarge: GoogleFonts.outfit(
+          fontSize: 16,
+          fontWeight: .w600,
+          color: AppColors.charcoal,
+        ),
+        bodyLarge: GoogleFonts.outfit(
+          fontSize: 14,
+          color: AppColors.charcoal,
+          height: 1.5,
+        ),
+        bodyMedium: GoogleFonts.outfit(
+          fontSize: 13,
+          color: AppColors.charcoal,
+          height: 1.4,
+        ),
+        bodySmall: GoogleFonts.outfit(
+          fontSize: 11,
+          color: AppColors.grey,
+          height: 1.4,
+        ),
+        labelLarge: GoogleFonts.outfit(
+          fontSize: 11,
+          fontWeight: .w700,
+          color: AppColors.charcoal,
+          letterSpacing: 0.8,
+        ),
+      ),
+
+      // Button Themes
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.charcoal,
+          foregroundColor: AppColors.white,
+          minimumSize: const Size(.infinity, 50),
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: .circular(12)),
+          textStyle: GoogleFonts.outfit(
+            fontSize: 14,
+            fontWeight: .w600,
+            letterSpacing: 0.8,
+          ),
+        ),
+      ),
+
+      // Chip Theme
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.greySubtle,
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(borderRadius: .circular(20)),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        labelStyle: GoogleFonts.poppins(fontSize: 12, color: AppColors.ink),
+      ),
+
+      // Input Decoration Theme
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.offWhite,
+        border: OutlineInputBorder(
+          borderRadius: .circular(12),
+          borderSide: .none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: .circular(12),
+          borderSide: const BorderSide(color: AppColors.greyLight, width: 1),
+        ),
+        contentPadding: const .symmetric(horizontal: 16, vertical: 14),
+      ),
+    );
+  }
+}

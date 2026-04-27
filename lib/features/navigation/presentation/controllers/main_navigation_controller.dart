@@ -9,7 +9,6 @@ import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
 class MainNavigationController extends GetxController {
   final RxInt selectedIndex = 0.obs;
 
-  // Preserve states of tabs
   late List<Widget> pages;
 
   AuthRole get currentRole => Get.find<AuthController>().selectedRole.value;

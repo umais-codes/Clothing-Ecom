@@ -14,6 +14,7 @@ class CustomTextField extends StatelessWidget {
   final bool enabled;
   final void Function(String)? onChanged;
   final Widget? suffixIcon;
+  final Widget? prefixIcon;
   final bool obscureText;
   final Color? focusColor;
   final bool hasError;
@@ -28,6 +29,9 @@ class CustomTextField extends StatelessWidget {
   final Color? fillColor;
   final String? errorText;
   final TextStyle? style;
+  final void Function(String)? onFieldSubmitted;
+  final bool autoFocus;
+  final TextInputAction? textInputAction;
 
   const CustomTextField({
     super.key,
@@ -35,18 +39,19 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     this.icon,
     this.gradient,
-    this.keyboardType = .text,
+    this.keyboardType = TextInputType.text,
     this.maxLines = 1,
     this.validator,
     this.enabled = true,
     this.onChanged,
     this.suffixIcon,
+    this.prefixIcon,
     this.obscureText = false,
     this.focusColor,
     this.hasError = false,
     this.hinttext,
     this.focusNode,
-    this.textAlign = .start,
+    this.textAlign = TextAlign.start,
     this.maxLength,
     this.contentPadding,
     this.readOnly = false,
@@ -55,6 +60,9 @@ class CustomTextField extends StatelessWidget {
     this.fillColor,
     this.errorText,
     this.style,
+    this.onFieldSubmitted,
+    this.autoFocus = false,
+    this.textInputAction,
   });
 
   @override
@@ -140,6 +148,7 @@ class CustomTextField extends StatelessWidget {
               filled: true,
               fillColor: fillColor ?? const Color(0xFFF8FAFC),
               hintText: hinttext,
+              prefixIcon: prefixIcon,
               suffixIcon: suffixIcon,
               errorText: errorText,
 
@@ -183,13 +192,16 @@ class CustomTextField extends StatelessWidget {
                     vertical: height * 0.012,
                   ),
 
-              hintStyle: TextStyle(
+              hintStyle: GoogleFonts.outfit(
                 color: AppColors.grey.withValues(alpha: 0.6),
-                fontSize: width * 0.034,
+                fontSize: width * 0.032,
                 fontWeight: .w400,
               ),
               errorStyle: TextStyle(fontSize: width * 0.03, fontWeight: .w500),
             ),
+            onFieldSubmitted: onFieldSubmitted,
+            autofocus: autoFocus,
+            textInputAction: textInputAction,
           ),
         ],
       ),

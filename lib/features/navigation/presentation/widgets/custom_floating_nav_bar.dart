@@ -1,8 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/cart_controller.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../controllers/main_navigation_controller.dart';
 
 class CustomFloatingNavBar extends StatelessWidget {
@@ -13,41 +15,89 @@ class CustomFloatingNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double sw = MediaQuery.sizeOf(context).width;
+    final double navHeight = sw * 0.18;
+    final double horizontalPadding = sw * 0.04;
 
     return Container(
-      margin: EdgeInsets.fromLTRB(sw * 0.06, 0, sw * 0.06, sw * 0.08),
-      height: sw * 0.18,
+      margin: .fromLTRB(sw * 0.04, 0, sw * 0.04, sw * 0.04),
+      height: navHeight,
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(sw * 0.09),
+        color: AppColors.white.withValues(alpha: 0.85),
+        borderRadius: .circular(sw * 0.09),
+        border: .all(
+          color: AppColors.camel.withValues(alpha: 0.15),
+          width: 0.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.charcoal.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+            color: AppColors.charcoal.withValues(alpha: 0.12),
+            blurRadius: 20,
+            spreadRadius: -8,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(sw * 0.09),
+        borderRadius: .circular(sw * 0.09),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          filter: .blur(sigmaX: 16, sigmaY: 16),
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: sw * 0.04),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(controller.navItems.length, (index) {
-                return Obx(() {
-                  final item = controller.navItems[index];
-                  final bool isActive = controller.selectedIndex.value == index;
-                  return _NavBarItem(
-                    item: item,
-                    isActive: isActive,
-                    onTap: () => controller.changeTab(index),
-                    sw: sw,
-                  );
-                });
-              }),
+            padding: .symmetric(horizontal: horizontalPadding),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double itemWidth =
+                    constraints.maxWidth / controller.navItems.length;
+
+                return Stack(
+                  children: [
+                    // Sliding Pill Indicator
+                    Obx(() {
+                      return AnimatedPositioned(
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.elasticOut,
+                        left: controller.selectedIndex.value * itemWidth,
+                        top: constraints.maxHeight * 0.15,
+                        child: Container(
+                          width: itemWidth,
+                          height: constraints.maxHeight * 0.7,
+                          padding: EdgeInsets.symmetric(horizontal: sw * 0.02),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.camel.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(sw * 0.07),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                    // Nav Items
+                    Row(
+                      children: List.generate(controller.navItems.length, (
+                        index,
+                      ) {
+                        return Expanded(
+                          child: Obx(() {
+                            final item = controller.navItems[index];
+                            final bool isActive =
+                                controller.selectedIndex.value == index;
+                            return _NavBarItem(
+                              item: item,
+                              isActive: isActive,
+                              onTap: () {
+                                if (!isActive) {
+                                  HapticFeedback.lightImpact();
+                                  controller.changeTab(index);
+                                }
+                              },
+                              sw: sw,
+                            );
+                          }),
+                        );
+                      }),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -73,50 +123,52 @@ class _NavBarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: sw * 0.18,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
+      behavior: .opaque,
+      child: Column(
+        mainAxisAlignment: .center,
+        children: [
+          AnimatedScale(
+            duration: const Duration(milliseconds: 300),
+            scale: isActive ? 1.15 : 1.0,
+            curve: Curves.easeOutBack,
+            child: Stack(
+              clipBehavior: .none,
               children: [
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(scale: animation, child: child),
+                    );
+                  },
                   child: Icon(
                     isActive ? item.activeIcon : item.icon,
                     key: ValueKey('${item.label}_$isActive'),
-                    color: isActive ? AppColors.camel : AppColors.charcoal.withValues(alpha: 0.6),
+                    color: isActive
+                        ? AppColors.camel
+                        : AppColors.charcoal.withValues(alpha: 0.5),
                     size: sw * 0.065,
                   ),
                 ),
                 if (item.hasBadge) _buildBadge(sw),
               ],
             ),
-            SizedBox(height: sw * 0.01),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 300),
-              style: TextStyle(
-                fontSize: sw * 0.024,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? AppColors.camel : AppColors.charcoal.withValues(alpha: 0.6),
-                letterSpacing: 0.5,
-              ),
-              child: Text(item.label.toUpperCase()),
+          ),
+          SizedBox(height: sw * 0.01),
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 300),
+            style: GoogleFonts.outfit(
+              fontSize: sw * 0.022,
+              fontWeight: isActive ? .w700 : .w600,
+              color: isActive
+                  ? AppColors.camel
+                  : AppColors.charcoal.withValues(alpha: 0.5),
+              letterSpacing: 0.8,
             ),
-            if (isActive)
-              Container(
-                margin: EdgeInsets.only(top: sw * 0.01),
-                height: 2,
-                width: sw * 0.03,
-                decoration: BoxDecoration(
-                  color: AppColors.camel,
-                  borderRadius: BorderRadius.circular(1),
-                ),
-              ),
-          ],
-        ),
+            child: Text(item.label.toUpperCase()),
+          ),
+        ],
       ),
     );
   }
@@ -124,28 +176,37 @@ class _NavBarItem extends StatelessWidget {
   Widget _buildBadge(double sw) {
     final CartController cartController = Get.find<CartController>();
     return Positioned(
-      top: -2,
-      right: -4,
+      top: -3,
+      right: -6,
       child: Obx(() {
         if (cartController.cartItems.isEmpty) return const SizedBox.shrink();
         return Container(
-          padding: const EdgeInsets.all(4),
-          decoration: const BoxDecoration(
-            color: AppColors.camel,
-            shape: BoxShape.circle,
+          padding: const .all(2),
+          decoration: BoxDecoration(
+            color: AppColors.rose,
+            shape: .circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.rose.withValues(alpha: 0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           constraints: BoxConstraints(
-            minWidth: sw * 0.035,
-            minHeight: sw * 0.035,
+            minWidth: sw * 0.038,
+            minHeight: sw * 0.038,
           ),
-          child: Text(
-            '${cartController.cartItems.length}',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: sw * 0.02,
-              fontWeight: FontWeight.bold,
+          child: Center(
+            child: Text(
+              '${cartController.cartItems.length}',
+              style: GoogleFonts.outfit(
+                color: AppColors.white,
+                fontSize: sw * 0.02,
+                fontWeight: .bold,
+              ),
+              textAlign: .center,
             ),
-            textAlign: TextAlign.center,
           ),
         );
       }),

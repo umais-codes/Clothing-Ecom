@@ -1,51 +1,100 @@
+import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 
-class HomeSearchBar extends StatelessWidget {
+class HomeSearchBar extends StatefulWidget {
   final double sw;
   const HomeSearchBar({super.key, required this.sw});
 
   @override
+  State<HomeSearchBar> createState() => _HomeSearchBarState();
+}
+
+class _HomeSearchBarState extends State<HomeSearchBar> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: .symmetric(horizontal: sw * 0.04, vertical: sw * 0.03),
-      child: Container(
-        padding: .symmetric(horizontal: sw * 0.04),
-        height: sw * 0.12,
-        decoration: BoxDecoration(
-          color: AppColors.offWhite,
-          borderRadius: .circular(sw * 0.035),
-          border: .all(color: AppColors.greyLight, width: 1),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.search_rounded, color: AppColors.grey, size: sw * 0.05),
-            SizedBox(width: sw * 0.025),
-            Expanded(
-              child: TextField(
-                style: Get.textTheme.bodyMedium?.copyWith(
-                  fontSize: sw * 0.035,
-                  color: AppColors.charcoal,
-                ),
-                decoration: InputDecoration(
-                  hintText: 'Search collections...',
-                  hintStyle: Get.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.grey,
-                    fontSize: sw * 0.033,
-                    letterSpacing: 0.5,
-                  ),
-                  filled: false,
-                  border: .none,
-                  enabledBorder: .none,
-                  focusedBorder: .none,
-                  isDense: true,
-                  contentPadding: .zero,
-                ),
+      padding: .symmetric(
+        horizontal: widget.sw * 0.05,
+        vertical: widget.sw * 0.02,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: CustomTextField(
+              controller: _searchController,
+              hinttext: 'Search collections, styles...',
+              fillColor: AppColors.offWhite,
+              borderRadius: widget.sw * 0.04,
+              margin: .zero,
+              contentPadding: .symmetric(
+                vertical: widget.sw * 0.03,
+                horizontal: widget.sw * 0.04,
               ),
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: AppColors.charcoal.withValues(alpha: 0.4),
+                size: widget.sw * 0.055,
+              ),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: Icon(Icons.close_rounded, size: widget.sw * 0.04),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {});
+                      },
+                    )
+                  : null,
+              onChanged: (val) => setState(() {}),
+              textInputAction: .search,
             ),
-            Icon(Icons.tune_rounded, color: AppColors.grey, size: sw * 0.045),
-          ],
+          ),
+          SizedBox(width: widget.sw * 0.01),
+          _buildFilterButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterButton() {
+    return Container(
+      height: widget.sw * 0.09,
+      width: widget.sw * 0.09,
+      decoration: BoxDecoration(
+        color: AppColors.camel,
+        borderRadius: .circular(widget.sw * 0.03),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.camel.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: .circular(widget.sw * 0.02),
+          onTap: () {},
+          child: Icon(
+            Icons.tune_rounded,
+            color: Colors.white,
+            size: widget.sw * 0.05,
+          ),
         ),
       ),
     );

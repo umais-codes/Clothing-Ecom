@@ -12,7 +12,7 @@ class AuthGatewayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AuthController());
+    final controller = Get.find<AuthController>();
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
 

@@ -73,13 +73,13 @@ class DiscoveryScreen extends StatelessWidget {
 
   Widget _buildDepartmentTabs(DiscoveryController controller, double sw) {
     return SizedBox(
-      height: sw * 0.12, // Responsive height
-      child: Obx(
-        () => ListView.builder(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.symmetric(horizontal: sw * 0.04),
-          itemCount: controller.departments.length,
-          itemBuilder: (context, index) {
+      height: sw * 0.12,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: sw * 0.04),
+        itemCount: controller.departments.length,
+        itemBuilder: (context, index) {
+          return Obx(() {
             final isSelected =
                 controller.selectedDepartmentIndex.value == index;
             return GestureDetector(
@@ -114,8 +114,8 @@ class DiscoveryScreen extends StatelessWidget {
                 ),
               ),
             );
-          },
-        ),
+          });
+        },
       ),
     );
   }

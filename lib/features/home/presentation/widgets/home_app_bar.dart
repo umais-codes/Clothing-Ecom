@@ -9,13 +9,14 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(
-        'Umais',
+        'Aura',
         style: Get.textTheme.displayMedium?.copyWith(
-          fontSize: sw * 0.048,
+          fontSize: sw * 0.05,
           letterSpacing: 0.5,
-          fontWeight: FontWeight.w700,
+          fontWeight: .w700,
         ),
       ),
+      centerTitle: false,
       actions: [
         IconButton(
           onPressed: () => Get.toNamed('/vendor-dashboard'),

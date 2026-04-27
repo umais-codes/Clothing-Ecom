@@ -7,6 +7,6 @@ void main() {
     await tester.pumpWidget(const EcomApp());
 
     // Verify that the app title is present (Umais is in our HomeView appBar)
-    expect(find.text('Umais'), findsWidgets);
+    expect(find.text('Aura'), findsWidgets);
   });
 }

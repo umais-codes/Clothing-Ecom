@@ -20,47 +20,55 @@ class VariantSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: Get.textTheme.labelLarge?.copyWith(
+          style: GoogleFonts.outfit(
             color: AppColors.grey,
-            fontSize: sw * 0.028,
-            letterSpacing: 1.2,
+            fontSize: sw * 0.025,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.5,
           ),
         ),
-        SizedBox(height: sw * 0.01),
+        SizedBox(height: sw * 0.015),
         Obx(
           () => Wrap(
-            spacing: sw * 0.02,
-            runSpacing: sw * 0.02,
+            spacing: sw * 0.03,
+            runSpacing: sw * 0.03,
             children: items.map((item) {
               final isSelected = selectedItem.value == item;
               return GestureDetector(
                 onTap: () => selectedItem.value = item,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: .symmetric(
-                    horizontal: sw * 0.04,
+                  duration: const Duration(milliseconds: 300),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: sw * 0.05,
                     vertical: sw * 0.02,
                   ),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.charcoal : AppColors.white,
-                    borderRadius: .circular(sw * 0.025),
-                    border: .all(
+                    borderRadius: BorderRadius.circular(sw * 0.02),
+                    border: Border.all(
                       color: isSelected
                           ? AppColors.charcoal
-                          : AppColors.greyLight,
-                      width: 1.2,
+                          : AppColors.greyLight.withValues(alpha: 0.5),
+                      width: 1.5,
                     ),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: AppColors.charcoal.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ] : null,
                   ),
                   child: Text(
                     item,
-                    style: GoogleFonts.poppins(
-                      color: isSelected ? AppColors.white : AppColors.ink,
-                      fontWeight: isSelected ? .w600 : .w400,
-                      fontSize: sw * 0.03,
+                    style: GoogleFonts.outfit(
+                      color: isSelected ? AppColors.white : AppColors.charcoal,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontSize: sw * 0.032,
                     ),
                   ),
                 ),

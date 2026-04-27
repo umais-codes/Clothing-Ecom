@@ -11,25 +11,49 @@ class PdpCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CarouselSlider(
-      options: CarouselOptions(
-        height: sw * 0.75,
-        viewportFraction: 1.0,
-        enableInfiniteScroll: false,
-      ),
-      items: [imageUrl, imageUrl, imageUrl].map((url) {
-        return Builder(
-          builder: (BuildContext context) {
-            return CachedNetworkImage(
-              imageUrl: url,
-              width: sw,
-              fit: BoxFit.cover,
-              placeholder: (context, url) =>
-                  Container(color: AppColors.offWhite),
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        CarouselSlider(
+          options: CarouselOptions(
+            height: sw * 0.65,
+            viewportFraction: 1.0,
+            enableInfiniteScroll: false,
+          ),
+          items: [imageUrl, imageUrl, imageUrl].map((url) {
+            return Builder(
+              builder: (BuildContext context) {
+                return CachedNetworkImage(
+                  imageUrl: url,
+                  width: sw,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) =>
+                      Container(color: AppColors.offWhite),
+                );
+              },
             );
-          },
-        );
-      }).toList(),
+          }).toList(),
+        ),
+        Positioned(
+          bottom: sw * 0.02,
+          child: Row(
+            mainAxisAlignment: .center,
+            children: [0, 1, 2].map((i) {
+              return Container(
+                width: sw * 0.015,
+                height: sw * 0.015,
+                margin: .symmetric(horizontal: sw * 0.01),
+                decoration: BoxDecoration(
+                  shape: .circle,
+                  color: i == 0
+                      ? AppColors.charcoal
+                      : AppColors.greyLight.withValues(alpha: 0.6),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 }

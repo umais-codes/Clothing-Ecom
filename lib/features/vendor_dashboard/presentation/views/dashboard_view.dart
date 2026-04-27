@@ -6,8 +6,8 @@ import '../controllers/dashboard_controller.dart';
 import '../widgets/stat_card.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 
-class DashboardView extends GetView<DashboardController> {
-  const DashboardView({super.key});
+class VendorDashboardView extends GetView<DashboardController> {
+  const VendorDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -144,11 +144,11 @@ class DashboardView extends GetView<DashboardController> {
 
   Widget _buildHeader(double sw) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: .center,
       children: [
         Expanded(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               Text(
                 'Good afternoon 👋',
@@ -341,7 +341,7 @@ class DashboardView extends GetView<DashboardController> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: controller.recentActivity.length,
-            separatorBuilder: (_, __) => Container(
+            separatorBuilder: (_, _) => Container(
               height: 1,
               margin: EdgeInsets.symmetric(horizontal: sw * 0.042),
               color: AppColors.greyLight,

@@ -49,7 +49,7 @@ class AISizePredictorCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: sw * 0.02),
+          SizedBox(height: sw * 0.01),
           Text(
             'Get your perfect fit using our intelligent size recommendation engine.',
             style: Get.textTheme.bodySmall?.copyWith(
@@ -58,13 +58,14 @@ class AISizePredictorCard extends StatelessWidget {
               height: 1.5,
             ),
           ),
-          SizedBox(height: sw * 0.035),
+          SizedBox(height: sw * 0.01),
           CustomButton(
             text: 'Predict My Size',
             onPressed: onPredict,
-            height: sw * 0.11,
+            height: sw * 0.1,
             icon: Icons.auto_awesome_rounded,
           ),
+          SizedBox(height: sw * 0.01),
         ],
       ),
     );

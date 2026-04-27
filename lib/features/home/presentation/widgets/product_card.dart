@@ -19,33 +19,38 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => Get.toNamed('/product-details', arguments: product),
-      borderRadius: BorderRadius.circular(sw * 0.04),
+      borderRadius: .circular(sw * 0.04),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(sw * 0.04),
+            borderRadius: .circular(sw * 0.04),
             child: Stack(
               children: [
                 AspectRatio(
                   aspectRatio: index % 2 == 0 ? 0.75 : 1.1,
                   child: CachedNetworkImage(
                     imageUrl: product['image'],
-                    fit: BoxFit.cover,
+                    fit: .cover,
                     placeholder: (context, url) =>
                         Container(color: AppColors.cream),
-                    errorWidget: (context, url, error) =>
-                        Container(color: AppColors.cream, child: const Icon(Icons.image_not_supported_outlined, color: AppColors.grey)),
+                    errorWidget: (context, url, error) => Container(
+                      color: AppColors.cream,
+                      child: const Icon(
+                        Icons.image_not_supported_outlined,
+                        color: AppColors.grey,
+                      ),
+                    ),
                   ),
                 ),
                 if (product['isNew'])
                   Positioned(
-                    top: sw * 0.025,
-                    left: sw * 0.025,
+                    top: sw * 0.015,
+                    left: sw * 0.015,
                     child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: sw * 0.025,
-                        vertical: sw * 0.01,
+                      padding: .symmetric(
+                        horizontal: sw * 0.015,
+                        vertical: sw * 0.005,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.camel,

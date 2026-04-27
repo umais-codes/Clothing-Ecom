@@ -25,9 +25,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         SizedBox(width: sw * 0.03),
         IconButton(
-          onPressed: () {},
+          onPressed: () => Get.toNamed('/cart'),
           icon: Icon(Icons.shopping_bag_outlined, size: sw * 0.055),
-          padding: .zero,
+          padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
         ),
         SizedBox(width: sw * 0.045),

@@ -123,7 +123,7 @@ class OnboardingController extends GetxController {
 
   void onPageChanged(int index) => currentPage.value = index;
 
-  void skipOnboarding() => Get.offAllNamed('/home');
+  void skipOnboarding() => Get.offAllNamed('/main-navigation');
 
   Future<void> sendOtp() async {
     if (phoneController.text.length < 10) {
@@ -161,14 +161,14 @@ class OnboardingController extends GetxController {
     isLoading.value = true;
     await Future.delayed(const Duration(seconds: 2)); // Simulated verification
     isLoading.value = false;
-    Get.offAllNamed('/home');
+    Get.offAllNamed('/main-navigation');
   }
 
   void continueWithGoogle() {
     isLoading.value = true;
     Future.delayed(const Duration(seconds: 2), () {
       isLoading.value = false;
-      Get.offAllNamed('/home');
+      Get.offAllNamed('/main-navigation');
     });
   }
 
@@ -176,7 +176,7 @@ class OnboardingController extends GetxController {
     isLoading.value = true;
     Future.delayed(const Duration(seconds: 2), () {
       isLoading.value = false;
-      Get.offAllNamed('/home');
+      Get.offAllNamed('/main-navigation');
     });
   }
 

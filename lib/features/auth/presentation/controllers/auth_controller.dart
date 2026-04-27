@@ -72,14 +72,14 @@ class AuthController extends GetxController {
     status.value = AuthStatus.loading;
     await Future.delayed(const Duration(seconds: 1)); // Mock
     status.value = AuthStatus.success;
-    Get.offAllNamed('/home');
+    Get.offAllNamed('/main-navigation');
   }
 
   void continueWithSocial(String provider) {
     status.value = AuthStatus.loading;
     Future.delayed(const Duration(seconds: 1), () {
       status.value = AuthStatus.success;
-      Get.offAllNamed('/home');
+      Get.offAllNamed('/main-navigation');
     });
   }
 

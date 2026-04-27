@@ -95,7 +95,7 @@ class AppTheme {
           height: 1.4,
         ),
         labelLarge: GoogleFonts.outfit(
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: .w700,
           color: AppColors.charcoal,
           letterSpacing: 0.8,
@@ -105,7 +105,7 @@ class AppTheme {
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.greySubtle,
-        side: BorderSide.none,
+        side: .none,
         shape: RoundedRectangleBorder(borderRadius: .circular(20)),
         padding: const .symmetric(horizontal: 12, vertical: 6),
         labelStyle: GoogleFonts.poppins(fontSize: 12, color: AppColors.ink),

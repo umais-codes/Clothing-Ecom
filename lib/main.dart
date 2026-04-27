@@ -9,8 +9,21 @@ import 'package:ecom_app/features/product_details/bindings/pdp_binding.dart';
 import 'package:ecom_app/features/product_details/presentation/views/pdp_view.dart';
 import 'package:ecom_app/features/vendor_dashboard/bindings/dashboard_binding.dart';
 import 'package:ecom_app/features/vendor_dashboard/presentation/views/dashboard_view.dart';
+import 'package:ecom_app/features/cart/data/repositories/cart_repository.dart';
+import 'package:ecom_app/features/cart/presentation/controllers/cart_controller.dart';
+import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:ecom_app/features/discovery/presentation/screens/discovery_screen.dart';
+import 'package:ecom_app/features/navigation/presentation/bindings/main_navigation_binding.dart';
+import 'package:ecom_app/features/navigation/presentation/screens/main_navigation_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final cartRepo = CartRepository();
+  await cartRepo.init();
+
+  Get.put(CartController(cartRepo), permanent: true);
+
   runApp(const EcomApp());
 }
 
@@ -25,6 +38,12 @@ class EcomApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       initialRoute: '/onboarding',
       getPages: [
+        GetPage(
+          name: '/main-navigation',
+          page: () => const MainNavigationScreen(),
+          binding: MainNavigationBinding(),
+          transition: Transition.fadeIn,
+        ),
         GetPage(
           name: '/onboarding',
           page: () => const OnboardingView(),
@@ -45,12 +64,21 @@ class EcomApp extends StatelessWidget {
         ),
         GetPage(
           name: '/vendor-dashboard',
-          page: () => const DashboardView(),
+          page: () => const VendorDashboardView(),
           binding: DashboardBinding(),
           transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/discovery',
+          page: () => DiscoveryScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/cart',
+          page: () => const CartScreen(),
+          transition: Transition.downToUp,
         ),
       ],
     );
   }
 }
-

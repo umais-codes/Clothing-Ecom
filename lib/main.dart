@@ -15,6 +15,8 @@ import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:ecom_app/features/discovery/presentation/screens/discovery_screen.dart';
 import 'package:ecom_app/features/navigation/presentation/bindings/main_navigation_binding.dart';
 import 'package:ecom_app/features/navigation/presentation/screens/main_navigation_screen.dart';
+import 'package:ecom_app/features/profile/bindings/profile_binding.dart';
+import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
 
 void main() async {
@@ -78,6 +80,12 @@ class EcomApp extends StatelessWidget {
         GetPage(
           name: '/cart',
           page: () => const CartScreen(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/profile',
+          page: () => const ProfileView(),
+          binding: ProfileBinding(),
           transition: Transition.rightToLeft,
         ),
       ],

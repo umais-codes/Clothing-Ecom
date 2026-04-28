@@ -53,7 +53,7 @@ class OrderSummaryBottomBar extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: sw * 0.02),
+            SizedBox(height: sw * 0.01),
 
             // Delivery Fee
             Row(
@@ -82,7 +82,7 @@ class OrderSummaryBottomBar extends StatelessWidget {
             ),
 
             Padding(
-              padding: .symmetric(vertical: sw * 0.02),
+              padding: .symmetric(vertical: sw * 0.01),
               child: const Divider(color: AppColors.greyLight, height: 1),
             ),
 
@@ -110,11 +110,12 @@ class OrderSummaryBottomBar extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: sw * 0.03),
+            SizedBox(height: sw * 0.02),
 
             // Checkout Button
             Obx(
               () => CustomButton(
+                height: sw * 0.12,
                 text: 'Proceed to Stripe Checkout',
                 onPressed: controller.cartItems.isEmpty
                     ? null

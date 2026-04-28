@@ -13,6 +13,8 @@ class CustomButton extends StatelessWidget {
   final double? width;
   final double? height;
   final double? borderRadius;
+  final Color? buttonColor;
+  final Color? textColor;
 
   const CustomButton({
     super.key,
@@ -24,6 +26,8 @@ class CustomButton extends StatelessWidget {
     this.width,
     this.height,
     this.borderRadius,
+    this.buttonColor,
+    this.textColor,
   });
 
   @override

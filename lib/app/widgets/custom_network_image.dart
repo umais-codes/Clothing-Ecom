@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import '../theme/app_colors.dart';
 
@@ -93,11 +94,11 @@ class CustomNetworkImage extends StatelessWidget {
               color: AppColors.grey.withValues(alpha: 0.5),
               size: (width < w * 0.1 || height < w * 0.1) ? w * 0.04 : w * 0.06,
             ),
-            if (width > 80 && height > 80) ...[
+            if (width > w * 0.12 && height > w * 0.12) ...[
               SizedBox(height: w * 0.01),
               Text(
                 'Failed to load',
-                style: TextStyle(
+                style: GoogleFonts.outfit(
                   color: AppColors.grey.withValues(alpha: 0.5),
                   fontSize: w * 0.03,
                 ),

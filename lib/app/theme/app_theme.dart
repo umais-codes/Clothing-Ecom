@@ -6,7 +6,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: .light,
+      brightness: Brightness.light,
       primaryColor: AppColors.charcoal,
       scaffoldBackgroundColor: AppColors.white,
 
@@ -40,7 +40,7 @@ class AppTheme {
       tabBarTheme: TabBarThemeData(
         labelColor: AppColors.charcoal,
         unselectedLabelColor: AppColors.grey,
-        indicatorSize: .label,
+        indicatorSize: TabBarIndicatorSize.label,
         labelStyle: GoogleFonts.poppins(fontWeight: .w600, fontSize: 13),
         unselectedLabelStyle: GoogleFonts.poppins(
           fontWeight: .w400,
@@ -105,9 +105,9 @@ class AppTheme {
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.greySubtle,
-        side: .none,
-        shape: RoundedRectangleBorder(borderRadius: .circular(20)),
-        padding: const .symmetric(horizontal: 12, vertical: 6),
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         labelStyle: GoogleFonts.poppins(fontSize: 12, color: AppColors.ink),
       ),
 
@@ -116,14 +116,14 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.offWhite,
         border: OutlineInputBorder(
-          borderRadius: .circular(12),
-          borderSide: .none,
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: .circular(12),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.greyLight, width: 1),
         ),
-        contentPadding: const .symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

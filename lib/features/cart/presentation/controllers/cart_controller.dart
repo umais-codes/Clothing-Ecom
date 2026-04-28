@@ -20,6 +20,10 @@ class CartController extends GetxController {
     cartItems.assignAll(_repository.getCartItems());
   }
 
+  void clearCart() {
+    cartItems.clear();
+  }
+
   void addItem(CartItem item) {
     final existingIndex = cartItems.indexWhere(
       (element) => element.id == item.id,

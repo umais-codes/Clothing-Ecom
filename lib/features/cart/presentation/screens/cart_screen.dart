@@ -17,17 +17,38 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: AppColors.charcoal,
+            size: w * 0.055,
+          ),
+          onPressed: () {
+            Get.back();
+          },
+        ),
         title: Text(
           'Shopping Cart',
-          style: GoogleFonts.cormorantGaramond(
-            fontSize: w * 0.05,
-            fontWeight: .w600,
-          ),
+          style: GoogleFonts.outfit(fontSize: w * 0.05, fontWeight: .w600),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_forever, color: AppColors.charcoal),
-            onPressed: () {},
+            icon: controller.cartItems.isNotEmpty
+                ? Icon(
+                    Icons.delete_forever,
+                    color: AppColors.charcoal,
+                    size: w * 0.055,
+                  )
+                : Icon(
+                    Icons.delete_forever,
+                    color: AppColors.greyLight,
+                    size: w * 0.055,
+                  ),
+            onPressed: controller.cartItems.isNotEmpty
+                ? () {
+                    controller.clearCart();
+                  }
+                : null,
           ),
         ],
       ),
@@ -39,14 +60,14 @@ class CartScreen extends StatelessWidget {
               children: [
                 Icon(
                   Icons.shopping_bag_outlined,
-                  size: w * 0.18,
+                  size: w * 0.16,
                   color: AppColors.greyLight,
                 ),
-                SizedBox(height: w * 0.04),
+                SizedBox(height: w * 0.02),
                 Text(
                   'Your cart is empty',
                   style: GoogleFonts.outfit(
-                    fontSize: w * 0.05,
+                    fontSize: w * 0.04,
                     color: AppColors.grey,
                   ),
                 ),
@@ -66,16 +87,13 @@ class CartScreen extends StatelessWidget {
             final items = groupedItems[vendor]!;
 
             return Padding(
-              padding: .only(bottom: w * 0.04),
+              padding: .only(bottom: w * 0.02),
               child: Column(
                 crossAxisAlignment: .start,
                 children: [
                   //  Vendor Header
                   Padding(
-                    padding: .symmetric(
-                      horizontal: w * 0.04,
-                      vertical: w * 0.02,
-                    ),
+                    padding: .symmetric(horizontal: w * 0.04),
                     child: Row(
                       mainAxisAlignment: .spaceBetween,
                       children: [
@@ -92,14 +110,6 @@ class CartScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Divider(
-                    color: AppColors.greyLight,
-                    height: 1,
-                    indent: w * 0.03,
-                    endIndent: w * 0.03,
-                  ),
-                  SizedBox(height: w * 0.01),
-
                   // Vendor Items
                   ...items.map((item) => CartItemTile(item: item)),
                 ],

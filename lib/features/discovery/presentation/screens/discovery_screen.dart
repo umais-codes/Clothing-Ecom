@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/custom_network_image.dart';
 import '../controllers/discovery_controller.dart';
 
 class DiscoveryScreen extends StatelessWidget {
@@ -192,7 +193,7 @@ class DiscoveryScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(sw * 0.04),
                 image: DecorationImage(
-                  image: NetworkImage(item['img'] as String),
+                  image: CustomNetworkImage.provider(item['img'] as String),
                   fit: BoxFit.cover,
                 ),
               ),

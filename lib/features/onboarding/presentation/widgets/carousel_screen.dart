@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_network_image.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,14 +25,11 @@ class CarouselScreen extends GetView<OnboardingController> {
             onPageChanged: controller.onCarouselPageChanged,
             itemBuilder: (_, index) {
               final slide = controller.carouselSlides[index];
-              return CachedNetworkImage(
+              return CustomNetworkImage(
                 imageUrl: slide['image']!,
                 fit: .cover,
                 width: .infinity,
                 height: .infinity,
-                placeholder: (ctx, url) => Container(color: AppColors.charcoal),
-                errorWidget: (ctx, url, err) =>
-                    Container(color: AppColors.charcoal),
               );
             },
           ),

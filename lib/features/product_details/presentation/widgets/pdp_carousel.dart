@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_network_image.dart';
 
 class PdpCarousel extends StatelessWidget {
   final double sw;
@@ -23,12 +23,10 @@ class PdpCarousel extends StatelessWidget {
           items: [imageUrl, imageUrl, imageUrl].map((url) {
             return Builder(
               builder: (BuildContext context) {
-                return CachedNetworkImage(
+                return CustomNetworkImage(
                   imageUrl: url,
                   width: sw,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      Container(color: AppColors.offWhite),
                 );
               },
             );

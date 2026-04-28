@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_network_image.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:ecom_app/features/onboarding/presentation/widgets/onboarding_progress_bar.dart';
 import 'package:flutter/material.dart';
@@ -212,7 +212,7 @@ class _PremiumRoleCard extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned.fill(
-                  child: CachedNetworkImage(imageUrl: image, fit: BoxFit.cover),
+                  child: CustomNetworkImage(imageUrl: image, fit: BoxFit.cover),
                 ),
                 Positioned.fill(
                   child: AnimatedContainer(

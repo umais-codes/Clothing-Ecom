@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/custom_network_image.dart';
 import '../../../../app/widgets/custom_text_field.dart';
 import '../../domain/models/cart_item_model.dart';
 import '../controllers/cart_controller.dart';
@@ -57,25 +58,12 @@ class _CartItemTileState extends State<CartItemTile> {
         crossAxisAlignment: .start,
         children: [
           ///  IMAGE (TIGHTER)
-          ClipRRect(
-            borderRadius: .circular(sw * 0.025),
-            child: Image.network(
-              widget.item.imageUrl,
-              width: sw * 0.14,
-              height: sw * 0.17,
-              fit: .cover,
-              errorBuilder: (_, _, _) => Container(
-                width: sw * 0.14,
-                height: sw * 0.17,
-                color: AppColors.greySubtle,
-                alignment: .center,
-                child: Icon(
-                  Icons.image_not_supported,
-                  color: AppColors.grey,
-                  size: sw * 0.05,
-                ),
-              ),
-            ),
+          CustomNetworkImage(
+            imageUrl: widget.item.imageUrl,
+            width: sw * 0.14,
+            height: sw * 0.17,
+            borderRadius: sw * 0.025,
+            fit: .cover,
           ),
 
           SizedBox(width: sw * 0.03),

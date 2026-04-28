@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_network_image.dart';
 
 class ProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
@@ -29,18 +29,9 @@ class ProductCard extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: index % 2 == 0 ? 0.75 : 1.1,
-                  child: CachedNetworkImage(
+                  child: CustomNetworkImage(
                     imageUrl: product['image'],
                     fit: .cover,
-                    placeholder: (context, url) =>
-                        Container(color: AppColors.cream),
-                    errorWidget: (context, url, error) => Container(
-                      color: AppColors.cream,
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        color: AppColors.grey,
-                      ),
-                    ),
                   ),
                 ),
                 if (product['isNew'])

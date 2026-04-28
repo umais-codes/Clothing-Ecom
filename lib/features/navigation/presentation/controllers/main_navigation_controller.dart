@@ -5,6 +5,7 @@ import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.
 import 'package:ecom_app/features/home/presentation/views/home_view.dart';
 import 'package:ecom_app/features/discovery/presentation/screens/discovery_screen.dart';
 import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
 
 class MainNavigationController extends GetxController {
   final RxInt selectedIndex = 0.obs;
@@ -25,14 +26,14 @@ class MainNavigationController extends GetxController {
         const VendorDashboardView(),
         const Center(child: Text('Inventory (Coming Soon)')),
         const Center(child: Text('Active Orders (Coming Soon)')),
-        const Center(child: Text('Vendor Profile (Coming Soon)')),
+        const ProfileView(),
       ];
     } else {
       pages = [
         const HomeView(),
         DiscoveryScreen(),
         const CartScreen(),
-        const Center(child: Text('User Profile (Coming Soon)')),
+        const ProfileView(),
       ];
     }
   }

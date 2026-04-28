@@ -8,6 +8,7 @@ import '../widgets/pdp_carousel.dart';
 import '../widgets/variant_section.dart';
 import '../widgets/ai_size_predictor_card.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_quantity_stepper.dart';
 
 class PdpView extends GetView<PdpController> {
   const PdpView({super.key});
@@ -92,41 +93,11 @@ class PdpView extends GetView<PdpController> {
 
                         /// 🔥 QTY STEPPER (FIXED)
                         Obx(
-                          () => Row(
-                            mainAxisAlignment: .end,
-                            children: [
-                              _buildQuantityBtn(
-                                Icons.remove_rounded,
-                                () => controller.updateQuantity(
-                                  controller.quantity.value - 1,
-                                ),
-                                sw,
-                                "Decrease",
-                              ),
-
-                              SizedBox(
-                                width: sw * 0.08,
-                                child: Center(
-                                  child: Text(
-                                    '${controller.quantity.value}',
-                                    style: GoogleFonts.outfit(
-                                      fontSize: sw * 0.03,
-                                      fontWeight: .w700,
-                                      color: AppColors.charcoal,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              _buildQuantityBtn(
-                                Icons.add_rounded,
-                                () => controller.updateQuantity(
-                                  controller.quantity.value + 1,
-                                ),
-                                sw,
-                                "Increase",
-                              ),
-                            ],
+                          () => CustomQuantityStepper(
+                            quantity: controller.quantity.value,
+                            sw: sw,
+                            onChanged: (newQty) =>
+                                controller.updateQuantity(newQty),
                           ),
                         ),
                       ],
@@ -216,37 +187,6 @@ class PdpView extends GetView<PdpController> {
     );
   }
 
-  Widget _buildQuantityBtn(
-    IconData icon,
-    VoidCallback onPressed,
-    double sw,
-    String tooltip,
-  ) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: .circular(sw * 0.03),
-        child: Container(
-          width: sw * 0.065,
-          height: sw * 0.065,
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            shape: .circle,
-            border: .all(color: AppColors.camel.withValues(alpha: 0.2)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.charcoal.withValues(alpha: 0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Icon(icon, size: sw * 0.04, color: AppColors.camel),
-        ),
-      ),
-    );
-  }
 
   Widget _buildFavoriteButton(double sw) {
     return Positioned(

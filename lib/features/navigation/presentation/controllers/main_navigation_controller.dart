@@ -1,4 +1,6 @@
-import 'package:ecom_app/features/vendor_dashboard/presentation/views/dashboard_view.dart';
+import 'package:ecom_app/features/wishlist/presentation/screens/wishlist_screen.dart';
+import 'package:ecom_app/features/vendor_dashboard/presentation/views/vendor_dashboard_view.dart';
+import 'package:ecom_app/features/b2b_portal/presentation/views/b2b_portal_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
@@ -18,6 +20,12 @@ class MainNavigationController extends GetxController {
   void onInit() {
     super.onInit();
     _initializePages();
+    
+    // Listen for role changes to update navigation dynamically
+    ever(Get.find<AuthController>().selectedRole, (_) {
+      _initializePages();
+      selectedIndex.value = 0; // Reset to home on role change
+    });
   }
 
   void _initializePages() {
@@ -28,10 +36,19 @@ class MainNavigationController extends GetxController {
         const Center(child: Text('Active Orders (Coming Soon)')),
         const ProfileView(),
       ];
+    } else if (currentRole == AuthRole.corporate) {
+      pages = [
+        const B2BPortalView(),
+        DiscoveryScreen(),
+        const WishlistScreen(),
+        const CartScreen(),
+        const ProfileView(),
+      ];
     } else {
       pages = [
         const HomeView(),
         DiscoveryScreen(),
+        const WishlistScreen(),
         const CartScreen(),
         const ProfileView(),
       ];
@@ -66,6 +83,35 @@ class MainNavigationController extends GetxController {
           label: 'Profile',
         ),
       ];
+    } else if (currentRole == AuthRole.corporate) {
+      return [
+        NavigationItemData(
+          icon: Icons.business_outlined,
+          activeIcon: Icons.business_rounded,
+          label: 'Sourcing',
+        ),
+        NavigationItemData(
+          icon: Icons.auto_awesome_outlined,
+          activeIcon: Icons.auto_awesome_rounded,
+          label: 'Discover',
+        ),
+        NavigationItemData(
+          icon: Icons.favorite_outline_rounded,
+          activeIcon: Icons.favorite_rounded,
+          label: 'Wishlist',
+        ),
+        NavigationItemData(
+          icon: Icons.shopping_bag_outlined,
+          activeIcon: Icons.shopping_bag_rounded,
+          label: 'Cart',
+          hasBadge: true,
+        ),
+        NavigationItemData(
+          icon: Icons.person_outline_rounded,
+          activeIcon: Icons.person_rounded,
+          label: 'Profile',
+        ),
+      ];
     } else {
       return [
         NavigationItemData(
@@ -77,6 +123,11 @@ class MainNavigationController extends GetxController {
           icon: Icons.auto_awesome_outlined,
           activeIcon: Icons.auto_awesome_rounded,
           label: 'Discover',
+        ),
+        NavigationItemData(
+          icon: Icons.favorite_outline_rounded,
+          activeIcon: Icons.favorite_rounded,
+          label: 'Wishlist',
         ),
         NavigationItemData(
           icon: Icons.shopping_bag_outlined,

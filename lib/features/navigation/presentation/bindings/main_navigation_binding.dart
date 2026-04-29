@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import '../controllers/main_navigation_controller.dart';
 import '../../../../features/home/presentation/controllers/home_controller.dart';
-import '../../../../features/vendor_dashboard/presentation/controllers/dashboard_controller.dart';
+import '../../../../features/vendor_dashboard/presentation/controllers/vendor_dashboard_controller.dart';
+import '../../../../features/b2b_portal/presentation/controllers/b2b_portal_controller.dart';
 import '../../../../features/profile/presentation/controllers/profile_controller.dart';
 
 class MainNavigationBinding extends Bindings {
@@ -9,7 +10,8 @@ class MainNavigationBinding extends Bindings {
   void dependencies() {
     Get.lazyPut<MainNavigationController>(() => MainNavigationController());
     Get.lazyPut<HomeController>(() => HomeController());
-    Get.lazyPut<DashboardController>(() => DashboardController());
+    Get.lazyPut<VendorDashboardController>(() => VendorDashboardController());
+    Get.lazyPut<B2BPortalController>(() => B2BPortalController());
     Get.lazyPut<ProfileController>(() => ProfileController());
   }
 }

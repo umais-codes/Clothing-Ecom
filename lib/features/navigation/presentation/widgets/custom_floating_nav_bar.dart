@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -45,14 +44,14 @@ class CustomFloatingNavBar extends StatelessWidget {
             padding: .symmetric(horizontal: horizontalPadding),
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final double itemWidth =
-                    constraints.maxWidth / controller.navItems.length;
+                return Obx(() {
+                  final double itemWidth =
+                      constraints.maxWidth / controller.navItems.length;
 
-                return Stack(
-                  children: [
-                    // Sliding Pill Indicator
-                    Obx(() {
-                      return AnimatedPositioned(
+                  return Stack(
+                    children: [
+                      // Sliding Pill Indicator
+                      AnimatedPositioned(
                         duration: const Duration(milliseconds: 350),
                         curve: Curves.elasticOut,
                         left: controller.selectedIndex.value * itemWidth,
@@ -60,27 +59,26 @@ class CustomFloatingNavBar extends StatelessWidget {
                         child: Container(
                           width: itemWidth,
                           height: constraints.maxHeight * 0.7,
-                          padding: EdgeInsets.symmetric(horizontal: sw * 0.02),
+                          padding: .symmetric(horizontal: sw * 0.02),
                           child: Container(
                             decoration: BoxDecoration(
                               color: AppColors.camel.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(sw * 0.07),
+                              borderRadius: .circular(sw * 0.07),
                             ),
                           ),
                         ),
-                      );
-                    }),
-                    // Nav Items
-                    Row(
-                      children: List.generate(controller.navItems.length, (
-                        index,
-                      ) {
-                        return Expanded(
-                          child: Obx(() {
-                            final item = controller.navItems[index];
-                            final bool isActive =
-                                controller.selectedIndex.value == index;
-                            return _NavBarItem(
+                      ),
+                      // Nav Items
+                      Row(
+                        children: List.generate(controller.navItems.length, (
+                          index,
+                        ) {
+                          final item = controller.navItems[index];
+                          final bool isActive =
+                              controller.selectedIndex.value == index;
+
+                          return Expanded(
+                            child: _NavBarItem(
                               item: item,
                               isActive: isActive,
                               onTap: () {
@@ -90,13 +88,13 @@ class CustomFloatingNavBar extends StatelessWidget {
                                 }
                               },
                               sw: sw,
-                            );
-                          }),
-                        );
-                      }),
-                    ),
-                  ],
-                );
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+                });
               },
             ),
           ),

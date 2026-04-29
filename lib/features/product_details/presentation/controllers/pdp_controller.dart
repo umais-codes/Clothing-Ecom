@@ -1,10 +1,24 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/cart/domain/models/cart_item_model.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/cart_controller.dart';
+import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
 import 'package:get/get.dart';
 
 class PdpController extends GetxController {
-  final product = Get.arguments as Map<String, dynamic>;
+  late final Map<String, dynamic> product;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final args = Get.arguments;
+    if (args is Map<String, dynamic>) {
+      product = args;
+    } else if (args is Product) {
+      product = args.toMap();
+    } else {
+      product = {};
+    }
+  }
 
   final RxString selectedSize = 'M'.obs;
   final RxString selectedColor = 'Sand'.obs;

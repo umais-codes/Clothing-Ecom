@@ -72,6 +72,7 @@ class AuthController extends GetxController {
     status.value = AuthStatus.loading;
     await Future.delayed(const Duration(seconds: 1)); // Mock
     status.value = AuthStatus.success;
+    selectedRole.value = AuthRole.shopper;
     Get.offAllNamed('/main-navigation');
   }
 
@@ -139,7 +140,11 @@ class AuthController extends GetxController {
     status.value = AuthStatus.loading;
     await Future.delayed(const Duration(seconds: 2)); // Mock
     status.value = AuthStatus.success;
-    // Stay in Vendor area or navigate to Vendor Dashboard (NOT home)
+    // Set role explicitly to ensure navigation logic picks it up
+    selectedRole.value = AuthRole.vendor;
+    
+    Get.offAllNamed('/main-navigation');
+    
     Get.snackbar(
       'Success',
       'Welcome back to the Brand Portal',
@@ -158,6 +163,8 @@ class AuthController extends GetxController {
     status.value = AuthStatus.loading;
     await Future.delayed(const Duration(seconds: 2)); // Mock
     status.value = AuthStatus.success;
+    selectedRole.value = AuthRole.corporate;
+    Get.offAllNamed('/main-navigation');
   }
 
   Future<void> signInCorporate() async {
@@ -169,7 +176,11 @@ class AuthController extends GetxController {
     status.value = AuthStatus.loading;
     await Future.delayed(const Duration(seconds: 2)); // Mock
     status.value = AuthStatus.success;
-    // Stay in Corporate area or navigate to Dashboard (NOT home)
+    // Set role explicitly to ensure navigation logic picks it up
+    selectedRole.value = AuthRole.corporate;
+
+    Get.offAllNamed('/main-navigation');
+
     Get.snackbar(
       'Success',
       'Welcome to Corporate Access',

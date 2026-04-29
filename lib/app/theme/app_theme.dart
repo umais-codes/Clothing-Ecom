@@ -28,9 +28,9 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: AppColors.charcoal),
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: GoogleFonts.outfit(
           color: AppColors.charcoal,
-          fontSize: 16,
+          fontSize: 18,
           fontWeight: .w700,
           letterSpacing: 0.5,
         ),
@@ -40,65 +40,70 @@ class AppTheme {
       tabBarTheme: TabBarThemeData(
         labelColor: AppColors.charcoal,
         unselectedLabelColor: AppColors.grey,
-        indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: GoogleFonts.poppins(fontWeight: .w600, fontSize: 13),
-        unselectedLabelStyle: GoogleFonts.poppins(
-          fontWeight: .w400,
+        indicatorSize: .label,
+        labelStyle: GoogleFonts.outfit(fontWeight: .w700, fontSize: 13),
+        unselectedLabelStyle: GoogleFonts.outfit(
+          fontWeight: .w500,
           fontSize: 13,
         ),
       ),
 
-      textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+      textTheme: GoogleFonts.outfitTextTheme().copyWith(
         displayLarge: GoogleFonts.cormorantGaramond(
           fontSize: 36,
-          fontWeight: .w700,
+          fontWeight: .w800,
           color: AppColors.charcoal,
           letterSpacing: -0.5,
           height: 1.1,
         ),
         displayMedium: GoogleFonts.cormorantGaramond(
           fontSize: 30,
-          fontWeight: .w700,
+          fontWeight: .w800,
           color: AppColors.charcoal,
           letterSpacing: -0.3,
           height: 1.1,
         ),
         displaySmall: GoogleFonts.cormorantGaramond(
           fontSize: 24,
-          fontWeight: .w600,
+          fontWeight: .w700,
           color: AppColors.charcoal,
           letterSpacing: -0.2,
         ),
         headlineMedium: GoogleFonts.cormorantGaramond(
-          fontSize: 20,
+          fontSize: 22,
           fontWeight: .w600,
           color: AppColors.charcoal,
         ),
         titleLarge: GoogleFonts.outfit(
+          fontSize: 18,
+          fontWeight: .w700,
+          color: AppColors.charcoal,
+        ),
+        titleMedium: GoogleFonts.outfit(
           fontSize: 16,
           fontWeight: .w600,
           color: AppColors.charcoal,
         ),
         bodyLarge: GoogleFonts.outfit(
-          fontSize: 14,
+          fontSize: 15,
           color: AppColors.charcoal,
-          height: 1.5,
+          height: 1.4,
         ),
         bodyMedium: GoogleFonts.outfit(
-          fontSize: 13,
+          fontSize: 14,
           color: AppColors.charcoal,
-          height: 1.4,
+          height: 1.3,
         ),
         bodySmall: GoogleFonts.outfit(
-          fontSize: 11,
+          fontSize: 12,
           color: AppColors.grey,
-          height: 1.4,
+          height: 1.2,
         ),
         labelLarge: GoogleFonts.outfit(
           fontSize: 12,
-          fontWeight: .w700,
+          fontWeight: .w800,
           color: AppColors.charcoal,
-          letterSpacing: 0.8,
+          letterSpacing: 1.0,
         ),
       ),
 
@@ -123,7 +128,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.greyLight, width: 1),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }

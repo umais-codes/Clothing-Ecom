@@ -8,6 +8,7 @@ import '../widgets/fit_profile_card.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/quick_action_grid.dart';
 import '../widgets/account_menu_section.dart';
+import '../widgets/perspective_switcher.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -51,11 +52,13 @@ class ProfileView extends GetView<ProfileController> {
             SizedBox(height: size.height * 0.02),
             const AccountMenuSection(),
             SizedBox(height: size.height * 0.02),
+            const PerspectiveSwitcher(),
+            SizedBox(height: size.height * 0.02),
             CustomButton(
               text: 'Log Out',
               onPressed: controller.logout,
               icon: Icons.logout_rounded,
-              buttonColor: AppColors.error.withOpacity(0.1),
+              buttonColor: AppColors.error.withValues(alpha: 0.1),
               textColor: AppColors.error,
             ),
             SizedBox(height: size.height * 0.1),

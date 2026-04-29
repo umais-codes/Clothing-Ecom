@@ -7,8 +7,10 @@ import 'package:ecom_app/features/onboarding/bindings/onboarding_binding.dart';
 import 'package:ecom_app/features/onboarding/presentation/views/onboarding_view.dart';
 import 'package:ecom_app/features/product_details/bindings/pdp_binding.dart';
 import 'package:ecom_app/features/product_details/presentation/views/pdp_view.dart';
-import 'package:ecom_app/features/vendor_dashboard/bindings/dashboard_binding.dart';
-import 'package:ecom_app/features/vendor_dashboard/presentation/views/dashboard_view.dart';
+import 'package:ecom_app/features/vendor_dashboard/bindings/vendor_dashboard_binding.dart';
+import 'package:ecom_app/features/vendor_dashboard/presentation/views/vendor_dashboard_view.dart';
+import 'package:ecom_app/features/b2b_portal/bindings/b2b_portal_binding.dart';
+import 'package:ecom_app/features/b2b_portal/presentation/views/b2b_portal_view.dart';
 import 'package:ecom_app/features/cart/data/repositories/cart_repository.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/cart_controller.dart';
 import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
@@ -18,6 +20,7 @@ import 'package:ecom_app/features/navigation/presentation/screens/main_navigatio
 import 'package:ecom_app/features/profile/bindings/profile_binding.dart';
 import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ecom_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,7 +72,13 @@ class EcomApp extends StatelessWidget {
         GetPage(
           name: '/vendor-dashboard',
           page: () => const VendorDashboardView(),
-          binding: DashboardBinding(),
+          binding: VendorDashboardBinding(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/b2b-portal',
+          page: () => const B2BPortalView(),
+          binding: B2BPortalBinding(),
           transition: Transition.rightToLeft,
         ),
         GetPage(
@@ -86,6 +95,11 @@ class EcomApp extends StatelessWidget {
           name: '/profile',
           page: () => const ProfileView(),
           binding: ProfileBinding(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/wishlist',
+          page: () => const WishlistScreen(),
           transition: Transition.rightToLeft,
         ),
       ],

@@ -17,16 +17,18 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.charcoal,
-            size: w * 0.055,
-          ),
-          onPressed: () {
-            Get.back();
-          },
-        ),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: AppColors.charcoal,
+                  size: w * 0.055,
+                ),
+                onPressed: () {
+                  Get.back();
+                },
+              )
+            : null,
         title: Text(
           'Shopping Cart',
           style: GoogleFonts.outfit(fontSize: w * 0.05, fontWeight: .w600),

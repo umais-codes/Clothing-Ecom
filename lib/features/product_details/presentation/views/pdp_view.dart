@@ -8,6 +8,8 @@ import '../widgets/pdp_carousel.dart';
 import '../widgets/variant_section.dart';
 import '../widgets/ai_size_predictor_card.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
+import 'package:ecom_app/features/wishlist/presentation/controllers/wishlist_controller.dart';
 import 'package:ecom_app/app/widgets/custom_quantity_stepper.dart';
 
 class PdpView extends GetView<PdpController> {
@@ -189,40 +191,39 @@ class PdpView extends GetView<PdpController> {
 
 
   Widget _buildFavoriteButton(double sw) {
+    final wishlistController = Get.put(WishlistController());
+    final product = Product.fromMap(controller.product);
+
     return Positioned(
       top: MediaQuery.of(Get.context!).padding.top + sw * 0.015,
       right: sw * 0.04,
-      child: Container(
-        width: sw * 0.1,
-        height: sw * 0.1,
-        decoration: BoxDecoration(
-          color: AppColors.white.withValues(alpha: 0.92),
-          borderRadius: .circular(sw * 0.03),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 8,
-            ),
-          ],
-        ),
-        child: IconButton(
-          padding: .zero,
-          icon: Icon(
-            Icons.favorite_border_rounded,
-            color: AppColors.charcoal,
-            size: sw * 0.05,
+      child: Obx(
+        () => Container(
+          width: sw * 0.1,
+          height: sw * 0.1,
+          decoration: BoxDecoration(
+            color: AppColors.white.withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(sw * 0.03),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 8,
+              ),
+            ],
           ),
-          onPressed: () {
-            Get.snackbar(
-              'Added to Wishlist',
-              'This item has been saved to your favorites.',
-              backgroundColor: AppColors.charcoal,
-              colorText: AppColors.white,
-              snackPosition: .BOTTOM,
-              margin: .all(sw * 0.04),
-              borderRadius: sw * 0.02,
-            );
-          },
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(
+              wishlistController.isInWishlist(product.id)
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_border_rounded,
+              color: wishlistController.isInWishlist(product.id)
+                  ? AppColors.camel
+                  : AppColors.charcoal,
+              size: sw * 0.05,
+            ),
+            onPressed: () => wishlistController.toggleWishlist(product),
+          ),
         ),
       ),
     );

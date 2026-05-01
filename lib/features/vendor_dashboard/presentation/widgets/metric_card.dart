@@ -25,10 +25,10 @@ class MetricCard extends StatelessWidget {
 
     return Container(
       height: isLarge ? sw * 0.18 : sw * 0.18,
-      padding: EdgeInsets.symmetric(horizontal: sw * 0.015, vertical: sw * 0.01),
+      padding: .symmetric(horizontal: sw * 0.015, vertical: sw * 0.01),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(sw * 0.03),
+        borderRadius: .circular(sw * 0.03),
         boxShadow: [
           BoxShadow(
             color: AppColors.charcoal.withValues(alpha: 0.15),
@@ -38,13 +38,13 @@ class MetricCard extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(
+                padding: .symmetric(
                   horizontal: sw * 0.015,
                   vertical: sw * 0.008,
                 ),
@@ -52,7 +52,7 @@ class MetricCard extends StatelessWidget {
                   color: (accentColor ?? AppColors.camel).withValues(
                     alpha: 0.1,
                   ),
-                  shape: BoxShape.circle,
+                  shape: .circle,
                 ),
                 child: Icon(
                   icon,
@@ -65,7 +65,7 @@ class MetricCard extends StatelessWidget {
                   trend!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppColors.success,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: .w700,
                     fontSize: sw * 0.024,
                   ),
                 ),
@@ -73,13 +73,13 @@ class MetricCard extends StatelessWidget {
           ),
           const Spacer(),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               Text(
                 title,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   letterSpacing: 0.5,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: .w600,
                   fontSize: sw * 0.025,
                 ),
               ),
@@ -90,7 +90,7 @@ class MetricCard extends StatelessWidget {
                             ? Theme.of(context).textTheme.displaySmall
                             : Theme.of(context).textTheme.titleLarge)
                         ?.copyWith(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: .w700,
                           fontSize: isLarge ? sw * 0.045 : sw * 0.035,
                           height: 1.1,
                           color: AppColors.charcoal,

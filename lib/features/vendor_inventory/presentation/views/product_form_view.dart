@@ -38,10 +38,10 @@ class ProductFormView extends StatelessWidget {
               Get.snackbar('Draft Saved', 'Your progress has been saved.');
             },
             child: Text(
-              'Save Draft',
+              'Save',
               style: GoogleFonts.outfit(
                 color: AppColors.camel,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -54,25 +54,28 @@ class ProductFormView extends StatelessWidget {
           );
         }
         return SingleChildScrollView(
-          padding: EdgeInsets.all(sw * 0.04),
+          padding: EdgeInsets.symmetric(
+            horizontal: sw * 0.04,
+            vertical: sw * 0.01,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionTitle('Basic Information', sw),
               _buildBasicInfoCard(controller, sw),
-              SizedBox(height: sw * 0.06),
+              SizedBox(height: sw * 0.012),
 
               _buildSectionTitle('Media Upload', sw),
               _buildMediaCard(controller, sw),
-              SizedBox(height: sw * 0.06),
+              SizedBox(height: sw * 0.012),
 
               _buildSectionTitle('Apparel Matrix Variants', sw),
               VariantMatrixCard(sw: sw),
-              SizedBox(height: sw * 0.06),
+              SizedBox(height: sw * 0.012),
 
               _buildSectionTitle('Pricing', sw),
               _buildPricingCard(controller, sw),
-              SizedBox(height: sw * 0.1),
+              SizedBox(height: sw * 0.012),
 
               CustomButton(
                 text: 'Publish Product',
@@ -89,7 +92,7 @@ class ProductFormView extends StatelessWidget {
 
   Widget _buildSectionTitle(String title, double sw) {
     return Padding(
-      padding: EdgeInsets.only(bottom: sw * 0.02),
+      padding: EdgeInsets.only(top: sw * 0.012),
       child: Text(
         title,
         style: GoogleFonts.outfit(
@@ -103,10 +106,10 @@ class ProductFormView extends StatelessWidget {
 
   Widget _buildBasicInfoCard(ProductCrudController controller, double sw) {
     return Container(
-      padding: EdgeInsets.all(sw * 0.04),
+      padding: EdgeInsets.symmetric(vertical: sw * 0.01, horizontal: sw * 0.02),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(sw * 0.03),
+        borderRadius: BorderRadius.circular(sw * 0.02),
         boxShadow: [
           BoxShadow(
             color: AppColors.charcoal.withValues(alpha: 0.05),
@@ -118,33 +121,22 @@ class ProductFormView extends StatelessWidget {
       child: Column(
         children: [
           CustomTextField(
-            controller: TextEditingController(text: controller.title.value),
+            controller: controller.titleController,
             hinttext: 'Product Title',
-            onChanged: (val) {
-              controller.title.value = val;
-              controller.saveDraft();
-            },
+            onChanged: (_) => controller.saveDraft(),
           ),
-          SizedBox(height: sw * 0.04),
+          SizedBox(height: sw * 0.02),
           CustomTextField(
-            controller: TextEditingController(
-              text: controller.description.value,
-            ),
+            controller: controller.descriptionController,
             hinttext: 'Product Description',
             maxLines: 4,
-            onChanged: (val) {
-              controller.description.value = val;
-              controller.saveDraft();
-            },
+            onChanged: (_) => controller.saveDraft(),
           ),
-          SizedBox(height: sw * 0.04),
+          SizedBox(height: sw * 0.02),
           CustomTextField(
-            controller: TextEditingController(text: controller.category.value),
+            controller: controller.categoryController,
             hinttext: 'Category (e.g., Shirts, Pants)',
-            onChanged: (val) {
-              controller.category.value = val;
-              controller.saveDraft();
-            },
+            onChanged: (_) => controller.saveDraft(),
           ),
         ],
       ),
@@ -153,10 +145,10 @@ class ProductFormView extends StatelessWidget {
 
   Widget _buildMediaCard(ProductCrudController controller, double sw) {
     return Container(
-      padding: EdgeInsets.all(sw * 0.04),
+      padding: EdgeInsets.symmetric(vertical: sw * 0.01, horizontal: sw * 0.02),
       decoration: BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.circular(sw * 0.03),
+        borderRadius: BorderRadius.circular(sw * 0.02),
         boxShadow: [
           BoxShadow(
             color: AppColors.charcoal.withValues(alpha: 0.05),
@@ -170,14 +162,13 @@ class ProductFormView extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () {
-              // Simulate adding an image
               controller.addImage(
                 'https://picsum.photos/200/300?random=${DateTime.now().millisecondsSinceEpoch}',
               );
             },
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: sw * 0.08),
+              padding: EdgeInsets.symmetric(vertical: sw * 0.06),
               decoration: BoxDecoration(
                 color: AppColors.offWhite,
                 borderRadius: BorderRadius.circular(sw * 0.02),
@@ -203,13 +194,13 @@ class ProductFormView extends StatelessWidget {
             ),
           ),
           if (controller.imageUrls.isNotEmpty) ...[
-            SizedBox(height: sw * 0.04),
+            SizedBox(height: sw * 0.02),
             SizedBox(
               height: sw * 0.2,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: controller.imageUrls.length,
-                separatorBuilder: (_, __) => SizedBox(width: sw * 0.02),
+                separatorBuilder: (_, _) => SizedBox(width: sw * 0.02),
                 itemBuilder: (context, index) {
                   return Stack(
                     children: [
@@ -231,13 +222,13 @@ class ProductFormView extends StatelessWidget {
                             controller.imageUrls[index],
                           ),
                           child: Container(
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: AppColors.white,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.close,
-                              size: 16,
+                              size: sw * 0.05,
                               color: AppColors.error,
                             ),
                           ),
@@ -256,7 +247,7 @@ class ProductFormView extends StatelessWidget {
 
   Widget _buildPricingCard(ProductCrudController controller, double sw) {
     return Container(
-      padding: EdgeInsets.all(sw * 0.04),
+      padding: EdgeInsets.symmetric(vertical: sw * 0.01, horizontal: sw * 0.02),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(sw * 0.03),
@@ -264,19 +255,17 @@ class ProductFormView extends StatelessWidget {
           BoxShadow(
             color: AppColors.charcoal.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset.zero,
           ),
         ],
       ),
       child: CustomTextField(
-        controller: TextEditingController(text: controller.basePrice.value),
+        controller: controller.basePriceController,
         hinttext: 'Base Price',
+        textAlign: TextAlign.left,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        prefixIcon: const Icon(Icons.attach_money, color: AppColors.charcoal),
-        onChanged: (val) {
-          controller.basePrice.value = val;
-          controller.saveDraft();
-        },
+        prefixIcon: Icon(Icons.attach_money, color: AppColors.charcoal),
+        onChanged: (_) => controller.saveDraft(),
       ),
     );
   }

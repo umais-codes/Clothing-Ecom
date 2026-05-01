@@ -70,7 +70,7 @@ class WishlistItemCard extends StatelessWidget {
               ),
 
               /// STOCK BADGE
-              if (!product.inStock)
+              if (product.inStock != null && !product.inStock!)
                 Positioned(
                   bottom: sw * 0.02,
                   left: sw * 0.02,
@@ -136,7 +136,7 @@ class WishlistItemCard extends StatelessWidget {
                 CustomButton(
                   text: 'Move to Cart',
                   height: sw * 0.08,
-                  onPressed: product.inStock
+                  onPressed: product.inStock != null && product.inStock!
                       ? () => controller.moveToCart(product)
                       : null,
                 ),

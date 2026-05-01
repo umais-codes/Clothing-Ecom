@@ -34,17 +34,27 @@ class InventoryView extends StatelessWidget {
         children: [
           _buildActionHeader(context, sw, controller),
           Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.camel),
-                );
-              }
-              if (controller.products.isEmpty) {
-                return _buildEmptyState(sw, controller);
-              }
-              return _buildProductList(controller, sw);
-            }),
+            child: RefreshIndicator(
+              onRefresh: controller.refreshProducts,
+              color: AppColors.camel,
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.camel),
+                  );
+                }
+                if (controller.products.isEmpty) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: MediaQuery.sizeOf(context).height * 0.6,
+                      child: _buildEmptyState(sw, controller),
+                    ),
+                  );
+                }
+                return _buildProductList(controller, sw);
+              }),
+            ),
           ),
         ],
       ),
@@ -208,10 +218,11 @@ class InventoryView extends StatelessWidget {
                 icon: const Icon(Icons.edit, color: AppColors.camel),
                 onPressed: () {
                   // Pre-fill form
-                  controller.title.value = product.title;
-                  controller.description.value = product.description;
-                  controller.category.value = product.category;
-                  controller.basePrice.value = product.basePrice.toString();
+                  controller.titleController.text = product.title;
+                  controller.descriptionController.text = product.description;
+                  controller.categoryController.text = product.category;
+                  controller.basePriceController.text = product.basePrice
+                      .toString();
                   controller.variants.assignAll(product.variants);
                   controller.imageUrls.assignAll(product.imageUrls);
                   Get.to(() => const ProductFormView());

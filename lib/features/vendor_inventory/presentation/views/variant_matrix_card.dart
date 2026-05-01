@@ -14,12 +14,16 @@ class VariantMatrixCard extends StatelessWidget {
     final controller = Get.find<ProductCrudController>();
 
     return Container(
-      padding: EdgeInsets.all(sw * 0.04),
+      padding: EdgeInsets.symmetric(vertical: sw * 0.01, horizontal: sw * 0.02),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(sw * 0.03),
         boxShadow: [
-          BoxShadow(color: AppColors.charcoal.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(
+            color: AppColors.charcoal.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: Offset.zero,
+          ),
         ],
       ),
       child: Column(
@@ -30,7 +34,10 @@ class VariantMatrixCard extends StatelessWidget {
               return Padding(
                 padding: EdgeInsets.symmetric(vertical: sw * 0.04),
                 child: Center(
-                  child: Text('No variants added yet.', style: GoogleFonts.outfit(color: AppColors.grey)),
+                  child: Text(
+                    'No variants added yet.',
+                    style: GoogleFonts.outfit(color: AppColors.grey),
+                  ),
                 ),
               );
             }
@@ -38,7 +45,8 @@ class VariantMatrixCard extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: controller.variants.length,
-              separatorBuilder: (_, _) => const Divider(color: AppColors.greyLight),
+              separatorBuilder: (_, _) =>
+                  const Divider(color: AppColors.greyLight),
               itemBuilder: (context, index) {
                 final variant = controller.variants[index];
                 return Row(
@@ -47,15 +55,30 @@ class VariantMatrixCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('${variant.color} / ${variant.size}', style: GoogleFonts.outfit(fontWeight: FontWeight.w600)),
-                        Text('SKU: ${variant.sku}', style: GoogleFonts.outfit(fontSize: sw * 0.025, color: AppColors.grey)),
+                        Text(
+                          '${variant.color} / ${variant.size}',
+                          style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          'SKU: ${variant.sku}',
+                          style: GoogleFonts.outfit(
+                            fontSize: sw * 0.025,
+                            color: AppColors.grey,
+                          ),
+                        ),
                       ],
                     ),
                     Row(
                       children: [
-                        Text('Qty: ${variant.stockQuantity}', style: GoogleFonts.outfit()),
+                        Text(
+                          'Qty: ${variant.stockQuantity}',
+                          style: GoogleFonts.outfit(),
+                        ),
                         IconButton(
-                          icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: AppColors.error,
+                          ),
                           onPressed: () => controller.removeVariant(variant.id),
                         ),
                       ],
@@ -69,7 +92,10 @@ class VariantMatrixCard extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => _showAddVariantDialog(context, controller, sw),
             icon: const Icon(Icons.add, color: AppColors.camel),
-            label: const Text('Add Variant', style: TextStyle(color: AppColors.camel)),
+            label: Text(
+              'Add Variant',
+              style: GoogleFonts.outfit(color: AppColors.camel),
+            ),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: AppColors.camel),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(sw * 0.02)),
@@ -80,7 +106,11 @@ class VariantMatrixCard extends StatelessWidget {
     );
   }
 
-  void _showAddVariantDialog(BuildContext context, ProductCrudController controller, double sw) {
+  void _showAddVariantDialog(
+    BuildContext context,
+    ProductCrudController controller,
+    double sw,
+  ) {
     String color = '';
     String size = '';
     String qty = '';
@@ -90,13 +120,22 @@ class VariantMatrixCard extends StatelessWidget {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomTextField(hinttext: 'Color (e.g. Red)', onChanged: (v) => color = v, controller: TextEditingController()),
+          CustomTextField(
+            hinttext: 'Color (e.g. Red)',
+            onChanged: (v) => color = v,
+            controller: TextEditingController(),
+          ),
           SizedBox(height: sw * 0.02),
-          CustomTextField(hinttext: 'Size (e.g. M)', onChanged: (v) => size = v, controller: TextEditingController()),
+          CustomTextField(
+            hinttext: 'Size (e.g. M)',
+            onChanged: (v) => size = v,
+            controller: TextEditingController(),
+          ),
           SizedBox(height: sw * 0.02),
           CustomTextField(
             hinttext: 'Stock Quantity',
             keyboardType: TextInputType.number,
+            textAlign: TextAlign.left,
             onChanged: (v) => qty = v,
             controller: TextEditingController(),
           ),

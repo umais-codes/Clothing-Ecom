@@ -1,3 +1,4 @@
+import 'package:ecom_app/features/profile/presentation/widgets/profile_menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
@@ -15,15 +16,14 @@ class PerspectiveSwitcher extends StatelessWidget {
       crossAxisAlignment: .start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: sw * 0.01),
+          padding: .only(left: sw * 0.02),
           child: Text(
             'Switch Perspective',
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        SizedBox(height: sw * 0.03),
+        SizedBox(height: sw * 0.02),
         Container(
-          padding: .symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
           decoration: BoxDecoration(
             color: AppColors.offWhite,
             borderRadius: .circular(sw * 0.04),
@@ -31,62 +31,31 @@ class PerspectiveSwitcher extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildRoleTile(
-                context,
-                'Consumer Mode',
-                Icons.shopping_bag_outlined,
-                AuthRole.shopper,
-                authController,
+              ProfileMenuItem(
+                icon: Icons.shopping_bag_outlined,
+                title: 'Consumer Mode',
+                onTap: () {
+                  authController.setRole(AuthRole.shopper);
+                },
               ),
-              const Divider(height: 1, indent: 40),
-              _buildRoleTile(
-                context,
-                'Vendor Portal',
-                Icons.storefront_outlined,
-                AuthRole.vendor,
-                authController,
+              ProfileMenuItem(
+                icon: Icons.storefront_outlined,
+                title: 'Vendor Portal',
+                onTap: () {
+                  authController.setRole(AuthRole.vendor);
+                },
               ),
-              const Divider(height: 1, indent: 40),
-              _buildRoleTile(
-                context,
-                'Corporate Sourcing',
-                Icons.business_outlined,
-                AuthRole.corporate,
-                authController,
+              ProfileMenuItem(
+                icon: Icons.business_outlined,
+                title: 'Corporate Sourcing',
+                onTap: () {
+                  authController.setRole(AuthRole.corporate);
+                },
               ),
             ],
           ),
         ),
       ],
     );
-  }
-
-  Widget _buildRoleTile(
-    BuildContext context,
-    String title,
-    IconData icon,
-    AuthRole role,
-    AuthController controller,
-  ) {
-    return Obx(() {
-      final isSelected = controller.selectedRole.value == role;
-      return ListTile(
-        leading: Icon(
-          icon,
-          color: isSelected ? AppColors.camel : AppColors.charcoal,
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: isSelected ? .w700 : .w500,
-            color: isSelected ? AppColors.camel : AppColors.charcoal,
-          ),
-        ),
-        trailing: isSelected
-            ? const Icon(Icons.check_circle, color: AppColors.camel)
-            : const Icon(Icons.chevron_right, color: AppColors.grey),
-        onTap: () => controller.setRole(role),
-      );
-    });
   }
 }

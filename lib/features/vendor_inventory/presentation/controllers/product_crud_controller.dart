@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/repositories/inventory_repository.dart';
 import '../../data/models/vendor_product_model.dart';
@@ -13,18 +14,37 @@ class ProductCrudController extends GetxController {
   final RxBool isLoading = false.obs;
 
   // Form State
-  final RxString title = ''.obs;
-  final RxString description = ''.obs;
-  final RxString category = ''.obs;
-  final RxString basePrice = ''.obs;
+  late final TextEditingController titleController;
+  late final TextEditingController descriptionController;
+  late final TextEditingController categoryController;
+  late final TextEditingController basePriceController;
+
   final RxList<ProductVariant> variants = <ProductVariant>[].obs;
   final RxList<String> imageUrls = <String>[].obs;
 
   @override
   void onInit() {
     super.onInit();
+    titleController = TextEditingController();
+    descriptionController = TextEditingController();
+    categoryController = TextEditingController();
+    basePriceController = TextEditingController();
+
     _loadProducts();
     _loadDraft();
+  }
+
+  @override
+  void onClose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    categoryController.dispose();
+    basePriceController.dispose();
+    super.onClose();
+  }
+
+  Future<void> refreshProducts() async {
+    await _loadProducts();
   }
 
   Future<void> _loadProducts() async {
@@ -40,10 +60,17 @@ class ProductCrudController extends GetxController {
   Future<void> _loadDraft() async {
     final draft = await _repository.getDraft();
     if (draft != null) {
-      title.value = draft.title;
-      description.value = draft.description;
-      category.value = draft.category;
-      basePrice.value = draft.basePrice > 0 ? draft.basePrice.toString() : '';
+      if (titleController.text.isEmpty) titleController.text = draft.title;
+      if (descriptionController.text.isEmpty) {
+        descriptionController.text = draft.description;
+      }
+      if (categoryController.text.isEmpty) {
+        categoryController.text = draft.category;
+      }
+      if (basePriceController.text.isEmpty) {
+        basePriceController.text =
+            draft.basePrice > 0 ? draft.basePrice.toString() : '';
+      }
       variants.assignAll(draft.variants);
       imageUrls.assignAll(draft.imageUrls);
     }
@@ -52,10 +79,10 @@ class ProductCrudController extends GetxController {
   void saveDraft() {
     final draft = VendorProduct(
       id: 'draft',
-      title: title.value,
-      description: description.value,
-      category: category.value,
-      basePrice: double.tryParse(basePrice.value) ?? 0.0,
+      title: titleController.text,
+      description: descriptionController.text,
+      category: categoryController.text,
+      basePrice: double.tryParse(basePriceController.text) ?? 0.0,
       variants: variants.toList(),
       imageUrls: imageUrls.toList(),
       isDraft: true,
@@ -70,7 +97,8 @@ class ProductCrudController extends GetxController {
         color: color,
         size: size,
         stockQuantity: stockQuantity,
-        sku: '${title.value.replaceAll(' ', '').toUpperCase()}-$color-$size',
+        sku:
+            '${titleController.text.replaceAll(' ', '').toUpperCase()}-$color-$size',
       ),
     );
     saveDraft();
@@ -92,12 +120,12 @@ class ProductCrudController extends GetxController {
   }
 
   Future<bool> saveProduct() async {
-    if (title.value.isEmpty || basePrice.value.isEmpty) {
+    if (titleController.text.isEmpty || basePriceController.text.isEmpty) {
       Get.snackbar('Error', 'Title and Base Price are required');
       return false;
     }
 
-    final price = double.tryParse(basePrice.value);
+    final price = double.tryParse(basePriceController.text);
     if (price == null || price <= 0) {
       Get.snackbar('Error', 'Invalid price format');
       return false;
@@ -107,9 +135,9 @@ class ProductCrudController extends GetxController {
     try {
       final product = VendorProduct(
         id: const Uuid().v4(),
-        title: title.value,
-        description: description.value,
-        category: category.value,
+        title: titleController.text,
+        description: descriptionController.text,
+        category: categoryController.text,
         basePrice: price,
         variants: variants.toList(),
         imageUrls: imageUrls.toList(),
@@ -118,10 +146,10 @@ class ProductCrudController extends GetxController {
 
       await _repository.saveProduct(product);
       products.add(product);
-      
+
       // Clear form and draft
       await clearForm();
-      
+
       Get.back();
       Get.snackbar('Success', 'Product saved successfully');
       return true;
@@ -136,10 +164,10 @@ class ProductCrudController extends GetxController {
   }
 
   Future<void> clearForm() async {
-    title.value = '';
-    description.value = '';
-    category.value = '';
-    basePrice.value = '';
+    titleController.clear();
+    descriptionController.clear();
+    categoryController.clear();
+    basePriceController.clear();
     variants.clear();
     imageUrls.clear();
     await _repository.clearDraft();

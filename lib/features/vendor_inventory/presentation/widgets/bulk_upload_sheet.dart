@@ -71,11 +71,19 @@ class _BulkUploadSheetState extends State<BulkUploadSheet> {
               decoration: BoxDecoration(
                 color: AppColors.offWhite,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.camel, style: BorderStyle.solid, width: 1.5),
+                border: Border.all(
+                  color: AppColors.camel,
+                  style: BorderStyle.solid,
+                  width: 1.5,
+                ),
               ),
               child: Column(
                 children: [
-                  Icon(Icons.cloud_upload_outlined, size: widget.sw * 0.12, color: AppColors.camel),
+                  Icon(
+                    Icons.cloud_upload_outlined,
+                    size: widget.sw * 0.12,
+                    color: AppColors.camel,
+                  ),
                   SizedBox(height: widget.sw * 0.02),
                   Text(
                     'Tap to select CSV file',

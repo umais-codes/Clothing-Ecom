@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../controllers/vendor_dashboard_controller.dart';
 import '../widgets/metric_card.dart';
 
@@ -25,6 +26,8 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
               SizedBox(height: sh * 0.015),
               _buildBentoGrid(context, sw),
               SizedBox(height: sh * 0.02),
+              _buildInventoryAction(context, sw),
+              SizedBox(height: sh * 0.02),
               _buildFinancialOverview(context, sw),
               SizedBox(height: sh * 0.02),
               _buildOperationalHealth(context, sw),
@@ -40,10 +43,10 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
 
   Widget _buildHeader(BuildContext context, double sw) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: .spaceBetween,
       children: [
         Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             Text(
               "VENDOR PORTAL",
@@ -55,9 +58,11 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
             ),
             Text(
               "Performance Hub",
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                fontSize: sw * 0.07,
+              style: GoogleFonts.outfit(
+                fontSize: sw * 0.05,
                 height: 1.0,
+                fontWeight: .w600,
+                color: AppColors.charcoal,
               ),
             ),
           ],
@@ -66,14 +71,14 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
           padding: .symmetric(horizontal: sw * 0.03, vertical: sw * 0.01),
           decoration: BoxDecoration(
             color: AppColors.white,
-            shape: BoxShape.circle,
+            shape: .circle,
             border: .all(
               color: AppColors.greyLight.withValues(alpha: 0.5),
               width: 1,
             ),
           ),
           child: Icon(
-            Icons.notifications_none_outlined,
+            Icons.notifications_none_sharp,
             size: sw * 0.06,
             color: AppColors.charcoal,
           ),
@@ -136,6 +141,60 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildInventoryAction(BuildContext context, double sw) {
+    return GestureDetector(
+      onTap: () => Get.toNamed('/vendor-inventory'),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(sw * 0.04),
+        decoration: BoxDecoration(
+          color: AppColors.camelLight,
+          borderRadius: BorderRadius.circular(sw * 0.04),
+          border: Border.all(color: AppColors.camel.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(sw * 0.02),
+                  decoration: BoxDecoration(
+                    color: AppColors.camel.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.inventory_2_outlined, color: AppColors.camel, size: sw * 0.06),
+                ),
+                SizedBox(width: sw * 0.03),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Manage Inventory',
+                      style: GoogleFonts.outfit(
+                        fontSize: sw * 0.04,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.charcoal,
+                      ),
+                    ),
+                    Text(
+                      'Add, edit, and track your products',
+                      style: GoogleFonts.outfit(
+                        fontSize: sw * 0.03,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: AppColors.camel, size: sw * 0.04),
+          ],
+        ),
+      ),
     );
   }
 

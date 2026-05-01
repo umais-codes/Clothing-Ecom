@@ -23,7 +23,7 @@ class WishlistScreen extends StatelessWidget {
           'My Wishlist',
           style: GoogleFonts.outfit(
             fontSize: sw * 0.05,
-            fontWeight: .w600,
+            fontWeight: FontWeight.w600,
             color: AppColors.charcoal,
           ),
         ),
@@ -41,16 +41,16 @@ class WishlistScreen extends StatelessWidget {
   Widget _buildEmptyState(double sw) {
     return Center(
       child: Padding(
-        padding: .symmetric(horizontal: sw * 0.1),
+        padding: EdgeInsets.symmetric(horizontal: sw * 0.1),
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             /// WIREFRAME HEART ICON
             Container(
-              padding: .symmetric(vertical: sw * 0.01, horizontal: sw * 0.01),
+              padding: EdgeInsets.symmetric(vertical: sw * 0.01, horizontal: sw * 0.01),
               decoration: BoxDecoration(
                 color: AppColors.white,
-                shape: .circle,
+                shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.charcoal.withValues(alpha: 0.03),
@@ -69,14 +69,14 @@ class WishlistScreen extends StatelessWidget {
               'Your wishlist is empty',
               style: GoogleFonts.outfit(
                 fontSize: sw * 0.05,
-                fontWeight: .w600,
+                fontWeight: FontWeight.w600,
                 color: AppColors.charcoal,
               ),
             ),
             SizedBox(height: sw * 0.01),
             Text(
               'Curate your dream wardrobe by saving items you love.',
-              textAlign: .center,
+              textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: sw * 0.035,
                 color: AppColors.grey,
@@ -96,7 +96,7 @@ class WishlistScreen extends StatelessWidget {
 
   Widget _buildWishlistGrid(WishlistController controller, double sw) {
     return GridView.builder(
-      padding: .symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
+      padding: EdgeInsets.symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: sw * 0.01,

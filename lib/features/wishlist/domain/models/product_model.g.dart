@@ -1,5 +1,10 @@
-import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
-import 'package:hive/hive.dart';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'product_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
 
 class ProductAdapter extends TypeAdapter<Product> {
   @override
@@ -17,15 +22,16 @@ class ProductAdapter extends TypeAdapter<Product> {
       vendorName: fields[2] as String,
       price: fields[3] as double,
       imageUrl: fields[4] as String,
-      inStock: fields[5] as bool,
-      description: fields[6] as String,
+      inStock: fields[5] as bool?,
+      description: fields[6] as String?,
+      isB2B: fields[7] as bool?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Product obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -39,7 +45,9 @@ class ProductAdapter extends TypeAdapter<Product> {
       ..writeByte(5)
       ..write(obj.inStock)
       ..writeByte(6)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(7)
+      ..write(obj.isB2B);
   }
 
   @override

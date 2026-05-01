@@ -8,11 +8,12 @@ import 'package:ecom_app/features/home/presentation/views/home_view.dart';
 import 'package:ecom_app/features/discovery/presentation/screens/discovery_screen.dart';
 import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
+import 'package:ecom_app/features/vendor_inventory/presentation/views/inventory_view.dart';
 
 class MainNavigationController extends GetxController {
   final RxInt selectedIndex = 0.obs;
 
-  late List<Widget> pages;
+  final RxList<Widget> pages = <Widget>[].obs;
 
   AuthRole get currentRole => Get.find<AuthController>().selectedRole.value;
 
@@ -30,28 +31,28 @@ class MainNavigationController extends GetxController {
 
   void _initializePages() {
     if (currentRole == AuthRole.vendor) {
-      pages = [
+      pages.assignAll([
         const VendorDashboardView(),
-        const Center(child: Text('Inventory (Coming Soon)')),
+        const InventoryView(),
         const Center(child: Text('Active Orders (Coming Soon)')),
         const ProfileView(),
-      ];
+      ]);
     } else if (currentRole == AuthRole.corporate) {
-      pages = [
+      pages.assignAll([
         const B2BPortalView(),
         DiscoveryScreen(),
         const WishlistScreen(),
         const CartScreen(),
         const ProfileView(),
-      ];
+      ]);
     } else {
-      pages = [
+      pages.assignAll([
         const HomeView(),
         DiscoveryScreen(),
         const WishlistScreen(),
         const CartScreen(),
         const ProfileView(),
-      ];
+      ]);
     }
   }
 

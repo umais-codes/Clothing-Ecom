@@ -4,6 +4,9 @@ import '../../../../features/home/presentation/controllers/home_controller.dart'
 import '../../../../features/vendor_dashboard/presentation/controllers/vendor_dashboard_controller.dart';
 import '../../../../features/b2b_portal/presentation/controllers/b2b_portal_controller.dart';
 import '../../../../features/profile/presentation/controllers/profile_controller.dart';
+import '../../../../features/vendor_inventory/domain/repositories/inventory_repository.dart';
+import '../../../../features/vendor_inventory/data/repositories/inventory_repository_impl.dart';
+import '../../../../features/vendor_inventory/presentation/controllers/product_crud_controller.dart';
 
 class MainNavigationBinding extends Bindings {
   @override
@@ -13,5 +16,8 @@ class MainNavigationBinding extends Bindings {
     Get.lazyPut<VendorDashboardController>(() => VendorDashboardController());
     Get.lazyPut<B2BPortalController>(() => B2BPortalController());
     Get.lazyPut<ProfileController>(() => ProfileController());
+
+    Get.lazyPut<InventoryRepository>(() => InventoryRepositoryImpl()..init());
+    Get.lazyPut<ProductCrudController>(() => ProductCrudController(Get.find()));
   }
 }

@@ -1,9 +1,8 @@
-import 'package:ecom_app/features/wishlist/domain/models/product_model.g.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../domain/models/product_model.dart';
-import '../../../cart/presentation/controllers/cart_controller.dart';
 import '../../../cart/domain/models/cart_item_model.dart';
+import '../../../cart/presentation/controllers/cart_controller.dart';
+import '../../domain/models/product_model.dart';
 
 class WishlistController extends GetxController {
   static const String _boxName = 'wishlist_box';

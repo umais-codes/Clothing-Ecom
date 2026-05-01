@@ -1,5 +1,7 @@
 import 'package:hive/hive.dart';
 
+part 'product_model.g.dart';
+
 @HiveType(typeId: 1)
 class Product {
   @HiveField(0)
@@ -18,13 +20,13 @@ class Product {
   final String imageUrl;
 
   @HiveField(5)
-  final bool inStock;
+  final bool? inStock;
 
   @HiveField(6)
-  final String description;
+  final String? description;
 
   @HiveField(7)
-  final bool isB2B;
+  final bool? isB2B;
 
   Product({
     required this.id,
@@ -32,10 +34,12 @@ class Product {
     required this.vendorName,
     required this.price,
     required this.imageUrl,
-    this.inStock = true,
-    this.description = '',
-    this.isB2B = false,
-  });
+    bool? inStock,
+    String? description,
+    bool? isB2B,
+  })  : inStock = inStock ?? true,
+        description = description ?? '',
+        isB2B = isB2B ?? false;
 
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(

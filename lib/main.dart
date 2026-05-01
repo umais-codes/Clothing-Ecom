@@ -21,7 +21,8 @@ import 'package:ecom_app/features/profile/bindings/profile_binding.dart';
 import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:ecom_app/features/wishlist/presentation/screens/wishlist_screen.dart';
-
+import 'package:ecom_app/features/vendor_inventory/bindings/vendor_inventory_binding.dart' as ecom_inventory_binding;
+import 'package:ecom_app/features/vendor_inventory/presentation/views/inventory_view.dart' as ecom_inventory;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -100,6 +101,12 @@ class EcomApp extends StatelessWidget {
         GetPage(
           name: '/wishlist',
           page: () => const WishlistScreen(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/vendor-inventory',
+          page: () => const ecom_inventory.InventoryView(),
+          binding: ecom_inventory_binding.VendorInventoryBinding(),
           transition: Transition.rightToLeft,
         ),
       ],

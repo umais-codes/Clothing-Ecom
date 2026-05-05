@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../domain/entities/line_sheet_entity.dart';
 import '../../../wishlist/domain/models/product_model.dart';
 
@@ -14,7 +15,7 @@ class LineSheetCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
-    
+
     return GestureDetector(
       onTap: () {
         Get.toNamed(
@@ -33,71 +34,79 @@ class LineSheetCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(sw * 0.04),
-          border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.3), width: 1),
+          borderRadius: .circular(sw * 0.04),
+          border: .all(
+            color: AppColors.greyLight.withValues(alpha: 0.3),
+            width: 1,
+          ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(sw * 0.04)),
+                borderRadius: .vertical(top: .circular(sw * 0.04)),
                 child: CachedNetworkImage(
                   imageUrl: item.imageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  placeholder: (context, url) => Container(color: AppColors.offWhite),
+                  fit: .cover,
+                  width: .infinity,
+                  placeholder: (context, url) =>
+                      Container(color: AppColors.offWhite),
                   errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(sw * 0.03),
+              padding: .all(sw * 0.03),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 children: [
                   Text(
                     item.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
+                    style: GoogleFonts.outfit(
                       fontSize: sw * 0.035,
+                      fontWeight: .w700,
                       color: AppColors.charcoal,
                     ),
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    overflow: .ellipsis,
                   ),
                   SizedBox(height: sw * 0.01),
                   Text(
                     item.composition,
-                    style: TextStyle(
-                      color: AppColors.grey,
+                    style: GoogleFonts.outfit(
                       fontSize: sw * 0.028,
+                      color: AppColors.grey,
+                      fontWeight: .w500,
                     ),
                   ),
                   SizedBox(height: sw * 0.02),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: .spaceBetween,
                     children: [
                       Text(
                         "\$${item.price.toStringAsFixed(2)}",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
+                        style: GoogleFonts.outfit(
+                          fontWeight: .w700,
                           color: AppColors.camel,
-                          fontSize: sw * 0.038,
+                          fontSize: sw * 0.035,
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: sw * 0.02, vertical: sw * 0.005),
+                        padding: .symmetric(
+                          horizontal: sw * 0.02,
+                          vertical: sw * 0.005,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.offWhite,
                           borderRadius: BorderRadius.circular(sw * 0.01),
                         ),
                         child: Text(
                           "MIN ${item.minQty}",
-                          style: TextStyle(
-                            color: AppColors.charcoal,
+                          style: GoogleFonts.outfit(
                             fontSize: sw * 0.022,
-                            fontWeight: FontWeight.w700,
+                            color: AppColors.grey,
+                            fontWeight: .w700,
                           ),
                         ),
                       ),

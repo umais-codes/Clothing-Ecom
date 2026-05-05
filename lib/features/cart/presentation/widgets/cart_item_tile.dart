@@ -1,9 +1,9 @@
+import 'package:ecom_app/app/widgets/custom_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_network_image.dart';
-import '../../../../app/widgets/custom_quantity_stepper.dart';
 import '../../domain/models/cart_item_model.dart';
 import '../controllers/cart_controller.dart';
 
@@ -19,7 +19,10 @@ class CartItemTile extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
-      padding: EdgeInsets.symmetric(horizontal: sw * 0.01, vertical: sw * 0.005),
+      padding: EdgeInsets.symmetric(
+        horizontal: sw * 0.01,
+        vertical: sw * 0.005,
+      ),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(sw * 0.03),
@@ -118,7 +121,6 @@ class CartItemTile extends StatelessWidget {
     );
   }
 
-  /// 🔥 UNIFIED QUANTITY CONTROL (PROFESSIONAL & CONSISTENT)
   Widget _buildQuantityControl(CartController controller, double sw) {
     return Obx(() {
       final currentItem = controller.cartItems.firstWhereOrNull(
@@ -126,9 +128,8 @@ class CartItemTile extends StatelessWidget {
       );
       final qty = currentItem?.quantity ?? item.quantity;
 
-      return CustomQuantityStepper(
-        quantity: qty,
-        sw: sw,
+      return CustomStepper(
+        value: qty,
         onChanged: (newQty) => controller.updateQuantity(item.id, newQty),
       );
     });

@@ -10,7 +10,7 @@ import '../widgets/ai_size_predictor_card.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
 import 'package:ecom_app/features/wishlist/presentation/controllers/wishlist_controller.dart';
-import 'package:ecom_app/app/widgets/custom_quantity_stepper.dart';
+import 'package:ecom_app/app/widgets/custom_stepper.dart';
 
 class PdpView extends GetView<PdpController> {
   const PdpView({super.key});
@@ -95,9 +95,8 @@ class PdpView extends GetView<PdpController> {
 
                         /// 🔥 QTY STEPPER (FIXED)
                         Obx(
-                          () => CustomQuantityStepper(
-                            quantity: controller.quantity.value,
-                            sw: sw,
+                          () => CustomStepper(
+                            value: controller.quantity.value,
                             onChanged: (newQty) =>
                                 controller.updateQuantity(newQty),
                           ),
@@ -109,7 +108,6 @@ class PdpView extends GetView<PdpController> {
 
                 SizedBox(height: sw * 0.02),
 
-                /// 🔹 SIZE SECTION
                 VariantSection(
                   title: 'SELECT SIZE',
                   items: controller.sizes,
@@ -119,7 +117,6 @@ class PdpView extends GetView<PdpController> {
 
                 SizedBox(height: sw * 0.05),
 
-                /// 🔹 COLOR SECTION
                 VariantSection(
                   title: 'SELECT COLOR',
                   items: controller.colors,
@@ -129,12 +126,11 @@ class PdpView extends GetView<PdpController> {
 
                 SizedBox(height: sw * 0.06),
 
-                /// 🔹 DESCRIPTION TITLE
                 Text(
                   'DESCRIPTION',
                   style: GoogleFonts.outfit(
                     fontSize: sw * 0.024,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: .w600,
                     letterSpacing: 1.5,
                     color: AppColors.grey,
                   ),
@@ -142,7 +138,6 @@ class PdpView extends GetView<PdpController> {
 
                 SizedBox(height: sw * 0.02),
 
-                /// DESCRIPTION TEXT
                 Text(
                   controller.description,
                   style: GoogleFonts.outfit(
@@ -154,7 +149,6 @@ class PdpView extends GetView<PdpController> {
 
                 SizedBox(height: sw * 0.03),
 
-                /// 🔹 AI SIZE PREDICTOR
                 AISizePredictorCard(
                   sw: sw,
                   onPredict: () => controller.runAIPrediction(),
@@ -188,7 +182,6 @@ class PdpView extends GetView<PdpController> {
       ),
     );
   }
-
 
   Widget _buildFavoriteButton(double sw) {
     final wishlistController = Get.put(WishlistController());

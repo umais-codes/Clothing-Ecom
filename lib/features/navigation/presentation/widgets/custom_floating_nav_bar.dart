@@ -1,8 +1,8 @@
+import 'package:ecom_app/features/cart/presentation/controllers/b2c_cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
-import 'package:ecom_app/features/cart/presentation/controllers/cart_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/main_navigation_controller.dart';
 
@@ -50,7 +50,6 @@ class CustomFloatingNavBar extends StatelessWidget {
 
                   return Stack(
                     children: [
-                      // Sliding Pill Indicator
                       AnimatedPositioned(
                         duration: const Duration(milliseconds: 350),
                         curve: Curves.elasticOut,
@@ -172,7 +171,7 @@ class _NavBarItem extends StatelessWidget {
   }
 
   Widget _buildBadge(double sw) {
-    final CartController cartController = Get.find<CartController>();
+    final B2CCartController cartController = Get.find<B2CCartController>();
     return Positioned(
       top: -3,
       right: -6,

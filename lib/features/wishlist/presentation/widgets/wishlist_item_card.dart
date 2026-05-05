@@ -133,12 +133,19 @@ class WishlistItemCard extends StatelessWidget {
                 SizedBox(height: sw * 0.01),
 
                 /// MOVE TO CART ACTION
-                CustomButton(
-                  text: 'Move to Cart',
-                  height: sw * 0.08,
-                  onPressed: product.inStock != null && product.inStock!
-                      ? () => controller.moveToCart(product)
-                      : null,
+                Row(
+                  mainAxisAlignment: .spaceBetween,
+                  children: [
+                    SizedBox(width: sw * 0.01),
+                    CustomButton(
+                      icon: Icons.shopping_cart,
+                      height: sw * 0.09,
+                      width: sw * 0.13,
+                      onPressed: product.inStock != null && product.inStock!
+                          ? () => controller.moveToCart(product)
+                          : null,
+                    ),
+                  ],
                 ),
               ],
             ),

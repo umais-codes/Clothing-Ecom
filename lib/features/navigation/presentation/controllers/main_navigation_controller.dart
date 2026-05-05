@@ -1,3 +1,5 @@
+import 'package:ecom_app/features/cart/presentation/screens/b2b_cart_screen.dart';
+import 'package:ecom_app/features/cart/presentation/screens/b2c_cart_screen.dart';
 import 'package:ecom_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 import 'package:ecom_app/features/vendor_dashboard/presentation/views/vendor_dashboard_view.dart';
 import 'package:ecom_app/features/b2b_portal/presentation/views/b2b_portal_view.dart';
@@ -6,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:ecom_app/features/home/presentation/views/home_view.dart';
 import 'package:ecom_app/features/discovery/presentation/screens/discovery_screen.dart';
-import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
 import 'package:ecom_app/features/vendor_inventory/presentation/views/inventory_view.dart';
 
@@ -21,11 +22,10 @@ class MainNavigationController extends GetxController {
   void onInit() {
     super.onInit();
     _initializePages();
-    
-    // Listen for role changes to update navigation dynamically
+
     ever(Get.find<AuthController>().selectedRole, (_) {
       _initializePages();
-      selectedIndex.value = 0; // Reset to home on role change
+      selectedIndex.value = 0;
     });
   }
 
@@ -42,7 +42,7 @@ class MainNavigationController extends GetxController {
         const B2BPortalView(),
         DiscoveryScreen(),
         const WishlistScreen(),
-        const CartScreen(),
+        const B2BCartScreen(),
         const ProfileView(),
       ]);
     } else {
@@ -50,7 +50,7 @@ class MainNavigationController extends GetxController {
         const HomeView(),
         DiscoveryScreen(),
         const WishlistScreen(),
-        const CartScreen(),
+        const B2CCartScreen(),
         const ProfileView(),
       ]);
     }

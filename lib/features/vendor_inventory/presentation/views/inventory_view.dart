@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/custom_button.dart';
 import '../controllers/product_crud_controller.dart';
 import '../widgets/bulk_upload_sheet.dart';
+import '../../../../app/widgets/custom_confirm_dialog.dart';
 
 class InventoryView extends StatelessWidget {
   const InventoryView({super.key});
@@ -17,6 +19,7 @@ class InventoryView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
       appBar: AppBar(
+        leading: Container(),
         backgroundColor: AppColors.white,
         elevation: 0,
         title: Text(
@@ -28,8 +31,8 @@ class InventoryView extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        iconTheme: const IconThemeData(color: AppColors.charcoal),
       ),
+
       body: Column(
         children: [
           _buildActionHeader(context, sw, controller),
@@ -67,53 +70,37 @@ class InventoryView extends StatelessWidget {
     ProductCrudController controller,
   ) {
     return Container(
-      padding: EdgeInsets.all(sw * 0.04),
+      padding: .symmetric(horizontal: sw * 0.04, vertical: sw * 0.01),
       color: AppColors.white,
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: CustomButton(
+                  text: 'Bulk Upload',
+                  icon: Icons.upload_file,
+                  variant: .outlined,
+                  height: sw * 0.11,
                   onPressed: () {
                     Get.bottomSheet(
                       BulkUploadSheet(sw: sw),
                       isScrollControlled: true,
                     );
                   },
-                  icon: const Icon(Icons.upload_file, color: AppColors.camel),
-                  label: const Text(
-                    'Bulk Upload',
-                    style: TextStyle(color: AppColors.camel),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.camel),
-                    padding: EdgeInsets.symmetric(vertical: sw * 0.03),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(sw * 0.02),
-                    ),
-                  ),
                 ),
               ),
               SizedBox(width: sw * 0.03),
               Expanded(
-                child: ElevatedButton.icon(
+                child: CustomButton(
+                  text: 'Add New',
+                  icon: Icons.add,
+                  variant: ButtonVariant.primary,
+                  height: sw * 0.11,
                   onPressed: () {
                     controller.clearForm();
                     Get.to(() => const ProductFormView());
                   },
-                  icon: const Icon(Icons.add, color: AppColors.white),
-                  label: const Text(
-                    'Add New',
-                    style: TextStyle(color: AppColors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.camel,
-                    padding: EdgeInsets.symmetric(vertical: sw * 0.03),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(sw * 0.02),
-                    ),
-                  ),
                 ),
               ),
             ],
@@ -149,13 +136,13 @@ class InventoryView extends StatelessWidget {
 
   Widget _buildProductList(ProductCrudController controller, double sw) {
     return ListView.separated(
-      padding: EdgeInsets.all(sw * 0.04),
+      padding: EdgeInsets.symmetric(horizontal: sw * 0.015, vertical: sw * 0.0075),
       itemCount: controller.products.length,
-      separatorBuilder: (_, __) => SizedBox(height: sw * 0.03),
+      separatorBuilder: (_, __) => SizedBox(height: sw * 0.01),
       itemBuilder: (context, index) {
         final product = controller.products[index];
         return Container(
-          padding: EdgeInsets.all(sw * 0.03),
+          padding: EdgeInsets.all(sw * 0.015),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(sw * 0.03),
@@ -169,10 +156,9 @@ class InventoryView extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Thumbnail
               Container(
-                width: sw * 0.15,
-                height: sw * 0.15,
+                width: sw * 0.12,
+                height: sw * 0.12,
                 decoration: BoxDecoration(
                   color: AppColors.offWhite,
                   borderRadius: BorderRadius.circular(sw * 0.02),
@@ -187,8 +173,7 @@ class InventoryView extends StatelessWidget {
                     ? Icon(Icons.image_not_supported, color: AppColors.grey)
                     : null,
               ),
-              SizedBox(width: sw * 0.03),
-              // Details
+              SizedBox(width: sw * 0.025),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,22 +187,21 @@ class InventoryView extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: sw * 0.01),
+                    SizedBox(height: sw * 0.005),
                     Text(
                       '\$${product.basePrice.toStringAsFixed(2)}',
                       style: GoogleFonts.outfit(
                         color: AppColors.charcoal,
                         fontWeight: FontWeight.w500,
+                        fontSize: sw * 0.032,
                       ),
                     ),
                   ],
                 ),
               ),
-              // Actions
               IconButton(
-                icon: const Icon(Icons.edit, color: AppColors.camel),
+                icon: Icon(Icons.edit, color: AppColors.camel, size: sw * 0.05),
                 onPressed: () {
-                  // Pre-fill form
                   controller.titleController.text = product.title;
                   controller.descriptionController.text = product.description;
                   controller.categoryController.text = product.category;
@@ -229,19 +213,22 @@ class InventoryView extends StatelessWidget {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                icon: Icon(
+                  Icons.delete_forever_rounded,
+                  color: AppColors.error,
+                  size: sw * 0.05,
+                ),
                 onPressed: () {
-                  Get.defaultDialog(
-                    title: 'Delete Product',
-                    middleText: 'Are you sure you want to delete this product?',
-                    textConfirm: 'Delete',
-                    textCancel: 'Cancel',
-                    confirmTextColor: AppColors.white,
-                    buttonColor: AppColors.error,
-                    onConfirm: () {
-                      controller.deleteProduct(product.id);
-                      Get.back();
-                    },
+                  Get.dialog(
+                    CustomConfirmDialog(
+                      title: 'Delete Product',
+                      message: 'Are you sure you want to delete this product? This action cannot be undone.',
+                      confirmText: 'Delete',
+                      onConfirm: () {
+                        controller.deleteProduct(product.id);
+                        Get.back();
+                      },
+                    ),
                   );
                 },
               ),

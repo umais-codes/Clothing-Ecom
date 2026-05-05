@@ -13,7 +13,10 @@ import 'package:ecom_app/features/b2b_portal/bindings/b2b_portal_binding.dart';
 import 'package:ecom_app/features/b2b_portal/presentation/views/b2b_portal_view.dart';
 import 'package:ecom_app/features/cart/data/repositories/cart_repository.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/cart_controller.dart';
-import 'package:ecom_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:ecom_app/features/cart/presentation/controllers/b2c_cart_controller.dart';
+import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_controller.dart';
+import 'package:ecom_app/features/cart/presentation/screens/b2c_cart_screen.dart';
+import 'package:ecom_app/features/cart/presentation/screens/b2b_cart_screen.dart';
 import 'package:ecom_app/features/discovery/presentation/screens/discovery_screen.dart';
 import 'package:ecom_app/features/navigation/presentation/bindings/main_navigation_binding.dart';
 import 'package:ecom_app/features/navigation/presentation/screens/main_navigation_screen.dart';
@@ -21,14 +24,19 @@ import 'package:ecom_app/features/profile/bindings/profile_binding.dart';
 import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:ecom_app/features/wishlist/presentation/screens/wishlist_screen.dart';
-import 'package:ecom_app/features/vendor_inventory/bindings/vendor_inventory_binding.dart' as ecom_inventory_binding;
-import 'package:ecom_app/features/vendor_inventory/presentation/views/inventory_view.dart' as ecom_inventory;
+import 'package:ecom_app/features/vendor_inventory/bindings/vendor_inventory_binding.dart'
+    as ecom_inventory_binding;
+import 'package:ecom_app/features/vendor_inventory/presentation/views/inventory_view.dart'
+    as ecom_inventory;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final cartRepo = CartRepository();
   await cartRepo.init();
 
+  Get.put(B2CCartController(cartRepo), permanent: true);
+  Get.put(B2BCartController(cartRepo), permanent: true);
   Get.put(CartController(cartRepo), permanent: true);
   Get.put(AuthController(), permanent: true);
 
@@ -89,7 +97,12 @@ class EcomApp extends StatelessWidget {
         ),
         GetPage(
           name: '/cart',
-          page: () => const CartScreen(),
+          page: () => const B2CCartScreen(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/b2b-cart',
+          page: () => const B2BCartScreen(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

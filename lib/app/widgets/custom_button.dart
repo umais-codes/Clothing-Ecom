@@ -5,7 +5,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 enum ButtonVariant { primary, secondary, outlined, ghost }
 
 class CustomButton extends StatelessWidget {
-  final String text;
+  final String? text;
   final VoidCallback? onPressed;
   final ButtonVariant variant;
   final bool isLoading;
@@ -18,9 +18,9 @@ class CustomButton extends StatelessWidget {
 
   const CustomButton({
     super.key,
-    required this.text,
+    this.text,
     this.onPressed,
-    this.variant = ButtonVariant.primary,
+    this.variant = .primary,
     this.isLoading = false,
     this.icon,
     this.width,
@@ -86,17 +86,18 @@ class CustomButton extends StatelessWidget {
                               size: sw * 0.045,
                               color: effectiveTextColor,
                             ),
-                            SizedBox(width: sw * 0.02),
+                            if (text != null) SizedBox(width: sw * 0.02),
                           ],
-                          Text(
-                            text,
-                            style: GoogleFonts.outfit(
-                              fontSize: sw * 0.035,
-                              fontWeight: .w700,
-                              color: effectiveTextColor,
-                              letterSpacing: 0.5,
+                          if (text != null)
+                            Text(
+                              text!,
+                              style: GoogleFonts.outfit(
+                                fontSize: sw * 0.035,
+                                fontWeight: .w700,
+                                color: effectiveTextColor,
+                                letterSpacing: 0.5,
+                              ),
                             ),
-                          ),
                         ],
                       ),
               ),

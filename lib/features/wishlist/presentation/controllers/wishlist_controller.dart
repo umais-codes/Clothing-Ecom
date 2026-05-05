@@ -1,7 +1,8 @@
+import 'package:ecom_app/features/cart/domain/models/cart_item_model.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../../cart/domain/models/cart_item_model.dart';
-import '../../../cart/presentation/controllers/cart_controller.dart';
+import '../../../cart/presentation/controllers/b2c_cart_controller.dart';
+import '../../../cart/presentation/controllers/b2b_cart_controller.dart';
 import '../../domain/models/product_model.dart';
 
 class WishlistController extends GetxController {
@@ -57,7 +58,10 @@ class WishlistController extends GetxController {
   }
 
   void moveToCart(Product product) {
-    final cartController = Get.find<CartController>();
+    final bool isB2B = product.isB2B ?? false;
+    final dynamic cartController = isB2B
+        ? Get.find<B2BCartController>()
+        : Get.find<B2CCartController>();
 
     // Convert Product to CartItem
     final cartItem = CartItem(
@@ -67,6 +71,7 @@ class WishlistController extends GetxController {
       price: product.price,
       imageUrl: product.imageUrl,
       quantity: 1,
+      isB2B: isB2B,
     );
 
     cartController.addItem(cartItem);

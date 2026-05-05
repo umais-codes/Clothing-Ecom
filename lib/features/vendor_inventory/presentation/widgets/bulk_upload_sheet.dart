@@ -37,28 +37,31 @@ class _BulkUploadSheetState extends State<BulkUploadSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(widget.sw * 0.05),
+      padding: .symmetric(
+        horizontal: widget.sw * 0.04,
+        vertical: widget.sw * 0.02,
+      ),
       decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: .vertical(top: .circular(24)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           Container(
             width: widget.sw * 0.15,
             height: 5,
             decoration: BoxDecoration(
               color: AppColors.greyLight,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: .circular(10),
             ),
           ),
-          SizedBox(height: widget.sw * 0.06),
+          SizedBox(height: widget.sw * 0.03),
           Text(
             'Bulk Upload CSV',
             style: GoogleFonts.outfit(
               fontSize: widget.sw * 0.05,
-              fontWeight: FontWeight.w600,
+              fontWeight: .w600,
               color: AppColors.charcoal,
             ),
           ),

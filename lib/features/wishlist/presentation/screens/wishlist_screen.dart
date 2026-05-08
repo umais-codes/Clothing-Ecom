@@ -15,15 +15,14 @@ class WishlistScreen extends StatelessWidget {
     final double sw = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6), // Soft Ivory
+      backgroundColor: const Color(0xFFFAF9F6),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: AppColors.white,
         title: Text(
           'My Wishlist',
           style: GoogleFonts.outfit(
             fontSize: sw * 0.05,
-            fontWeight: FontWeight.w600,
+            fontWeight: .w600,
             color: AppColors.charcoal,
           ),
         ),
@@ -41,16 +40,15 @@ class WishlistScreen extends StatelessWidget {
   Widget _buildEmptyState(double sw) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: sw * 0.1),
+        padding: .symmetric(horizontal: sw * 0.1),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: .center,
           children: [
-            /// WIREFRAME HEART ICON
             Container(
-              padding: EdgeInsets.symmetric(vertical: sw * 0.01, horizontal: sw * 0.01),
+              padding: .symmetric(vertical: sw * 0.01, horizontal: sw * 0.01),
               decoration: BoxDecoration(
                 color: AppColors.white,
-                shape: BoxShape.circle,
+                shape: .circle,
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.charcoal.withValues(alpha: 0.03),
@@ -69,14 +67,14 @@ class WishlistScreen extends StatelessWidget {
               'Your wishlist is empty',
               style: GoogleFonts.outfit(
                 fontSize: sw * 0.05,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
                 color: AppColors.charcoal,
               ),
             ),
             SizedBox(height: sw * 0.01),
             Text(
               'Curate your dream wardrobe by saving items you love.',
-              textAlign: TextAlign.center,
+              textAlign: .center,
               style: GoogleFonts.outfit(
                 fontSize: sw * 0.035,
                 color: AppColors.grey,
@@ -96,15 +94,15 @@ class WishlistScreen extends StatelessWidget {
 
   Widget _buildWishlistGrid(WishlistController controller, double sw) {
     return GridView.builder(
-      padding: EdgeInsets.symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
+      padding: .symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisSpacing: sw * 0.01,
         crossAxisSpacing: sw * 0.01,
-        childAspectRatio: 0.8,
+        childAspectRatio: 0.9,
       ),
       itemCount: controller.wishlistItems.length,
-      itemBuilder: (context, index) {
+      itemBuilder: (_, index) {
         final product = controller.wishlistItems[index];
         return WishlistItemCard(product: product, sw: sw);
       },

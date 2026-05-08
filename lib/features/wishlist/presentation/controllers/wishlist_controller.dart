@@ -8,6 +8,7 @@ import '../../domain/models/product_model.dart';
 class WishlistController extends GetxController {
   static const String _boxName = 'wishlist_box';
   final RxList<Product> wishlistItems = <Product>[].obs;
+  final RxMap<String, int> wishlistQuantities = <String, int>{}.obs;
   late Box<Product> _box;
 
   @override
@@ -26,6 +27,9 @@ class WishlistController extends GetxController {
 
   void _loadWishlist() {
     wishlistItems.assignAll(_box.values.toList());
+    for (var item in wishlistItems) {
+      wishlistQuantities[item.id] = 1;
+    }
   }
 
   void toggleWishlist(Product product) {
@@ -39,6 +43,7 @@ class WishlistController extends GetxController {
   void addToWishlist(Product product) {
     if (!isInWishlist(product.id)) {
       wishlistItems.add(product);
+      wishlistQuantities[product.id] = 1;
       _box.put(product.id, product);
       Get.snackbar(
         'Added to Wishlist',
@@ -57,6 +62,11 @@ class WishlistController extends GetxController {
     return wishlistItems.any((item) => item.id == productId);
   }
 
+  void updateQuantity(String productId, int quantity) {
+    if (quantity < 1) return;
+    wishlistQuantities[productId] = quantity;
+  }
+
   void moveToCart(Product product) {
     final bool isB2B = product.isB2B ?? false;
     final dynamic cartController = isB2B
@@ -70,7 +80,7 @@ class WishlistController extends GetxController {
       vendorName: product.vendorName,
       price: product.price,
       imageUrl: product.imageUrl,
-      quantity: 1,
+      quantity: wishlistQuantities[product.id] ?? 1,
       isB2B: isB2B,
     );
 

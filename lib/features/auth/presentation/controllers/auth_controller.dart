@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:ecom_app/features/auth/presentation/screens/pending_approval_screen.dart';
 import 'package:file_picker/file_picker.dart';
 
-enum AuthRole { shopper, vendor, corporate }
+enum AuthRole { shopper, vendor, corporate, admin }
+
 
 enum AuthStatus { initial, loading, success, pendingApproval, error }
 

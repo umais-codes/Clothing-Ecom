@@ -1,6 +1,7 @@
 import 'package:ecom_app/features/profile/presentation/widgets/profile_menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
 
@@ -13,21 +14,26 @@ class PerspectiveSwitcher extends StatelessWidget {
     final sw = MediaQuery.of(context).size.width;
 
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: .only(left: sw * 0.02),
+          padding: const EdgeInsets.only(left: 8.0),
           child: Text(
             'Switch Perspective',
-            style: Theme.of(context).textTheme.titleLarge,
+            style: GoogleFonts.outfit(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.grey,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
-        SizedBox(height: sw * 0.02),
+        const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
             color: AppColors.offWhite,
-            borderRadius: .circular(sw * 0.04),
-            border: .all(color: AppColors.greyLight, width: 1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.greyLight, width: 1),
           ),
           child: Column(
             children: [
@@ -50,6 +56,13 @@ class PerspectiveSwitcher extends StatelessWidget {
                 title: 'Corporate Sourcing',
                 onTap: () {
                   authController.setRole(AuthRole.corporate);
+                },
+              ),
+              ProfileMenuItem(
+                icon: Icons.admin_panel_settings_outlined,
+                title: 'Super Admin Control',
+                onTap: () {
+                  Get.toNamed('/admin-login');
                 },
               ),
             ],

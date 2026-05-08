@@ -12,7 +12,7 @@ class ProfileController extends GetxController {
   final RxString userEmail = 'eleanor.fitz@example.com'.obs;
   final RxString userPhone = '+1 234 567 890'.obs;
   final RxString profileImagePath = ''.obs;
-  
+
   // Fit Profile Metrics
   final RxString height = '175cm'.obs;
   final RxString weight = '62kg'.obs;
@@ -31,6 +31,8 @@ class ProfileController extends GetxController {
         return 'B2B Corporate Client';
       case AuthRole.vendor:
         return 'Vendor Partner';
+      case AuthRole.admin:
+        return 'admin';
     }
   }
 

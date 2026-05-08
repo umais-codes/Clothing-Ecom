@@ -15,6 +15,8 @@ class CustomButton extends StatelessWidget {
   final double? borderRadius;
   final Color? buttonColor;
   final Color? textColor;
+  final double? fontSize;
+  final FontWeight? fontWeight;
 
   const CustomButton({
     super.key,
@@ -28,6 +30,8 @@ class CustomButton extends StatelessWidget {
     this.borderRadius,
     this.buttonColor,
     this.textColor,
+    this.fontSize,
+    this.fontWeight,
   });
 
   @override
@@ -92,8 +96,8 @@ class CustomButton extends StatelessWidget {
                             Text(
                               text!,
                               style: GoogleFonts.outfit(
-                                fontSize: sw * 0.035,
-                                fontWeight: .w700,
+                                fontSize: fontSize ?? sw * 0.035,
+                                fontWeight: fontWeight ?? .w700,
                                 color: effectiveTextColor,
                                 letterSpacing: 0.5,
                               ),
@@ -109,6 +113,7 @@ class CustomButton extends StatelessWidget {
   }
 
   Color _getBgColor() {
+    if (buttonColor != null) return buttonColor!;
     switch (variant) {
       case .primary:
         return AppColors.charcoal;
@@ -132,6 +137,7 @@ class CustomButton extends StatelessWidget {
   }
 
   Color _getTextColor() {
+    if (textColor != null) return textColor!;
     switch (variant) {
       case .primary:
         return AppColors.white;

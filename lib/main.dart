@@ -28,6 +28,10 @@ import 'package:ecom_app/features/vendor_inventory/bindings/vendor_inventory_bin
     as ecom_inventory_binding;
 import 'package:ecom_app/features/vendor_inventory/presentation/views/inventory_view.dart'
     as ecom_inventory;
+import 'package:ecom_app/features/super_admin/bindings/admin_binding.dart';
+import 'package:ecom_app/features/super_admin/presentation/screens/admin_main_layout.dart';
+import 'package:ecom_app/features/super_admin/presentation/screens/admin_login_screen.dart';
+import 'package:ecom_app/app/middleware/admin_guard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -121,6 +125,18 @@ class EcomApp extends StatelessWidget {
           page: () => const ecom_inventory.InventoryView(),
           binding: ecom_inventory_binding.VendorInventoryBinding(),
           transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/admin-login',
+          page: () => const AdminLoginScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/admin-panel',
+          page: () => const AdminMainLayout(),
+          binding: AdminBinding(),
+          middlewares: [AdminGuard()],
+          transition: Transition.fadeIn,
         ),
       ],
     );

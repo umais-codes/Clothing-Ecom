@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/widgets/custom_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -25,27 +26,25 @@ class WishlistItemCard extends StatelessWidget {
           BoxShadow(
             color: AppColors.charcoal.withValues(alpha: 0.05),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: .zero,
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: .start,
         children: [
-          /// IMAGE SECTION
           Stack(
             children: [
               ClipRRect(
                 borderRadius: .vertical(top: .circular(sw * 0.04)),
                 child: CustomNetworkImage(
                   imageUrl: product.imageUrl,
-                  height: sw * 0.35,
+                  height: sw * 0.28,
                   width: .infinity,
                   fit: .cover,
                 ),
               ),
 
-              /// HEART ICON
               Positioned(
                 top: sw * 0.01,
                 right: sw * 0.01,
@@ -68,8 +67,6 @@ class WishlistItemCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              /// STOCK BADGE
               if (product.inStock != null && !product.inStock!)
                 Positioned(
                   bottom: sw * 0.02,
@@ -125,9 +122,10 @@ class WishlistItemCard extends StatelessWidget {
                 Text(
                   '\$${product.price.toStringAsFixed(2)}',
                   style: GoogleFonts.outfit(
-                    fontSize: sw * 0.03,
-                    fontWeight: .w600,
-                    color: AppColors.charcoal,
+                    fontSize: sw * 0.035,
+                    fontWeight: .w700,
+                    letterSpacing: 1.2,
+                    color: AppColors.camel,
                   ),
                 ),
                 SizedBox(height: sw * 0.01),
@@ -136,6 +134,14 @@ class WishlistItemCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
+                    Obx(
+                      () => CustomStepper(
+                        value: controller.wishlistQuantities[product.id] ?? 1,
+                        size: sw * 0.07,
+                        onChanged: (val) =>
+                            controller.updateQuantity(product.id, val),
+                      ),
+                    ),
                     SizedBox(width: sw * 0.01),
                     CustomButton(
                       icon: Icons.shopping_cart,

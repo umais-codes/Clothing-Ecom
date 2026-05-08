@@ -103,7 +103,7 @@ class RetailCartItemTile extends StatelessWidget {
     final double sw = MediaQuery.sizeOf(context).width;
 
     return Container(
-      height: sw * 0.2,
+      height: sw * 0.215,
       margin: .symmetric(horizontal: sw * 0.02),
       padding: .symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
       decoration: BoxDecoration(

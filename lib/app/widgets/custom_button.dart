@@ -46,11 +46,16 @@ class CustomButton extends StatelessWidget {
     final Gradient? effectiveGradient = _getGradient();
 
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 100),
       opacity: isDisabled ? 0.6 : 1.0,
       child: Container(
         width:
-            width ?? (variant == ButtonVariant.ghost ? null : double.infinity),
+            width ??
+            (variant == ButtonVariant.ghost
+                ? null
+                : variant == ButtonVariant.secondary
+                ? sw * 0.6
+                : null),
         height: height ?? sw * 0.13,
         decoration: BoxDecoration(
           color: effectiveBgColor,
@@ -126,6 +131,7 @@ class CustomButton extends StatelessWidget {
   }
 
   Gradient? _getGradient() {
+    if (buttonColor != null) return null;
     if (variant == ButtonVariant.primary) {
       return const LinearGradient(
         colors: [AppColors.camel, AppColors.rose],

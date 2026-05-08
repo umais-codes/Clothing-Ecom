@@ -107,7 +107,9 @@ class _WideDashboardLayout extends StatelessWidget {
                     Obx(
                       () => AdminStatCard(
                         title: 'Total GMV',
-                        value: controller.formatCurrency(controller.totalGmv.value),
+                        value: controller.formatCurrency(
+                          controller.totalGmv.value,
+                        ),
                         icon: Icons.trending_up_rounded,
                         color: AppColors.camel,
                         trend: '+12.4%',
@@ -117,7 +119,9 @@ class _WideDashboardLayout extends StatelessWidget {
                     Obx(
                       () => AdminStatCard(
                         title: 'Commission Earned',
-                        value: controller.formatCurrency(controller.totalCommission.value),
+                        value: controller.formatCurrency(
+                          controller.totalCommission.value,
+                        ),
                         icon: Icons.percent_rounded,
                         color: AppColors.success,
                       ),
@@ -126,7 +130,9 @@ class _WideDashboardLayout extends StatelessWidget {
                     Obx(
                       () => AdminStatCard(
                         title: 'Pending Payouts',
-                        value: controller.formatCurrency(controller.pendingPayouts.value),
+                        value: controller.formatCurrency(
+                          controller.pendingPayouts.value,
+                        ),
                         icon: Icons.schedule_send_rounded,
                         color: AppColors.warning,
                       ),
@@ -255,7 +261,6 @@ class _NarrowDashboardLayout extends StatelessWidget {
   }
 }
 
-
 class _OperationCountCard extends StatelessWidget {
   const _OperationCountCard({
     required this.label,
@@ -338,8 +343,7 @@ class _ActivityFeedCard extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: controller.activityFeed.length.clamp(0, 8),
-              separatorBuilder: (_, _) =>
-                  const Divider(color: AppColors.greyLight, height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 4),
               itemBuilder: (_, i) {
                 final item = controller.activityFeed[i];
                 return _ActivityTile(item: item);

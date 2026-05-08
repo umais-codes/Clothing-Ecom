@@ -101,3 +101,39 @@ class ActivityFeedItem {
 }
 
 enum ActivityType { transaction, vendorSignup, approval, rejection, payout }
+
+enum UserRole { shopper, corporate, vendor, admin }
+
+class AppUserEntity {
+  final String id;
+  final String fullName;
+  final String email;
+  final UserRole role;
+  final String status;
+  final String joinDate;
+
+  const AppUserEntity({
+    required this.id,
+    required this.fullName,
+    required this.email,
+    required this.role,
+    required this.status,
+    required this.joinDate,
+  });
+}
+
+class FinancialRuleEntity {
+  final String id;
+  final String title;
+  final double value;
+  final String type;
+  final String category;
+
+  const FinancialRuleEntity({
+    required this.id,
+    required this.title,
+    required this.value,
+    required this.type,
+    required this.category,
+  });
+}

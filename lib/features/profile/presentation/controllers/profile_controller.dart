@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';

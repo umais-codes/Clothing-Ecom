@@ -119,7 +119,7 @@ class EditProfileView extends GetView<ProfileController> {
                 shape: BoxShape.circle,
                 color: AppColors.offWhite,
                 border: Border.all(
-                  color: AppColors.camel.withOpacity(0.3),
+                  color: AppColors.camel.withValues(alpha: 0.3),
                   width: 2,
                 ),
                 image: imagePath.isNotEmpty

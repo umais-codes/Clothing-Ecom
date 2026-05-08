@@ -11,7 +11,7 @@ class PerspectiveSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
-    final sw = MediaQuery.of(context).size.width;
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

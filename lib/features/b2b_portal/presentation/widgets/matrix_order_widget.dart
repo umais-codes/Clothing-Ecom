@@ -28,7 +28,7 @@ class MatrixOrderWidget extends GetView<B2BPortalController> {
         children: [
           _buildMatrixHeader(sw),
           SizedBox(height: sw * 0.04),
-          ...controller.colors.map((color) => _buildMatrixRow(sw, color)).toList(),
+          ...controller.colors.map((color) => _buildMatrixRow(sw, color)),
           SizedBox(height: sw * 0.06),
           _buildMatrixFooter(sw),
         ],
@@ -40,9 +40,11 @@ class MatrixOrderWidget extends GetView<B2BPortalController> {
     return Row(
       children: [
         Expanded(flex: 2, child: Text("COLOR", style: _headerStyle(sw))),
-        ...controller.sizes.map((size) => Expanded(
-          child: Center(child: Text(size, style: _headerStyle(sw))),
-        )).toList(),
+        ...controller.sizes.map(
+          (size) => Expanded(
+            child: Center(child: Text(size, style: _headerStyle(sw))),
+          ),
+        ),
       ],
     );
   }
@@ -80,33 +82,45 @@ class MatrixOrderWidget extends GetView<B2BPortalController> {
               ],
             ),
           ),
-          ...controller.sizes.map((size) => Expanded(
-            child: Container(
-              height: sw * 0.1,
-              margin: EdgeInsets.symmetric(horizontal: sw * 0.005),
-              decoration: BoxDecoration(
-                color: AppColors.offWhite,
-                borderRadius: BorderRadius.circular(sw * 0.02),
-                border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.5), width: 0.5),
-              ),
-              child: TextField(
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: sw * 0.035, fontWeight: FontWeight.w700),
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.zero,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  fillColor: Colors.transparent,
+          ...controller.sizes.map(
+            (size) => Expanded(
+              child: Container(
+                height: sw * 0.1,
+                margin: EdgeInsets.symmetric(horizontal: sw * 0.005),
+                decoration: BoxDecoration(
+                  color: AppColors.offWhite,
+                  borderRadius: BorderRadius.circular(sw * 0.02),
+                  border: Border.all(
+                    color: AppColors.greyLight.withValues(alpha: 0.5),
+                    width: 0.5,
+                  ),
                 ),
-                onChanged: (val) {
-                  final qty = int.tryParse(val) ?? 0;
-                  controller.updateMatrixQuantity(size, color['name'] as String, qty);
-                },
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: sw * 0.035,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.zero,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    fillColor: Colors.transparent,
+                  ),
+                  onChanged: (val) {
+                    final qty = int.tryParse(val) ?? 0;
+                    controller.updateMatrixQuantity(
+                      size,
+                      color['name'] as String,
+                      qty,
+                    );
+                  },
+                ),
               ),
             ),
-          )).toList(),
+          ),
         ],
       ),
     );
@@ -127,12 +141,22 @@ class MatrixOrderWidget extends GetView<B2BPortalController> {
             children: [
               Text(
                 "TOTAL UNITS",
-                style: TextStyle(color: AppColors.grey, fontSize: sw * 0.025, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: AppColors.grey,
+                  fontSize: sw * 0.025,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              Obx(() => Text(
-                "${controller.totalMatrixQuantity} Units",
-                style: TextStyle(color: AppColors.charcoal, fontSize: sw * 0.04, fontWeight: FontWeight.w800),
-              )),
+              Obx(
+                () => Text(
+                  "${controller.totalMatrixQuantity} Units",
+                  style: TextStyle(
+                    color: AppColors.charcoal,
+                    fontSize: sw * 0.04,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
             ],
           ),
           Column(
@@ -140,12 +164,22 @@ class MatrixOrderWidget extends GetView<B2BPortalController> {
             children: [
               Text(
                 "EST. WHOLESALE TOTAL",
-                style: TextStyle(color: AppColors.grey, fontSize: sw * 0.025, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: AppColors.grey,
+                  fontSize: sw * 0.025,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              Obx(() => Text(
-                "\$${controller.totalMatrixPrice.toStringAsFixed(2)}",
-                style: TextStyle(color: AppColors.camel, fontSize: sw * 0.045, fontWeight: FontWeight.w900),
-              )),
+              Obx(
+                () => Text(
+                  "\$${controller.totalMatrixPrice.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    color: AppColors.camel,
+                    fontSize: sw * 0.045,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
             ],
           ),
         ],

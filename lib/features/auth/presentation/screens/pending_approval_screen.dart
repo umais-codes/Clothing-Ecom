@@ -10,7 +10,6 @@ class PendingApprovalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
     final w = size.width;
     final h = size.height;
@@ -19,9 +18,9 @@ class PendingApprovalScreen extends StatelessWidget {
       backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
-          padding: .symmetric(horizontal: w * 0.08),
+          padding: EdgeInsets.symmetric(horizontal: w * 0.08),
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
               Container(
@@ -29,7 +28,7 @@ class PendingApprovalScreen extends StatelessWidget {
                 height: w * 0.3,
                 decoration: BoxDecoration(
                   color: AppColors.camel.withValues(alpha: 0.12),
-                  shape: .circle,
+                  shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Icon(
@@ -45,11 +44,11 @@ class PendingApprovalScreen extends StatelessWidget {
                 'Application Received',
                 style: GoogleFonts.outfit(
                   fontSize: w * 0.05,
-                  fontWeight: .w600,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.charcoal,
                   letterSpacing: 0.2,
                 ),
-                textAlign: .center,
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: h * 0.01),
 
@@ -58,10 +57,10 @@ class PendingApprovalScreen extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: w * 0.032,
                   color: AppColors.grey,
-                  fontWeight: .w400,
+                  fontWeight: FontWeight.w400,
                   height: 1.3,
                 ),
-                textAlign: .center,
+                textAlign: TextAlign.center,
               ),
 
               const Spacer(),

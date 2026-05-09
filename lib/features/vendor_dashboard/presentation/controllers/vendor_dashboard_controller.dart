@@ -55,11 +55,6 @@ class VendorDashboardController extends GetxController {
     ),
   ].obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
   void refreshDashboard() {
     gmv.value += 150.0;
   }

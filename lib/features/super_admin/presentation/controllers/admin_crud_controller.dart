@@ -102,12 +102,15 @@ class AdminCrudController extends GetxController {
   ].obs;
 
   // ── Actions ──────────────────────────────────────────────────────────────────
-  
+
   void updateProduct(PendingProductEntity product) {
     int index = allProducts.indexWhere((p) => p.id == product.id);
     if (index != -1) {
       allProducts[index] = product;
+    } else {
+      allProducts.insert(0, product);
     }
+    allProducts.refresh();
   }
 
   void deleteProduct(String id) {

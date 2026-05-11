@@ -136,9 +136,12 @@ class InventoryView extends StatelessWidget {
 
   Widget _buildProductList(ProductCrudController controller, double sw) {
     return ListView.separated(
-      padding: EdgeInsets.symmetric(horizontal: sw * 0.015, vertical: sw * 0.0075),
+      padding: EdgeInsets.symmetric(
+        horizontal: sw * 0.015,
+        vertical: sw * 0.0075,
+      ),
       itemCount: controller.products.length,
-      separatorBuilder: (_, __) => SizedBox(height: sw * 0.01),
+      separatorBuilder: (context, index) => SizedBox(height: sw * 0.01),
       itemBuilder: (context, index) {
         final product = controller.products[index];
         return Container(
@@ -222,7 +225,8 @@ class InventoryView extends StatelessWidget {
                   Get.dialog(
                     CustomConfirmDialog(
                       title: 'Delete Product',
-                      message: 'Are you sure you want to delete this product? This action cannot be undone.',
+                      message:
+                          'Are you sure you want to delete this product? This action cannot be undone.',
                       confirmText: 'Delete',
                       onConfirm: () {
                         controller.deleteProduct(product.id);

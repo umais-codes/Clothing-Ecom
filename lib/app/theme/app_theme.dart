@@ -110,10 +110,10 @@ class AppTheme {
       // Chip Theme
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.greySubtle,
-        side: BorderSide.none,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        labelStyle: GoogleFonts.poppins(fontSize: 12, color: AppColors.ink),
+        side: .none,
+        shape: RoundedRectangleBorder(borderRadius: .circular(20)),
+        padding: const .symmetric(horizontal: 12, vertical: 6),
+        labelStyle: GoogleFonts.outfit(fontSize: 12, color: AppColors.ink),
       ),
 
       // Input Decoration Theme
@@ -121,17 +121,14 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.offWhite,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderRadius: .circular(12),
+          borderSide: .none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.greyLight, width: 1),
+          borderRadius: .circular(12),
+          borderSide: BorderSide(color: AppColors.greyLight, width: 1),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        contentPadding: .symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
-import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
 import 'admin_dashboard_screen.dart';
 import 'kyc_queue_screen.dart';
@@ -92,7 +92,8 @@ class AdminMainLayout extends GetView<AdminController> {
               ),
               title: Obx(
                 () => Text(
-                  _items[controller.selectedSidebarIndex.value].label.toUpperCase(),
+                  _items[controller.selectedSidebarIndex.value].label
+                      .toUpperCase(),
                   style: GoogleFonts.outfit(
                     fontSize: context.wp(2.5).clamp(16, 20),
                     fontWeight: FontWeight.w700,
@@ -305,7 +306,11 @@ class _CollapsedRail extends StatelessWidget {
               color: AppColors.camel,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.shield_outlined, color: AppColors.white, size: 18),
+            child: const Icon(
+              Icons.shield_outlined,
+              color: AppColors.white,
+              size: 18,
+            ),
           ),
           const SizedBox(height: 24),
           Expanded(

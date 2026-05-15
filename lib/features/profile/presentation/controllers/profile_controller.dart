@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 
 class ProfileController extends GetxController {
   final AuthController _authController = Get.find<AuthController>();

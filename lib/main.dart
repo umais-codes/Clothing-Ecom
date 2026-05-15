@@ -22,7 +22,7 @@ import 'package:ecom_app/features/navigation/presentation/bindings/main_navigati
 import 'package:ecom_app/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:ecom_app/features/profile/bindings/profile_binding.dart';
 import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';
-import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:ecom_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 import 'package:ecom_app/features/vendor_inventory/bindings/vendor_inventory_binding.dart'
     as ecom_inventory_binding;

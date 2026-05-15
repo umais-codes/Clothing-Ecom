@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
-import '../controllers/auth_controller.dart';
+import '../../controllers/auth_controller.dart';
 
 class CorporateAuthView extends StatelessWidget {
   final AuthController controller;

@@ -4,7 +4,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/features/onboarding/presentation/widgets/pin_input_field.dart';
-import '../controllers/auth_controller.dart';
+import '../../controllers/auth_controller.dart';
 
 class ShopperAuthView extends StatelessWidget {
   final AuthController controller;

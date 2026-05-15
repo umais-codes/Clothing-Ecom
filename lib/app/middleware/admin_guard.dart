@@ -1,6 +1,6 @@
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
 
 class AdminGuard extends GetMiddleware {
   @override

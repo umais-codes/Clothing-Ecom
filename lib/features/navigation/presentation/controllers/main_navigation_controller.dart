@@ -5,7 +5,7 @@ import 'package:ecom_app/features/vendor_dashboard/presentation/views/vendor_das
 import 'package:ecom_app/features/b2b_portal/presentation/views/b2b_portal_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:ecom_app/features/home/presentation/views/home_view.dart';
 import 'package:ecom_app/features/discovery/presentation/screens/discovery_screen.dart';
 import 'package:ecom_app/features/profile/presentation/views/profile_view.dart';

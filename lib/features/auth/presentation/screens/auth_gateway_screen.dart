@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
-import '../controllers/auth_controller.dart';
+import '../../controllers/auth_controller.dart';
 import '../widgets/shopper_auth_view.dart';
 import '../widgets/vendor_auth_view.dart';
 import '../widgets/corporate_auth_view.dart';

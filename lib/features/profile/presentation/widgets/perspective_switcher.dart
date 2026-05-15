@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
-import 'package:ecom_app/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 
 class PerspectiveSwitcher extends StatelessWidget {
   const PerspectiveSwitcher({super.key});
@@ -11,7 +11,6 @@ class PerspectiveSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authController = Get.find<AuthController>();
-
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

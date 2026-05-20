@@ -60,11 +60,14 @@ class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
       leading: GestureDetector(
         onTap: () => Get.back(),
         child: Container(
-          margin: const EdgeInsets.all(10),
+          margin: .symmetric(
+            horizontal: context.wp(2).clamp(8, 12),
+            vertical: context.wp(2).clamp(8, 12),
+          ),
           decoration: BoxDecoration(
             color: AppColors.offWhite,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.greyLight, width: 1),
+            border: .all(color: AppColors.greyLight, width: 1),
           ),
           child: const Icon(
             Icons.arrow_back_ios_new_rounded,
@@ -74,7 +77,7 @@ class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
         ),
       ),
       title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           Text(
             controller.product == null ? 'New Catalog Entry' : 'Catalog Audit',

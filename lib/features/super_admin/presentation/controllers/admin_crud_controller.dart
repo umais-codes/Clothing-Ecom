@@ -5,6 +5,7 @@ import '../../domain/entities/admin_entities.dart';
 class AdminCrudController extends GetxController {
   // ── Global Search & Filters ──────────────────────────────────────────────────
   final RxString globalSearchQuery = ''.obs;
+  final TextEditingController searchController = TextEditingController();
   final RxString selectedCategoryFilter = 'All'.obs;
   final RxString selectedStatusFilter = 'All'.obs;
 
@@ -146,5 +147,11 @@ class AdminCrudController extends GetxController {
     if (index != -1) {
       financialRules[index] = rule;
     }
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 }

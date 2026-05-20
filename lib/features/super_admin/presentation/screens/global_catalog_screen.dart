@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:ecom_app/app/utils/responsive.dart';
+import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -34,77 +35,48 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                 children: [
                   // ── Search & Filter Bar ────────────────────────────────────────────
                   AdminCard(
-                    padding: EdgeInsets.all(context.wp(1.2).clamp(6.0, 12.0)),
+                    padding: .all(context.wp(1.5).clamp(12.0, 16.0)),
                     borderRadius: 12,
-                    child: Row(
+                    child: Column(
                       children: [
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.offWhite,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: AppColors.greyLight.withValues(alpha: 0.8),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.search_rounded,
-                                  color: AppColors.grey,
-                                  size: context.sp(18).clamp(16.0, 20.0),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: TextField(
-                                    style: GoogleFonts.outfit(
-                                      fontSize: 13,
-                                      color: AppColors.charcoal,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'Search products...',
-                                      hintStyle: GoogleFonts.outfit(
-                                        fontSize: 13,
-                                        color: AppColors.grey.withValues(alpha: 0.6),
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                      border: InputBorder.none,
-                                      isDense: true,
-                                      contentPadding: const EdgeInsets.symmetric(
-                                        vertical: 10,
-                                      ),
-                                    ),
-                                    cursorColor: AppColors.camel,
-                                  ),
-                                ),
-                              ],
-                            ),
+                        CustomTextField(
+                          controller: controller.searchController,
+                          hinttext: 'Search products...',
+                          prefixIcon: Icon(
+                            Icons.search_rounded,
+                            color: AppColors.grey,
+                            size: context.sp(18).clamp(16.0, 20.0),
                           ),
+                          fillColor: AppColors.offWhite,
+                          borderRadius: 10,
+                          margin: EdgeInsets.zero,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: context.wp(2).clamp(8, 12),
+                            vertical: 10,
+                          ),
+                          onChanged: (value) =>
+                              controller.globalSearchQuery.value = value,
                         ),
-                        SizedBox(width: context.wp(1).clamp(4.0, 8.0)),
-                        Expanded(
-                          flex: 1,
-                          child: _buildDropdownFilter('Category', [
-                            'All Categories',
-                            'Luxury Wear',
-                            'Formal',
-                          ]),
-                        ),
-                        SizedBox(width: context.wp(1).clamp(4.0, 8.0)),
-                        Expanded(
-                          flex: 1,
-                          child: _buildDropdownFilter('Status', [
-                            'All Status',
-                            'Approved',
-                            'Pending',
-                          ]),
+                        SizedBox(height: context.hp(1.5).clamp(12.0, 16.0)),
+                        // --- Filters Row ---
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildDropdownFilter('Category', [
+                                'All Categories',
+                                'Luxury Wear',
+                                'Formal',
+                              ]),
+                            ),
+                            SizedBox(width: context.wp(1.5).clamp(8.0, 12.0)),
+                            Expanded(
+                              child: _buildDropdownFilter('Status', [
+                                'All Status',
+                                'Approved',
+                                'Pending',
+                              ]),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -138,32 +110,46 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                                 flex: 3,
                                 child: Row(
                                   children: [
-                                      Container(
-                                        width: context.wp(3.5).clamp(28, 32),
-                                        height: context.wp(3.5).clamp(28, 32),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                          image: DecorationImage(
-                                            image: item.imageUrl.startsWith('http')
-                                                ? NetworkImage(item.imageUrl) as ImageProvider
-                                                : FileImage(File(item.imageUrl)),
-                                            fit: .cover,
-                                          ),
+                                    Container(
+                                      width: context.wp(3.5).clamp(28, 32),
+                                      height: context.wp(3.5).clamp(28, 32),
+                                      decoration: BoxDecoration(
+                                        borderRadius: .circular(4),
+                                        image: DecorationImage(
+                                          image:
+                                              item.imageUrl.startsWith('http')
+                                              ? NetworkImage(item.imageUrl)
+                                                    as ImageProvider
+                                              : FileImage(File(item.imageUrl)),
+                                          fit: .cover,
                                         ),
                                       ),
+                                    ),
                                     SizedBox(
                                       width: context.wp(2).clamp(8.0, 16.0),
                                     ),
                                     Expanded(
-                                      child: Text(
-                                        item.name,
-                                        style: GoogleFonts.outfit(
-                                          fontWeight: .w600,
-                                          fontSize: context
-                                              .sp(12)
-                                              .clamp(11.0, 14.0),
-                                        ),
+                                      child: Column(
+                                        crossAxisAlignment: .start,
+                                        children: [
+                                          Text(
+                                            item.name,
+                                            style: textStyle.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: .ellipsis,
+                                          ),
+                                          Text(
+                                            item.id,
+                                            style: textStyle.copyWith(
+                                              fontSize: context
+                                                  .sp(10.5)
+                                                  .clamp(9.0, 12.0),
+                                              color: AppColors.grey,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -171,78 +157,53 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Text(
-                                  item.vendorName,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: textStyle.copyWith(
-                                    color: AppColors.grey,
-                                  ),
-                                ),
+                                child: Text(item.vendorName, style: textStyle),
                               ),
                               Expanded(
                                 flex: 2,
                                 child: Text(
                                   'PKR ${item.price.toStringAsFixed(0)}',
-                                  style: GoogleFonts.outfit(
-                                    fontSize: context
-                                        .sp(12.5)
-                                        .clamp(11.0, 14.0),
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.charcoal,
-                                    letterSpacing: -0.2,
+                                  style: textStyle.copyWith(
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Text(
-                                  item.category,
-                                  maxLines: 1,
-                                  overflow: .ellipsis,
-                                  style: GoogleFonts.outfit(
-                                    fontSize: context.sp(12).clamp(11.0, 14.0),
-                                  ),
-                                ),
+                                child: Text(item.category, style: textStyle),
                               ),
                               Expanded(
                                 flex: 2,
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: AdminStatusBadge(
-                                    status: item.status
-                                        .toString()
-                                        .split('.')
-                                        .last,
-                                  ),
+                                child: AdminStatusBadge(
+                                  status: item.status
+                                      .toString()
+                                      .split('.')
+                                      .last,
                                 ),
                               ),
                               Expanded(
                                 flex: 1,
                                 child: Row(
-                                  mainAxisAlignment: .end,
-                                  mainAxisSize: .min,
                                   children: [
-                                    InkWell(
-                                      onTap: () => _showProductDrawer(
+                                    IconButton(
+                                      onPressed: () => _showProductDrawer(
                                         context,
                                         product: item,
                                       ),
-                                      child: Icon(
-                                        Icons.edit,
-                                        size: 18,
-                                        color: AppColors.camel,
+                                      icon: const Icon(
+                                        Icons.edit_note_rounded,
+                                        size: 20,
                                       ),
+                                      color: AppColors.camel,
                                     ),
-                                    SizedBox(width: context.wp(1.5)),
-                                    InkWell(
-                                      onTap: () =>
+                                    IconButton(
+                                      onPressed: () =>
                                           _confirmDelete(context, item.id),
-                                      child: Icon(
-                                        Icons.delete_forever,
+                                      icon: const Icon(
+                                        Icons.delete_outline_rounded,
                                         size: 18,
-                                        color: AppColors.error,
                                       ),
+                                      color: AppColors.error,
                                     ),
                                     SizedBox(width: context.wp(4.5)),
                                   ],
@@ -268,7 +229,7 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border.all(
+        border: .all(
           color: AppColors.greyLight.withValues(alpha: 0.8),
           width: 1.2,
         ),
@@ -297,7 +258,7 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                 value,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.outfit(
-                  fontSize: 13,
+                  fontSize: 12,
                   color: AppColors.charcoal,
                   fontWeight: FontWeight.w500,
                 ),
@@ -314,7 +275,7 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
     Get.to(
       () => const GlobalCatalogEditScreen(),
       arguments: product,
-      transition: Transition.rightToLeftWithFade,
+      transition: .rightToLeft,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutQuart,
     );

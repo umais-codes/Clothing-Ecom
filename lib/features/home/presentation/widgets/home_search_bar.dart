@@ -1,69 +1,56 @@
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import '../controllers/home_controller.dart';
+import '../../../navigation/presentation/controllers/main_navigation_controller.dart';
 
-class HomeSearchBar extends StatefulWidget {
+class HomeSearchBar extends StatelessWidget {
   final double sw;
   const HomeSearchBar({super.key, required this.sw});
 
   @override
-  State<HomeSearchBar> createState() => _HomeSearchBarState();
-}
-
-class _HomeSearchBarState extends State<HomeSearchBar> {
-  late final TextEditingController _searchController;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = Get.find<HomeController>();
+
     return Padding(
-      padding: .symmetric(
-        horizontal: widget.sw * 0.05,
-        vertical: widget.sw * 0.02,
+      padding: EdgeInsets.symmetric(
+        horizontal: sw * 0.05,
+        vertical: sw * 0.02,
       ),
       child: Row(
         children: [
           Expanded(
-            child: CustomTextField(
-              controller: _searchController,
-              hinttext: 'Search collections, styles...',
-              fillColor: AppColors.offWhite,
-              borderRadius: widget.sw * 0.04,
-              margin: .zero,
-              contentPadding: .symmetric(
-                vertical: widget.sw * 0.03,
-                horizontal: widget.sw * 0.04,
-              ),
-              prefixIcon: Icon(
-                Icons.search_rounded,
-                color: AppColors.charcoal.withValues(alpha: 0.4),
-                size: widget.sw * 0.055,
-              ),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.close_rounded, size: widget.sw * 0.04),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {});
-                      },
-                    )
-                  : null,
-              onChanged: (val) => setState(() {}),
-              textInputAction: .search,
-            ),
+            child: Obx(() {
+              final query = controller.searchQuery.value;
+              return CustomTextField(
+                controller: controller.searchController,
+                hinttext: 'Search collections, styles...',
+                fillColor: AppColors.offWhite,
+                borderRadius: sw * 0.04,
+                margin: EdgeInsets.zero,
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: sw * 0.03,
+                  horizontal: sw * 0.04,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: AppColors.charcoal.withValues(alpha: 0.4),
+                  size: sw * 0.055,
+                ),
+                suffixIcon: query.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.close_rounded, size: sw * 0.04),
+                        onPressed: () {
+                          controller.searchController.clear();
+                        },
+                      )
+                    : null,
+                textInputAction: TextInputAction.search,
+              );
+            }),
           ),
-          SizedBox(width: widget.sw * 0.01),
+          SizedBox(width: sw * 0.02),
           _buildFilterButton(),
         ],
       ),
@@ -72,11 +59,11 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
 
   Widget _buildFilterButton() {
     return Container(
-      height: widget.sw * 0.09,
-      width: widget.sw * 0.09,
+      height: sw * 0.11,
+      width: sw * 0.11,
       decoration: BoxDecoration(
         color: AppColors.camel,
-        borderRadius: .circular(widget.sw * 0.03),
+        borderRadius: BorderRadius.circular(sw * 0.03),
         boxShadow: [
           BoxShadow(
             color: AppColors.camel.withValues(alpha: 0.2),
@@ -88,12 +75,16 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: .circular(widget.sw * 0.02),
-          onTap: () {},
+          borderRadius: BorderRadius.circular(sw * 0.03),
+          onTap: () {
+            if (Get.isRegistered<MainNavigationController>()) {
+              Get.find<MainNavigationController>().changeTab(1);
+            }
+          },
           child: Icon(
             Icons.tune_rounded,
             color: Colors.white,
-            size: widget.sw * 0.05,
+            size: sw * 0.05,
           ),
         ),
       ),

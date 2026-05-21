@@ -7,6 +7,10 @@ import '../../../../features/profile/presentation/controllers/profile_controller
 import '../../../../features/vendor_inventory/domain/repositories/inventory_repository.dart';
 import '../../../../features/vendor_inventory/data/repositories/inventory_repository_impl.dart';
 import '../../../../features/vendor_inventory/presentation/controllers/product_crud_controller.dart';
+import '../../../../features/discovery/domain/repositories/discovery_repository.dart';
+import '../../../../features/discovery/data/repositories/discovery_repository_impl.dart';
+import '../../../../features/discovery/presentation/controllers/filter_controller.dart';
+import '../../../../features/discovery/presentation/controllers/discovery_controller.dart';
 
 class MainNavigationBinding extends Bindings {
   @override
@@ -19,5 +23,11 @@ class MainNavigationBinding extends Bindings {
 
     Get.lazyPut<InventoryRepository>(() => InventoryRepositoryImpl()..init());
     Get.lazyPut<ProductCrudController>(() => ProductCrudController(Get.find()));
+
+    // Discovery Dependencies
+    Get.lazyPut<DiscoveryRepository>(() => DiscoveryRepositoryImpl());
+    Get.lazyPut<FilterController>(() => FilterController(Get.find<DiscoveryRepository>()));
+    Get.lazyPut<DiscoveryController>(() => DiscoveryController());
   }
 }
+

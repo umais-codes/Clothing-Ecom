@@ -87,7 +87,7 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                     child: Obx(
                       () => AdminDataTable<dynamic>(
                         title: 'Product Inventory',
-                        columnFlex: const [3, 2, 2, 2, 2, 1],
+                        columnFlex: const [3, 2, 2, 2, 2, 2],
                         columns: const [
                           'Product',
                           'Vendor',
@@ -182,8 +182,9 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                                 ),
                               ),
                               Expanded(
-                                flex: 1,
+                                flex: 2,
                                 child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
                                       onPressed: () => _showProductDrawer(
@@ -195,7 +196,11 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                                         size: 20,
                                       ),
                                       color: AppColors.camel,
+                                      visualDensity: VisualDensity.compact,
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
                                     ),
+                                    const SizedBox(width: 8),
                                     IconButton(
                                       onPressed: () =>
                                           _confirmDelete(context, item.id),
@@ -204,8 +209,10 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                                         size: 18,
                                       ),
                                       color: AppColors.error,
+                                      visualDensity: VisualDensity.compact,
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
                                     ),
-                                    SizedBox(width: context.wp(4.5)),
                                   ],
                                 ),
                               ),

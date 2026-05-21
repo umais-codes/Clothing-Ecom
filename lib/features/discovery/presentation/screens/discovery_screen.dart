@@ -1,234 +1,289 @@
-import 'package:ecom_app/features/discovery/presentation/widgets/filter_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../../../app/theme/app_colors.dart';
-import '../../../../app/widgets/custom_network_image.dart';
+import '../../../../app/widgets/custom_text_field.dart';
+import '../../../../app/widgets/custom_button.dart';
+import '../../../auth/controllers/auth_controller.dart';
+import '../../../home/presentation/widgets/product_card.dart';
+import '../../data/repositories/discovery_repository_impl.dart';
+import '../../domain/repositories/discovery_repository.dart';
 import '../controllers/discovery_controller.dart';
+import '../controllers/filter_controller.dart';
+import '../widgets/active_filter_chips.dart';
+import '../widgets/filter_bottom_sheet.dart';
 
 class DiscoveryScreen extends StatelessWidget {
   DiscoveryScreen({super.key}) {
-    Get.put(DiscoveryController());
+    _ensureDependenciesRegistered();
+  }
+
+  void _ensureDependenciesRegistered() {
+    // Ensure all controllers and repositories are registered
+    if (!Get.isRegistered<DiscoveryRepository>()) {
+      Get.lazyPut<DiscoveryRepository>(() => DiscoveryRepositoryImpl());
+    }
+    if (!Get.isRegistered<FilterController>()) {
+      Get.put(FilterController(Get.find<DiscoveryRepository>()));
+    }
+    if (!Get.isRegistered<DiscoveryController>()) {
+      Get.put(DiscoveryController());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final DiscoveryController controller = Get.find<DiscoveryController>();
+    _ensureDependenciesRegistered();
+    final FilterController filterController = Get.find<FilterController>();
+    final AuthController authController = Get.find<AuthController>();
     final Size size = MediaQuery.sizeOf(context);
     final double sw = size.width;
 
     return Scaffold(
-      backgroundColor: AppColors.white,
-      appBar: _buildAppBar(sw),
-      endDrawer: const FilterDrawer(),
+      backgroundColor: AppColors.offWhite,
+      appBar: _buildAppBar(sw, authController),
       body: Column(
         children: [
-          _buildDepartmentTabs(controller, sw),
-          Expanded(child: _buildBentoGrid(sw)),
+          _buildSearchHeader(filterController, sw),
+
+          const ActiveFilterChips(),
+
+          Expanded(
+            child: Obx(() {
+              if (filterController.isLoading.value) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.camel),
+                  ),
+                );
+              }
+
+              final products = filterController.filteredProducts;
+
+              if (products.isEmpty) {
+                return _buildEmptyState(filterController, sw);
+              }
+
+              return RefreshIndicator(
+                color: AppColors.camel,
+                onRefresh: () => filterController.loadProducts(),
+                child: MasonryGridView.count(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: sw * 0.04,
+                    vertical: sw * 0.02,
+                  ),
+                  crossAxisCount: sw > 600 ? 3 : 2,
+                  mainAxisSpacing: sw * 0.03,
+                  crossAxisSpacing: sw * 0.03,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return ProductCard(
+                      product: product.toMap(),
+                      index: index,
+                      sw: sw,
+                    );
+                  },
+                ),
+              );
+            }),
+          ),
+          SizedBox(height: sw * 0.2),
         ],
       ),
     );
   }
 
-  AppBar _buildAppBar(double sw) {
+  // --- App Bar ---
+  AppBar _buildAppBar(double sw, AuthController authController) {
     return AppBar(
+      backgroundColor: AppColors.white,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
       title: Text(
-        'Discover',
+        'Discover Collections',
         style: GoogleFonts.cormorantGaramond(
-          fontSize: sw * 0.08, // Responsive title size
+          fontSize: sw * 0.055,
           fontWeight: FontWeight.w700,
           color: AppColors.charcoal,
         ),
       ),
-      centerTitle: false,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.search, color: AppColors.charcoal),
-          onPressed: () {},
-        ),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(
-                Icons.shopping_bag_outlined,
-                color: AppColors.charcoal,
-              ),
-              onPressed: () => Get.toNamed('/cart'),
+        // Role Switch Indicator for easy testing
+        Obx(() {
+          final role = authController.selectedRole.value;
+          final isB2B = role == AuthRole.corporate;
+          return Container(
+            margin: EdgeInsets.only(right: sw * 0.01),
+            padding: EdgeInsets.symmetric(
+              horizontal: sw * 0.025,
+              vertical: sw * 0.01,
             ),
-            // Cart badge could be added here
-          ],
-        ),
-        Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.tune, color: AppColors.charcoal),
-            onPressed: () {
-              Scaffold.of(context).openEndDrawer();
-            },
+            decoration: BoxDecoration(
+              color: isB2B ? AppColors.camelLight : AppColors.greySubtle,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isB2B ? AppColors.camel : AppColors.greyLight,
+                width: 1,
+              ),
+            ),
+            child: Text(
+              isB2B ? 'B2B Portal' : 'B2C Shopper',
+              style: GoogleFonts.outfit(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isB2B ? AppColors.camel : AppColors.charcoal,
+              ),
+            ),
+          );
+        }),
+        IconButton(
+          icon: const Icon(
+            Icons.shopping_bag_outlined,
+            color: AppColors.charcoal,
           ),
+          onPressed: () => Get.toNamed('/cart'),
         ),
       ],
     );
   }
 
-  Widget _buildDepartmentTabs(DiscoveryController controller, double sw) {
-    return SizedBox(
-      height: sw * 0.12,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: sw * 0.04),
-        itemCount: controller.departments.length,
-        itemBuilder: (context, index) {
-          return Obx(() {
-            final isSelected =
-                controller.selectedDepartmentIndex.value == index;
-            return GestureDetector(
-              onTap: () => controller.selectDepartment(index),
-              child: Padding(
-                padding: EdgeInsets.only(right: sw * 0.06),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      controller.departments[index],
-                      style: GoogleFonts.outfit(
-                        fontSize: sw * 0.032,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
-                        color: isSelected ? AppColors.charcoal : AppColors.grey,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    if (isSelected)
-                      Container(
-                        margin: const EdgeInsets.only(top: 4),
-                        width: 4,
-                        height: 4,
-                        decoration: const BoxDecoration(
-                          color: AppColors.camel,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                  ],
-                ),
+  // --- Search Header Block ---
+  Widget _buildSearchHeader(FilterController filterController, double sw) {
+    return Container(
+      color: AppColors.white,
+      padding: EdgeInsets.symmetric(horizontal: sw * 0.04, vertical: sw * 0.01),
+      child: Row(
+        children: [
+          // Dynamic Search Box
+          Expanded(
+            child: CustomTextField(
+              controller: filterController.searchController,
+              hinttext: 'Search brands, items, materials...',
+              fillColor: AppColors.offWhite,
+              borderRadius: sw * 0.035,
+              margin: EdgeInsets.zero,
+              contentPadding: EdgeInsets.symmetric(
+                vertical: sw * 0.015,
+                horizontal: sw * 0.03,
               ),
-            );
-          });
-        },
+              prefixIcon: Icon(
+                Icons.search_rounded,
+                color: AppColors.charcoal.withValues(alpha: 0.5),
+                size: 20,
+              ),
+              suffixIcon: Obx(() {
+                return filterController.searchQuery.value.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(
+                          Icons.clear_rounded,
+                          color: AppColors.charcoal,
+                          size: 18,
+                        ),
+                        onPressed: () {
+                          filterController.searchController.clear();
+                        },
+                      )
+                    : const SizedBox.shrink();
+              }),
+            ),
+          ),
+          SizedBox(width: sw * 0.018),
+          _buildFilterButton(sw),
+        ],
       ),
     );
   }
 
-  Widget _buildBentoGrid(double sw) {
-    // Dummy images for illustration
-    final items = [
-      {
-        'title': 'New Arrivals',
-        'crossAxis': 2,
-        'mainAxis': 2,
-        'img':
-            'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=600&fit=crop',
-      },
-      {
-        'title': 'Linen Blazers',
-        'crossAxis': 2,
-        'mainAxis': 1,
-        'img':
-            'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=300&fit=crop',
-      },
-      {
-        'title': 'Accessories',
-        'crossAxis': 1,
-        'mainAxis': 1,
-        'img':
-            'https://images.unsplash.com/photo-1509319117193-57bab727e09d?w=300&h=300&fit=crop',
-      },
-      {
-        'title': 'Abaya Collection',
-        'crossAxis': 1,
-        'mainAxis': 2,
-        'img':
-            'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?w=300&h=600&fit=crop',
-      },
-      {
-        'title': 'Footwear',
-        'crossAxis': 2,
-        'mainAxis': 1,
-        'img':
-            'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&h=300&fit=crop',
-      },
-    ];
-
-    return MasonryGridView.count(
-      padding: EdgeInsets.all(sw * 0.04),
-      crossAxisCount: sw > 600 ? 3 : 2, // Responsive grid columns
-      mainAxisSpacing: sw * 0.04,
-      crossAxisSpacing: sw * 0.04,
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        final crossAxis = item['crossAxis'] as int;
-        final ratio = crossAxis / (item['mainAxis'] as int);
-
-        return GestureDetector(
+  // --- Filter Bottom Sheet Button ---
+  Widget _buildFilterButton(double sw) {
+    return Container(
+      height: sw * 0.115,
+      width: sw * 0.115,
+      decoration: BoxDecoration(
+        color: AppColors.camel,
+        borderRadius: BorderRadius.circular(sw * 0.035),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.camel.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(sw * 0.035),
           onTap: () {
-            // Navigate to PDP with dummy data
-            Get.toNamed(
-              '/product-details',
-              arguments: {
-                'id': 'prod_$index',
-                'name': item['title'],
-                'price': 120.0,
-                'image': item['img'],
-                'vendor': 'Boutique Apparel',
-                'isB2B': index == 3, // Simulate B2B for Abaya Collection
-              },
+            Get.bottomSheet(
+              const FilterBottomSheet(),
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              enterBottomSheetDuration: const Duration(milliseconds: 250),
+              exitBottomSheetDuration: const Duration(milliseconds: 200),
             );
           },
-          child: AspectRatio(
-            aspectRatio: ratio,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(sw * 0.04),
-                image: DecorationImage(
-                  image: CustomNetworkImage.provider(item['img'] as String),
-                  fit: BoxFit.cover,
+          child: Icon(Icons.tune_rounded, color: AppColors.white, size: 22),
+        ),
+      ),
+    );
+  }
+
+  // --- Empty Filter State Screen ---
+  Widget _buildEmptyState(FilterController filterController, double sw) {
+    return Center(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: sw * 0.08),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: .symmetric(horizontal: sw * 0.06, vertical: sw * 0.06),
+                decoration: BoxDecoration(
+                  color: AppColors.camelLight.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.shopping_bag_outlined,
+                  size: sw * 0.1,
+                  color: AppColors.camel,
                 ),
               ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    bottom: sw * 0.03,
-                    left: sw * 0.03,
-                    right: sw * 0.03,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: sw * 0.03,
-                        vertical: sw * 0.02,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.white.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(sw * 0.02),
-                      ),
-                      child: Text(
-                        item['title'] as String,
-                        style: GoogleFonts.cormorantGaramond(
-                          fontSize: sw * 0.04,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.charcoal,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
+              SizedBox(height: sw * 0.01),
+              Text(
+                'No Match Found',
+                style: GoogleFonts.cormorantGaramond(
+                  fontSize: sw * 0.06,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.charcoal,
+                ),
               ),
-            ),
+              SizedBox(height: sw * 0.01),
+              Text(
+                'We couldn\'t find any items matching your selected criteria. Try resetting or adjusting your active filter chips.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: sw * 0.03,
+                  color: AppColors.grey,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: sw * 0.03),
+              CustomButton(
+                text: 'Reset Filters',
+                buttonColor: AppColors.camel,
+                textColor: AppColors.white,
+                width: sw * 0.5,
+                onPressed: () => filterController.clearAll(),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

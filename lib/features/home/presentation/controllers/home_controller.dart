@@ -4,6 +4,15 @@ import 'package:get/get.dart';
 class HomeController extends GetxController {
   final RxString selectedCategory = 'All'.obs;
   final TextEditingController searchController = TextEditingController();
+  final RxString searchQuery = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    searchController.addListener(() {
+      searchQuery.value = searchController.text;
+    });
+  }
 
   @override
   void onClose() {
@@ -61,5 +70,28 @@ class HomeController extends GetxController {
 
   void setCategory(String category) {
     selectedCategory.value = category;
+  }
+
+  List<Map<String, dynamic>> get filteredProducts {
+    List<Map<String, dynamic>> list = trendingProducts;
+
+    // 1. Filter by category
+    if (selectedCategory.value != 'All') {
+      list = list
+          .where((p) => p['category'].toString().toLowerCase() == selectedCategory.value.toLowerCase())
+          .toList();
+    }
+
+    // 2. Filter by search query
+    if (searchQuery.value.isNotEmpty) {
+      final query = searchQuery.value.toLowerCase();
+      list = list.where((p) {
+        final name = p['name'].toString().toLowerCase();
+        final category = p['category'].toString().toLowerCase();
+        return name.contains(query) || category.contains(query);
+      }).toList();
+    }
+
+    return list;
   }
 }

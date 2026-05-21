@@ -36,18 +36,58 @@ class HomeView extends GetView<HomeController> {
   Widget _buildMasonryGrid(double sw) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: sw * 0.04),
-      child: MasonryGridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
-        mainAxisSpacing: sw * 0.03,
-        crossAxisSpacing: sw * 0.03,
-        itemCount: controller.trendingProducts.length,
-        itemBuilder: (context, index) {
-          final product = controller.trendingProducts[index];
-          return ProductCard(product: product, index: index, sw: sw);
-        },
-      ),
+      child: Obx(() {
+        final products = controller.filteredProducts;
+
+        if (products.isEmpty) {
+          return Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: sw * 0.15),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off_rounded,
+                  size: sw * 0.12,
+                  color: AppColors.grey.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'No products found',
+                  style: TextStyle(
+                    fontSize: sw * 0.04,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.charcoal,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Try searching for something else or changing categories.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: sw * 0.03,
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return MasonryGridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          mainAxisSpacing: sw * 0.03,
+          crossAxisSpacing: sw * 0.03,
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            return ProductCard(product: product, index: index, sw: sw);
+          },
+        );
+      }),
     );
   }
 }

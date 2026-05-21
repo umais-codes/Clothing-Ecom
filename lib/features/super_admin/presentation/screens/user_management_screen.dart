@@ -36,6 +36,7 @@ class UserManagementScreen extends GetView<AdminCrudController> {
             Expanded(
               child: AdminDataTable<dynamic>(
                 title: 'Platform Entities',
+                columnFlex: const [3, 3, 2, 2, 2, 2],
                 columns: const [
                   'User/Vendor',
                   'Email',
@@ -49,6 +50,7 @@ class UserManagementScreen extends GetView<AdminCrudController> {
                   return Row(
                     children: [
                       Expanded(
+                        flex: 3,
                         child: Row(
                           children: [
                             CircleAvatar(
@@ -63,35 +65,53 @@ class UserManagementScreen extends GetView<AdminCrudController> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Text(
-                              item.fullName,
-                              style: GoogleFonts.outfit(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                            Expanded(
+                              child: Text(
+                                item.fullName,
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
                       ),
                       Expanded(
+                        flex: 3,
                         child: Text(
                           item.email,
                           style: GoogleFonts.outfit(
                             fontSize: 12,
                             color: AppColors.grey,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Expanded(child: _buildRoleBadge(item.role)),
-                      Expanded(child: _buildStatusBadge(item.status)),
                       Expanded(
+                        flex: 2,
+                        child: _buildRoleBadge(item.role),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: _buildStatusBadge(item.status),
+                      ),
+                      Expanded(
+                        flex: 2,
                         child: Text(
                           item.joinDate,
                           style: GoogleFonts.outfit(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Expanded(
+                        flex: 2,
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Tooltip(
                               message: 'Impersonate',
@@ -103,8 +123,12 @@ class UserManagementScreen extends GetView<AdminCrudController> {
                                   size: 18,
                                   color: Colors.blueAccent,
                                 ),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             IconButton(
                               onPressed: () {},
                               icon: const Icon(
@@ -112,6 +136,9 @@ class UserManagementScreen extends GetView<AdminCrudController> {
                                 size: 18,
                                 color: AppColors.camel,
                               ),
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                             ),
                           ],
                         ),
@@ -142,6 +169,8 @@ class UserManagementScreen extends GetView<AdminCrudController> {
           fontWeight: FontWeight.w800,
           color: AppColors.charcoal,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

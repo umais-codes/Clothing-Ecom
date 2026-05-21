@@ -28,6 +28,15 @@ class Product {
   @HiveField(7)
   final bool? isB2B;
 
+  // Fields for search & advanced filtering (not stored in Hive to maintain adapter compatibility)
+  final String category;
+  final List<String> sizes;
+  final List<String> colors;
+  final int moq;
+  final String sourcingType; // e.g. "Ready to Ship" or "Private Label"
+  final String location;     // e.g. "Pakistan" or "International"
+  final bool isNew;
+
   Product({
     required this.id,
     required this.name,
@@ -37,6 +46,13 @@ class Product {
     bool? inStock,
     String? description,
     bool? isB2B,
+    this.category = '',
+    this.sizes = const [],
+    this.colors = const [],
+    this.moq = 1,
+    this.sourcingType = 'Ready to Ship',
+    this.location = 'Pakistan',
+    this.isNew = false,
   })  : inStock = inStock ?? true,
         description = description ?? '',
         isB2B = isB2B ?? false;
@@ -51,6 +67,13 @@ class Product {
       inStock: map['inStock'] ?? true,
       description: map['description'] ?? '',
       isB2B: map['isB2B'] ?? false,
+      category: map['category'] ?? '',
+      sizes: List<String>.from(map['sizes'] ?? []),
+      colors: List<String>.from(map['colors'] ?? []),
+      moq: map['moq'] ?? 1,
+      sourcingType: map['sourcingType'] ?? 'Ready to Ship',
+      location: map['location'] ?? 'Pakistan',
+      isNew: map['isNew'] ?? false,
     );
   }
 
@@ -64,6 +87,13 @@ class Product {
       'inStock': inStock,
       'description': description,
       'isB2B': isB2B,
+      'category': category,
+      'sizes': sizes,
+      'colors': colors,
+      'moq': moq,
+      'sourcingType': sourcingType,
+      'location': location,
+      'isNew': isNew,
     };
   }
 }

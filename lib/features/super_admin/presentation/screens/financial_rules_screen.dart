@@ -37,35 +37,59 @@ class FinancialRulesScreen extends GetView<AdminCrudController> {
             Expanded(
               child: AdminDataTable<dynamic>(
                 title: 'Active Rules & Pricing',
+                columnFlex: const [3, 2, 2, 2, 1],
                 columns: const ['Rule Title', 'Value', 'Type', 'Category', 'Actions'],
                 items: controller.financialRules,
                 rowBuilder: (item) {
                   return Row(
                     children: [
                       Expanded(
+                        flex: 3,
                         child: Text(
                           item.title,
                           style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Expanded(
+                        flex: 2,
                         child: Text(
                           item.type == 'Percentage' ? '${item.value}%' : 'PKR ${item.value.toStringAsFixed(0)}',
                           style: GoogleFonts.outfit(fontWeight: FontWeight.w800, fontSize: 13, color: AppColors.camel),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Expanded(
-                        child: Text(item.type, style: GoogleFonts.outfit(fontSize: 12)),
+                        flex: 2,
+                        child: Text(
+                          item.type,
+                          style: GoogleFonts.outfit(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Expanded(
-                        child: Text(item.category, style: GoogleFonts.outfit(fontSize: 12, color: AppColors.grey)),
+                        flex: 2,
+                        child: Text(
+                          item.category,
+                          style: GoogleFonts.outfit(fontSize: 12, color: AppColors.grey),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Expanded(
+                        flex: 1,
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               onPressed: () => _showRuleDrawer(context, item),
                               icon: const Icon(Icons.tune_rounded, size: 18, color: AppColors.camel),
+                              visualDensity: VisualDensity.compact,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
                             ),
                           ],
                         ),

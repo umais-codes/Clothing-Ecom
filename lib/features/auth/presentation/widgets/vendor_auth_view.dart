@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
+import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
+import 'package:ecom_app/app/utils/constants.dart';
 import '../../controllers/auth_controller.dart';
 import 'document_picker_box.dart';
 
@@ -240,7 +242,21 @@ class VendorAuthView extends StatelessWidget {
           obscureText: true,
           icon: Icons.lock_outline,
         ),
-        SizedBox(height: w * 0.015),
+        SizedBox(height: w * 0.02),
+        Obx(
+          () => CustomDropdownField(
+            label: 'Business Category',
+            icon: Icons.category_outlined,
+            value: controller.selectedVendorCategory.value,
+            items: AppConstants.categories,
+            onChanged: (value) {
+              if (value != null) {
+                controller.selectedVendorCategory.value = value;
+              }
+            },
+          ),
+        ),
+        SizedBox(height: w * 0.03),
         Padding(
           padding: .symmetric(horizontal: w * 0.018),
           child: Row(

@@ -8,6 +8,7 @@ import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 import '../controllers/global_catalog_edit_controller.dart';
+import 'package:ecom_app/app/utils/constants.dart';
 import '../widgets/admin_card.dart';
 import '../widgets/admin_form_widgets.dart';
 
@@ -292,11 +293,18 @@ class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: AdminFormField(
-                  controller: controller.categoryController,
-                  label: 'Category',
-                  labelIcon: Icons.category_outlined,
-                  hint: 'e.g. Luxury Wear',
+                child: Obx(
+                  () => AdminDropdownField(
+                    label: 'Category',
+                    labelIcon: Icons.category_outlined,
+                    value: controller.selectedCategory.value,
+                    items: AppConstants.categories,
+                    onChanged: (value) {
+                      if (value != null) {
+                        controller.selectedCategory.value = value;
+                      }
+                    },
+                  ),
                 ),
               ),
             ],

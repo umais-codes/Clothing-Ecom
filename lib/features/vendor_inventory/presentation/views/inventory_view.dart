@@ -207,7 +207,7 @@ class InventoryView extends StatelessWidget {
                 onPressed: () {
                   controller.titleController.text = product.title;
                   controller.descriptionController.text = product.description;
-                  controller.categoryController.text = product.category;
+                  controller.selectedCategory.value = product.category;
                   controller.basePriceController.text = product.basePrice
                       .toString();
                   controller.variants.assignAll(product.variants);

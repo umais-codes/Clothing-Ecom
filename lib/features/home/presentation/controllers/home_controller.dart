@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/constants.dart';
 
 class HomeController extends GetxController {
   final RxString selectedCategory = 'All'.obs;
@@ -22,11 +23,7 @@ class HomeController extends GetxController {
 
   final List<String> categories = [
     'All',
-    'Men',
-    'Women',
-    'Modest Wear',
-    'Uniforms',
-    'Accessories',
+    ...AppConstants.categories,
   ];
 
   final List<Map<String, dynamic>> trendingProducts = [
@@ -43,7 +40,7 @@ class HomeController extends GetxController {
       'id': '2',
       'name': 'Bespoke Executive Suit',
       'price': 4500.00,
-      'category': 'Men',
+      'category': "Men's",
       'image':
           'https://images.unsplash.com/photo-1594932224011-042041c6f9fa?q=80&w=1000&auto=format&fit=crop',
       'isNew': false,
@@ -52,7 +49,7 @@ class HomeController extends GetxController {
       'id': '3',
       'name': 'Corporate Aviation Uniform',
       'price': 850.00,
-      'category': 'Uniforms',
+      'category': 'Workwear',
       'image':
           'https://images.unsplash.com/photo-1562147138-b193f538562d?q=80&w=1000&auto=format&fit=crop',
       'isNew': true,

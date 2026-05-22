@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/features/auth/presentation/screens/pending_approval_screen.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
+import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 
 enum AuthRole { shopper, vendor, corporate, admin }
-
 
 enum AuthStatus { initial, loading, success, pendingApproval, error }
 
@@ -28,6 +29,7 @@ class AuthController extends GetxController {
       TextEditingController();
   final TextEditingController brandNameController = TextEditingController();
   final TextEditingController contactPersonController = TextEditingController();
+  final RxString selectedVendorCategory = "Men's".obs;
   final RxBool hasCnicUploaded = false.obs;
   final RxString cnicFileName = ''.obs;
   final RxBool hasSecpUploaded = false.obs;
@@ -128,6 +130,33 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     await Future.delayed(const Duration(seconds: 2)); // Mock
+
+    try {
+      final adminCtrl = Get.find<AdminController>();
+      final newVendor = KycVendorEntity(
+        id: 'kyc-${DateTime.now().millisecondsSinceEpoch}',
+        brandName: brandNameController.text,
+        ownerName: contactPersonController.text.isEmpty
+            ? 'Unknown'
+            : contactPersonController.text,
+        email: vendorEmailController.text,
+        phone: '+92-300-1234567',
+        category: selectedVendorCategory.value,
+        appliedDate: 'May 22, 2026',
+        status: KycStatus.pending,
+        cnicDocUrl: 'https://picsum.photos/seed/newcnic/800/600',
+        secpDocUrl: 'https://picsum.photos/seed/newsecp/800/600',
+        bio:
+            'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
+        city: 'Karachi',
+      );
+      adminCtrl.kycQueue.insert(0, newVendor);
+    } catch (e) {
+      debugPrint(
+        'AdminController not registered yet, skipping kycQueue insertion: $e',
+      );
+    }
+
     status.value = AuthStatus.pendingApproval;
     Get.to(() => const PendingApprovalScreen(), transition: Transition.fadeIn);
   }
@@ -143,9 +172,9 @@ class AuthController extends GetxController {
     status.value = AuthStatus.success;
     // Set role explicitly to ensure navigation logic picks it up
     selectedRole.value = AuthRole.vendor;
-    
+
     Get.offAllNamed('/main-navigation');
-    
+
     Get.snackbar(
       'Success',
       'Welcome back to the Brand Portal',

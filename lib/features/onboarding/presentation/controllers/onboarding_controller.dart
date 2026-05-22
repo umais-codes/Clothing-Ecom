@@ -70,7 +70,7 @@ class OnboardingController extends GetxController {
     {'label': "Women's", 'icon': Icons.woman_outlined},
     {'label': 'Modest Wear', 'icon': Icons.favorite_outline},
     {'label': 'Kidswear', 'icon': Icons.child_care_outlined},
-    {'label': 'Uniforms', 'icon': Icons.work_outline},
+    {'label': 'Workwear', 'icon': Icons.work_outline},
     {'label': 'Accessories', 'icon': Icons.watch_outlined},
   ];
 

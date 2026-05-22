@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/constants.dart';
 import '../../domain/repositories/inventory_repository.dart';
 import '../../data/models/vendor_product_model.dart';
 import '../../data/models/product_variant_model.dart';
@@ -16,7 +17,7 @@ class ProductCrudController extends GetxController {
   // Form State
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
-  late final TextEditingController categoryController;
+  final RxString selectedCategory = "Men's".obs;
   late final TextEditingController basePriceController;
 
   final RxList<ProductVariant> variants = <ProductVariant>[].obs;
@@ -27,7 +28,6 @@ class ProductCrudController extends GetxController {
     super.onInit();
     titleController = TextEditingController();
     descriptionController = TextEditingController();
-    categoryController = TextEditingController();
     basePriceController = TextEditingController();
 
     _loadProducts();
@@ -38,7 +38,6 @@ class ProductCrudController extends GetxController {
   void onClose() {
     titleController.dispose();
     descriptionController.dispose();
-    categoryController.dispose();
     basePriceController.dispose();
     super.onClose();
   }
@@ -64,8 +63,10 @@ class ProductCrudController extends GetxController {
       if (descriptionController.text.isEmpty) {
         descriptionController.text = draft.description;
       }
-      if (categoryController.text.isEmpty) {
-        categoryController.text = draft.category;
+      if (draft.category.isNotEmpty) {
+        selectedCategory.value = AppConstants.categories.contains(draft.category)
+            ? draft.category
+            : AppConstants.categories.first;
       }
       if (basePriceController.text.isEmpty) {
         basePriceController.text =
@@ -81,7 +82,7 @@ class ProductCrudController extends GetxController {
       id: 'draft',
       title: titleController.text,
       description: descriptionController.text,
-      category: categoryController.text,
+      category: selectedCategory.value,
       basePrice: double.tryParse(basePriceController.text) ?? 0.0,
       variants: variants.toList(),
       imageUrls: imageUrls.toList(),
@@ -137,7 +138,7 @@ class ProductCrudController extends GetxController {
         id: const Uuid().v4(),
         title: titleController.text,
         description: descriptionController.text,
-        category: categoryController.text,
+        category: selectedCategory.value,
         basePrice: price,
         variants: variants.toList(),
         imageUrls: imageUrls.toList(),
@@ -166,7 +167,7 @@ class ProductCrudController extends GetxController {
   Future<void> clearForm() async {
     titleController.clear();
     descriptionController.clear();
-    categoryController.clear();
+    selectedCategory.value = AppConstants.categories.first;
     basePriceController.clear();
     variants.clear();
     imageUrls.clear();

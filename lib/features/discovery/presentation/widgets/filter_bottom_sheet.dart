@@ -260,6 +260,7 @@ class FilterBottomSheet extends StatelessWidget {
       "Kidswear",
       "Modest Wear",
       "Workwear",
+      "Accessories",
     ];
 
     return SizedBox(

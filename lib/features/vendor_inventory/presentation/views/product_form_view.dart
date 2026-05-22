@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
 import '../../../../app/widgets/custom_text_field.dart';
+import '../../../../app/widgets/custom_dropdown_field.dart';
+import '../../../../app/utils/constants.dart';
 import '../controllers/product_crud_controller.dart';
 
 class ProductFormView extends StatelessWidget {
@@ -133,10 +135,18 @@ class ProductFormView extends StatelessWidget {
             onChanged: (_) => controller.saveDraft(),
           ),
           SizedBox(height: sw * 0.02),
-          CustomTextField(
-            controller: controller.categoryController,
-            hinttext: 'Category (e.g., Shirts, Pants)',
-            onChanged: (_) => controller.saveDraft(),
+          Obx(
+            () => CustomDropdownField(
+              value: controller.selectedCategory.value,
+              items: AppConstants.categories,
+              hinttext: 'Category',
+              onChanged: (value) {
+                if (value != null) {
+                  controller.selectedCategory.value = value;
+                  controller.saveDraft();
+                }
+              },
+            ),
           ),
         ],
       ),

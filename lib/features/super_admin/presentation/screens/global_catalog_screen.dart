@@ -11,6 +11,7 @@ import '../widgets/admin_card.dart';
 import '../widgets/admin_data_table.dart';
 import '../widgets/admin_widgets.dart';
 import '../widgets/screen_header.dart';
+import 'package:ecom_app/app/utils/constants.dart';
 import 'global_catalog_edit_screen.dart';
 
 class GlobalCatalogScreen extends GetView<AdminCrudController> {
@@ -59,24 +60,34 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                         ),
                         SizedBox(height: context.hp(1.5).clamp(12.0, 16.0)),
                         // --- Filters Row ---
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildDropdownFilter('Category', [
-                                'All Categories',
-                                'Luxury Wear',
-                                'Formal',
-                              ]),
-                            ),
-                            SizedBox(width: context.wp(1.5).clamp(8.0, 12.0)),
-                            Expanded(
-                              child: _buildDropdownFilter('Status', [
-                                'All Status',
-                                'Approved',
-                                'Pending',
-                              ]),
-                            ),
-                          ],
+                        Obx(
+                          () => Row(
+                            children: [
+                              Expanded(
+                                child: _buildDropdownFilter(
+                                  controller.selectedCategoryFilter.value,
+                                  ['All Categories', ...AppConstants.categories],
+                                  (value) {
+                                    if (value != null) {
+                                      controller.selectedCategoryFilter.value = value;
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: context.wp(1.5).clamp(8.0, 12.0)),
+                              Expanded(
+                                child: _buildDropdownFilter(
+                                  controller.selectedStatusFilter.value,
+                                  ['All Status', 'Approved', 'Pending'],
+                                  (value) {
+                                    if (value != null) {
+                                      controller.selectedStatusFilter.value = value;
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -96,7 +107,7 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
                           'Status',
                           'Actions',
                         ],
-                        items: controller.allProducts.toList(),
+                        items: controller.filteredProducts,
                         onAddPressed: () => _showProductDrawer(context),
                         rowBuilder: (item) {
                           final textStyle = GoogleFonts.outfit(
@@ -231,12 +242,16 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
     );
   }
 
-  Widget _buildDropdownFilter(String label, List<String> options) {
+  Widget _buildDropdownFilter(
+    String selectedValue,
+    List<String> options,
+    ValueChanged<String?> onChanged,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: .all(
+        border: Border.all(
           color: AppColors.greyLight.withValues(alpha: 0.8),
           width: 1.2,
         ),
@@ -244,7 +259,7 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: options.first,
+          value: options.contains(selectedValue) ? selectedValue : options.first,
           isExpanded: true,
           icon: const Icon(
             Icons.unfold_more_rounded,
@@ -272,7 +287,7 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
               ),
             );
           }).toList(),
-          onChanged: (_) {},
+          onChanged: onChanged,
         ),
       ),
     );

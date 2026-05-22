@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/constants.dart';
 import '../../domain/entities/admin_entities.dart';
 import 'admin_crud_controller.dart';
 
@@ -13,7 +14,7 @@ class GlobalCatalogEditController extends GetxController {
 
   late TextEditingController nameController;
   late TextEditingController priceController;
-  late TextEditingController categoryController;
+  final RxString selectedCategory = "Men's".obs;
   late TextEditingController descriptionController;
   late TextEditingController skuController;
 
@@ -32,7 +33,10 @@ class GlobalCatalogEditController extends GetxController {
     priceController = TextEditingController(
       text: product?.price.toString() ?? '',
     );
-    categoryController = TextEditingController(text: product?.category ?? '');
+    final String initialCat = product?.category ?? '';
+    selectedCategory.value = AppConstants.categories.contains(initialCat)
+        ? initialCat
+        : AppConstants.categories.first;
     descriptionController = TextEditingController(
       text: product?.description ?? '',
     );
@@ -51,7 +55,6 @@ class GlobalCatalogEditController extends GetxController {
   void onClose() {
     nameController.dispose();
     priceController.dispose();
-    categoryController.dispose();
     descriptionController.dispose();
     skuController.dispose();
     super.onClose();
@@ -129,7 +132,7 @@ class GlobalCatalogEditController extends GetxController {
       id: skuController.text.isEmpty ? 'AUTO-GEN' : skuController.text,
       name: nameController.text,
       price: double.tryParse(priceController.text) ?? 0.0,
-      category: categoryController.text,
+      category: selectedCategory.value,
       description: descriptionController.text,
       imageUrl: galleryImages.isNotEmpty ? galleryImages.first : '',
       additionalImages: galleryImages.length > 1

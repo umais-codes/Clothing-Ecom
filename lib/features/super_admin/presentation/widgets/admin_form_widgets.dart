@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
+import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 
 class AdminFormField extends StatelessWidget {
@@ -44,6 +45,38 @@ class AdminFormField extends StatelessWidget {
       textInputAction: textInputAction,
       prefixText: prefixText,
       inputFormatters: inputFormatters,
+      isRequired: isRequired,
+      margin: EdgeInsets.zero,
+    );
+  }
+}
+
+class AdminDropdownField extends StatelessWidget {
+  const AdminDropdownField({
+    super.key,
+    required this.label,
+    required this.labelIcon,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    this.isRequired = false,
+  });
+
+  final String label;
+  final IconData labelIcon;
+  final String value;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+  final bool isRequired;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomDropdownField(
+      label: label,
+      icon: labelIcon,
+      value: value,
+      items: items,
+      onChanged: onChanged,
       isRequired: isRequired,
       margin: EdgeInsets.zero,
     );
@@ -106,53 +139,61 @@ class _AdminStatusDropdownState extends State<AdminStatusDropdown> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+    final Color focusColor = AppColors.camel;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _FieldLabel(label: widget.label, icon: widget.labelIcon),
         const SizedBox(height: 7),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAF9F7),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: AppColors.greyLight.withValues(alpha: 0.9),
-              width: 1.2,
+        DropdownButtonFormField<ProductStatus>(
+          value: _selected,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFFAF9F7),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: width * 0.04,
+              vertical: height * 0.012,
             ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<ProductStatus>(
-              value: _selected,
-              isExpanded: true,
-              dropdownColor: AppColors.white,
-              borderRadius: BorderRadius.circular(12),
-              icon: const Icon(
-                Icons.unfold_more_rounded,
-                size: 18,
-                color: AppColors.grey,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(width * 0.028),
+              borderSide: BorderSide(
+                color: AppColors.greyLight.withValues(alpha: 0.9),
+                width: 1.2,
               ),
-              // Selected item shown inside the button
-              selectedItemBuilder: (_) => ProductStatus.values.map((s) {
-                final c = _kStatusConfig[s]!;
-                return _StatusTile(config: c);
-              }).toList(),
-              // Full items in the dropdown menu
-              items: ProductStatus.values.map((s) {
-                final c = _kStatusConfig[s]!;
-                return DropdownMenuItem<ProductStatus>(
-                  value: s,
-                  child: _StatusTile(config: c),
-                );
-              }).toList(),
-              onChanged: (v) {
-                if (v != null) {
-                  setState(() => _selected = v);
-                  widget.onChanged?.call(v);
-                }
-              },
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(width * 0.028),
+              borderSide: BorderSide(color: focusColor, width: 1.8),
             ),
           ),
+          dropdownColor: AppColors.white,
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: AppColors.charcoal,
+          ),
+          // Selected item shown inside the button
+          selectedItemBuilder: (_) => ProductStatus.values.map((s) {
+            final c = _kStatusConfig[s]!;
+            return _StatusTile(config: c);
+          }).toList(),
+          // Full items in the dropdown menu
+          items: ProductStatus.values.map((s) {
+            final c = _kStatusConfig[s]!;
+            return DropdownMenuItem<ProductStatus>(
+              value: s,
+              child: _StatusTile(config: c),
+            );
+          }).toList(),
+          onChanged: (v) {
+            if (v != null) {
+              setState(() => _selected = v);
+              widget.onChanged?.call(v);
+            }
+          },
         ),
       ],
     );

@@ -6,8 +6,8 @@ class AdminCrudController extends GetxController {
   // ── Global Search & Filters ──────────────────────────────────────────────────
   final RxString globalSearchQuery = ''.obs;
   final TextEditingController searchController = TextEditingController();
-  final RxString selectedCategoryFilter = 'All'.obs;
-  final RxString selectedStatusFilter = 'All'.obs;
+  final RxString selectedCategoryFilter = 'All Categories'.obs;
+  final RxString selectedStatusFilter = 'All Status'.obs;
 
   // ── Catalog Management ───────────────────────────────────────────────────────
   final RxList<PendingProductEntity> allProducts = <PendingProductEntity>[
@@ -17,7 +17,7 @@ class AdminCrudController extends GetxController {
       vendorName: 'House of Linen',
       vendorId: 'V-002',
       price: 12500,
-      category: 'Luxury Wear',
+      category: "Women's",
       sizes: ['S', 'M', 'L'],
       imageUrl: 'https://picsum.photos/seed/p1/400/500',
       status: ProductStatus.approved,
@@ -29,7 +29,7 @@ class AdminCrudController extends GetxController {
       vendorName: 'Threads & Co.',
       vendorId: 'V-001',
       price: 18000,
-      category: 'Men\'s Formal',
+      category: "Men's",
       sizes: ['40', '42', '44'],
       imageUrl: 'https://picsum.photos/seed/p2/400/500',
       status: ProductStatus.approved,
@@ -41,13 +41,33 @@ class AdminCrudController extends GetxController {
       vendorName: 'Zara Couture',
       vendorId: 'V-003',
       price: 4500,
-      category: 'Summer Collection',
+      category: "Women's",
       sizes: ['Unstitched'],
       imageUrl: 'https://picsum.photos/seed/p3/400/500',
       status: ProductStatus.pending,
       description: '3-piece designer lawn with chiffon dupatta.',
     ),
   ].obs;
+
+  List<PendingProductEntity> get filteredProducts {
+    return allProducts.where((product) {
+      final query = globalSearchQuery.value.trim().toLowerCase();
+      final matchesSearch = query.isEmpty ||
+          product.name.toLowerCase().contains(query) ||
+          product.id.toLowerCase().contains(query) ||
+          product.vendorName.toLowerCase().contains(query);
+
+      final catFilter = selectedCategoryFilter.value;
+      final matchesCategory = catFilter == 'All Categories' ||
+          product.category.toLowerCase() == catFilter.toLowerCase();
+
+      final statusFilter = selectedStatusFilter.value;
+      final matchesStatus = statusFilter == 'All Status' ||
+          product.status.name.toLowerCase() == statusFilter.replaceAll(' ', '').toLowerCase();
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    }).toList();
+  }
 
   // ── User & Vendor Management ─────────────────────────────────────────────────
   final RxList<AppUserEntity> allUsers = <AppUserEntity>[

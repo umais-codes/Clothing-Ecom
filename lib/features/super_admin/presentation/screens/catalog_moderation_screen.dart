@@ -47,26 +47,17 @@ class CatalogModerationScreen extends GetView<AdminController> {
                   if (!context.isMobileView &&
                       controller.pendingProducts.isNotEmpty) ...[
                     const SizedBox(width: 12),
-                    ElevatedButton.icon(
+                    CustomButton(
                       onPressed: () => _confirmBulkApprove(context),
-                      icon: const Icon(Icons.done_all_rounded, size: 16),
-                      label: const Text('Approve All'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.success,
-                        foregroundColor: AppColors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        textStyle: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
+                      icon: Icons.done_all_rounded,
+                      text: 'Approve All',
+                      variant: ButtonVariant.primary,
+                      buttonColor: AppColors.success,
+                      textColor: AppColors.white,
+                      height: 38,
+                      borderRadius: 8,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ],
                 ],
@@ -123,32 +114,26 @@ class CatalogModerationScreen extends GetView<AdminController> {
           style: GoogleFonts.outfit(fontSize: 14, color: AppColors.ink),
         ),
         actions: [
-          TextButton(
+          CustomButton(
+            text: 'Cancel',
             onPressed: () => Get.back(),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.outfit(color: AppColors.grey),
-            ),
+            height: 35,
+            variant: ButtonVariant.ghost,
+            textColor: AppColors.grey,
+            width: Get.width * 0.3,
           ),
-          ElevatedButton(
+          const SizedBox(width: 8),
+          CustomButton(
+            text: 'Confirm',
             onPressed: () {
               Get.back();
               controller.approveAllProducts();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              'Confirm',
-              style: GoogleFonts.outfit(
-                color: AppColors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            height: 35,
+            variant: ButtonVariant.primary,
+            buttonColor: AppColors.success,
+            textColor: AppColors.white,
+            width: Get.width * 0.3,
           ),
         ],
       ),

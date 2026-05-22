@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
+import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -247,49 +248,13 @@ class GlobalCatalogScreen extends GetView<AdminCrudController> {
     List<String> options,
     ValueChanged<String?> onChanged,
   ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(
-          color: AppColors.greyLight.withValues(alpha: 0.8),
-          width: 1.2,
-        ),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: options.contains(selectedValue) ? selectedValue : options.first,
-          isExpanded: true,
-          icon: const Icon(
-            Icons.unfold_more_rounded,
-            size: 16,
-            color: AppColors.grey,
-          ),
-          style: GoogleFonts.outfit(
-            fontSize: 13,
-            color: AppColors.charcoal,
-            fontWeight: FontWeight.w500,
-          ),
-          dropdownColor: AppColors.white,
-          borderRadius: BorderRadius.circular(12),
-          items: options.map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                value,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: AppColors.charcoal,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
+    return CustomDropdownField(
+      value: options.contains(selectedValue) ? selectedValue : options.first,
+      items: options,
+      onChanged: onChanged,
+      borderRadius: 10,
+      fillColor: AppColors.white,
+      margin: EdgeInsets.zero,
     );
   }
 

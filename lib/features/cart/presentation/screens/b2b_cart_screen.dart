@@ -28,21 +28,15 @@ class B2BCartScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton.icon(
+          CustomButton(
+            text: "Import CSV",
             onPressed: () => controller.uploadCsv(),
-            icon: Icon(
-              Icons.upload_file,
-              size: sw * 0.05,
-              color: AppColors.camel,
-            ),
-            label: Text(
-              "Import CSV",
-              style: GoogleFonts.outfit(
-                fontSize: sw * 0.035,
-                color: AppColors.camel,
-                fontWeight: .w600,
-              ),
-            ),
+            variant: ButtonVariant.ghost,
+            icon: Icons.upload_file,
+            textColor: AppColors.camel,
+            height: 35,
+            fontSize: sw * 0.035,
+            fontWeight: FontWeight.w600,
           ),
           SizedBox(width: sw * 0.01),
         ],

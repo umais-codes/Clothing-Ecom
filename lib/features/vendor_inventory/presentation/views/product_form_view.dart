@@ -33,19 +33,18 @@ class ProductFormView extends StatelessWidget {
         centerTitle: true,
         iconTheme: const IconThemeData(color: AppColors.charcoal),
         actions: [
-          TextButton(
+          CustomButton(
+            text: 'Save',
             onPressed: () {
               controller.saveDraft();
               Get.back();
               Get.snackbar('Draft Saved', 'Your progress has been saved.');
             },
-            child: Text(
-              'Save',
-              style: GoogleFonts.outfit(
-                color: AppColors.camel,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            variant: ButtonVariant.ghost,
+            textColor: AppColors.camel,
+            height: 35,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ],
       ),

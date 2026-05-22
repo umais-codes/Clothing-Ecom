@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
+import '../../../../app/widgets/custom_dropdown_field.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../controllers/filter_controller.dart';
 
@@ -61,7 +62,7 @@ class FilterBottomSheet extends StatelessWidget {
                       letterSpacing: -0.2,
                     ),
                   ),
-                  TextButton(
+                  CustomButton(
                     onPressed: () {
                       controller.clearAll();
                       Get.snackbar(
@@ -73,18 +74,13 @@ class FilterBottomSheet extends StatelessWidget {
                         duration: const Duration(seconds: 1),
                       );
                     },
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.grey,
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: Text(
-                      'Reset All',
-                      style: GoogleFonts.outfit(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
+                    text: 'Reset All',
+                    variant: ButtonVariant.ghost,
+                    textColor: AppColors.grey,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    width: null,
+                    height: 36,
                   ),
                 ],
               ),
@@ -218,37 +214,17 @@ class FilterBottomSheet extends StatelessWidget {
       'Price: High to Low',
     ];
 
-    return Obx(() => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.offWhite,
-        borderRadius: BorderRadius.circular(sw * 0.03),
-        border: Border.all(color: AppColors.greyLight, width: 1.2),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: controller.sortBy.value,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.charcoal),
-          style: GoogleFonts.outfit(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-          ),
-          dropdownColor: AppColors.white,
-          isExpanded: true,
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              controller.sortBy.value = newValue;
-            }
-          },
-          items: sortOptions.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
-      ),
+    return Obx(() => CustomDropdownField(
+      value: controller.sortBy.value,
+      items: sortOptions,
+      onChanged: (String? newValue) {
+        if (newValue != null) {
+          controller.sortBy.value = newValue;
+        }
+      },
+      borderRadius: sw * 0.03,
+      fillColor: AppColors.offWhite,
+      margin: EdgeInsets.zero,
     ));
   }
 
@@ -442,37 +418,17 @@ class FilterBottomSheet extends StatelessWidget {
       '> 200 pieces',
     ];
 
-    return Obx(() => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.offWhite,
-        borderRadius: BorderRadius.circular(sw * 0.03),
-        border: Border.all(color: AppColors.greyLight, width: 1.2),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: controller.selectedMoqOption.value,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.charcoal),
-          style: GoogleFonts.outfit(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-          ),
-          dropdownColor: AppColors.white,
-          isExpanded: true,
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              controller.setMoqOption(newValue);
-            }
-          },
-          items: moqOptions.map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
-      ),
+    return Obx(() => CustomDropdownField(
+      value: controller.selectedMoqOption.value,
+      items: moqOptions,
+      onChanged: (String? newValue) {
+        if (newValue != null) {
+          controller.setMoqOption(newValue);
+        }
+      },
+      borderRadius: sw * 0.03,
+      fillColor: AppColors.offWhite,
+      margin: EdgeInsets.zero,
     ));
   }
 

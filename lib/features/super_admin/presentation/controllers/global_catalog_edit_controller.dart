@@ -5,6 +5,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/constants.dart';
 import '../../domain/entities/admin_entities.dart';
 import 'admin_crud_controller.dart';
+import 'package:ecom_app/app/widgets/custom_button.dart';
 
 class GlobalCatalogEditController extends GetxController {
   final PendingProductEntity? product;
@@ -101,16 +102,26 @@ class GlobalCatalogEditController extends GetxController {
         title: const Text('Discard Changes?'),
         content: const Text('Are you sure you want to revert all changes?'),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('CANCEL')),
-          TextButton(
+          CustomButton(
+            text: 'CANCEL',
+            onPressed: () => Get.back(),
+            height: 35,
+            variant: ButtonVariant.ghost,
+            textColor: AppColors.grey,
+            width: Get.width * 0.3,
+          ),
+          const SizedBox(width: 8),
+          CustomButton(
+            text: 'DISCARD',
             onPressed: () {
               _initializeFields();
               Get.back();
             },
-            child: const Text(
-              'DISCARD',
-              style: TextStyle(color: AppColors.error),
-            ),
+            height: 35,
+            variant: ButtonVariant.primary,
+            buttonColor: AppColors.error,
+            textColor: AppColors.white,
+            width: Get.width * 0.3,
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/vendor_dashboard_controller.dart';
 import '../widgets/metric_card.dart';
+import 'package:ecom_app/app/widgets/custom_button.dart';
 
 class VendorDashboardView extends GetView<VendorDashboardController> {
   const VendorDashboardView({super.key});
@@ -444,16 +445,14 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
-            TextButton(
+            CustomButton(
+              text: "See All",
               onPressed: () {},
-              child: Text(
-                "See All",
-                style: TextStyle(
-                  color: AppColors.camel,
-                  fontWeight: FontWeight.w600,
-                  fontSize: sw * 0.035,
-                ),
-              ),
+              variant: ButtonVariant.ghost,
+              textColor: AppColors.camel,
+              height: 30,
+              fontSize: sw * 0.035,
+              fontWeight: FontWeight.w600,
             ),
           ],
         ),

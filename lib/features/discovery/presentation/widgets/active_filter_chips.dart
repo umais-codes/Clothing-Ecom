@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../app/widgets/custom_button.dart';
 import '../controllers/filter_controller.dart';
 
 class ActiveFilterChips extends StatelessWidget {
@@ -29,22 +30,16 @@ class ActiveFilterChips extends StatelessWidget {
           itemCount: activeFilters.length + (activeFilters.length >= 2 ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == activeFilters.length) {
-              return TextButton(
+              return CustomButton(
+                text: 'Clear All',
+                variant: ButtonVariant.ghost,
+                textColor: AppColors.camel,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                width: null,
+                height: sw * 0.08,
+                borderRadius: 4,
                 onPressed: () => controller.clearAll(),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.camel,
-                  padding: EdgeInsets.symmetric(horizontal: sw * 0.015),
-                  minimumSize: .zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  'Clear All',
-                  style: GoogleFonts.outfit(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.2,
-                  ),
-                ),
               );
             }
 

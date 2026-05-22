@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
+import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
 import '../../controllers/auth_controller.dart';
 
 class CorporateAuthView extends StatelessWidget {
@@ -242,57 +243,18 @@ class CorporateAuthView extends StatelessWidget {
           icon: Icons.lock_outline,
         ),
         SizedBox(height: w * 0.015),
-        Padding(
-          padding: .symmetric(horizontal: w * 0.014),
-          child: Row(
-            children: [
-              Icon(
-                Icons.pie_chart_outline,
-                color: AppColors.camel,
-                size: w * 0.045,
-              ),
-              SizedBox(width: w * 0.025),
-              Text(
-                'Estimated Volume',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  fontSize: w * 0.032,
-                  color: AppColors.charcoal,
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: w * 0.015),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: AppColors.offWhite,
-            borderRadius: .circular(12),
-            border: .all(color: AppColors.greyLight),
-          ),
-          child: Obx(
-            () => DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: controller.selectedVolume.value,
-                isExpanded: true,
-                icon: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: AppColors.charcoal,
-                ),
-                style: theme.textTheme.bodyLarge?.copyWith(fontWeight: .w500),
-                items: controller.volumeOptions.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  if (newValue != null) {
-                    controller.selectedVolume.value = newValue;
-                  }
-                },
-              ),
-            ),
+        Obx(
+          () => CustomDropdownField(
+            label: 'Estimated Volume',
+            icon: Icons.pie_chart_outline,
+            value: controller.selectedVolume.value,
+            items: controller.volumeOptions,
+            onChanged: (newValue) {
+              if (newValue != null) {
+                controller.selectedVolume.value = newValue;
+              }
+            },
+            margin: EdgeInsets.only(bottom: w * 0.04),
           ),
         ),
         SizedBox(height: w * 0.04),

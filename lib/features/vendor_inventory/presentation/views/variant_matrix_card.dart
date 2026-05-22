@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_text_field.dart';
 import '../controllers/product_crud_controller.dart';
+import 'package:ecom_app/app/widgets/custom_button.dart';
 
 class VariantMatrixCard extends StatelessWidget {
   final double sw;
@@ -89,17 +90,14 @@ class VariantMatrixCard extends StatelessWidget {
             );
           }),
           SizedBox(height: sw * 0.04),
-          OutlinedButton.icon(
+          CustomButton(
+            text: 'Add Variant',
             onPressed: () => _showAddVariantDialog(context, controller, sw),
-            icon: const Icon(Icons.add, color: AppColors.camel),
-            label: Text(
-              'Add Variant',
-              style: GoogleFonts.outfit(color: AppColors.camel),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: AppColors.camel),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(sw * 0.02)),
-            ),
+            icon: Icons.add,
+            variant: ButtonVariant.outlined,
+            textColor: AppColors.camel,
+            height: sw * 0.1,
+            borderRadius: sw * 0.02,
           ),
         ],
       ),

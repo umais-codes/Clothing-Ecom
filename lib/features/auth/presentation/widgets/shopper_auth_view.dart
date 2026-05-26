@@ -4,6 +4,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/features/onboarding/presentation/widgets/pin_input_field.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../../controllers/auth_controller.dart';
 
 class ShopperAuthView extends StatelessWidget {
@@ -14,9 +15,8 @@ class ShopperAuthView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final w = size.width;
-    final h = size.height;
+    final w = context.screenWidth;
+    final h = context.screenHeight;
 
     return SingleChildScrollView(
       padding: .symmetric(horizontal: w * 0.06, vertical: w * 0.02),

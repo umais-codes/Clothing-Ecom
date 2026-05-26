@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,7 +13,7 @@ class B2CCartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final B2CCartController controller = Get.find<B2CCartController>();
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,

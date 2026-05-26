@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
@@ -12,7 +13,7 @@ class B2BPortalView extends GetView<B2BPortalController> {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return DefaultTabController(
       length: 3,

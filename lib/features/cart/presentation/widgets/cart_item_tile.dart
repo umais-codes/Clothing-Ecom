@@ -2,6 +2,7 @@ import 'package:ecom_app/app/widgets/custom_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_network_image.dart';
 import '../../domain/models/cart_item_model.dart';
@@ -15,7 +16,7 @@ class CartItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CartController controller = Get.find<CartController>();
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),

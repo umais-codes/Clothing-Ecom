@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_stepper.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../controllers/b2c_cart_controller.dart';
 
 class RetailCartView extends StatelessWidget {
@@ -12,7 +13,7 @@ class RetailCartView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double w = MediaQuery.sizeOf(context).width;
+    final double w = context.screenWidth;
 
     return Obx(() {
       if (controller.cartItems.isEmpty) {
@@ -100,7 +101,7 @@ class RetailCartItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return Container(
       height: sw * 0.215,

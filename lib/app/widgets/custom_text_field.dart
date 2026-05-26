@@ -3,6 +3,7 @@ import 'package:ecom_app/app/validations/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class CustomTextField extends StatelessWidget {
   final String? label;
@@ -86,9 +87,8 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
+    final width = context.screenWidth;
+    final height = context.screenHeight;
     final effectiveFocusColor = focusColor ?? AppColors.camel;
 
     return Container(

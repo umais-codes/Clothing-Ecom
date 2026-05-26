@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class CustomStepper extends StatelessWidget {
   final int value;
@@ -20,7 +21,7 @@ class CustomStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
     final double effectiveSize = size ?? sw * 0.08;
     final double effectiveIconSize = iconSize ?? sw * 0.04;
 

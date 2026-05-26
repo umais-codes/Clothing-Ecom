@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class DocumentPickerBox extends StatelessWidget {
   final String title;
@@ -20,7 +21,7 @@ class DocumentPickerBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final w = MediaQuery.of(context).size.width;
+    final w = context.screenWidth;
 
     return GestureDetector(
       onTap: onTap,

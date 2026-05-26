@@ -4,15 +4,15 @@ import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class PendingApprovalScreen extends StatelessWidget {
   const PendingApprovalScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final w = size.width;
-    final h = size.height;
+    final w = context.screenWidth;
+    final h = context.screenHeight;
 
     return Scaffold(
       backgroundColor: AppColors.white,

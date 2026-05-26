@@ -3,6 +3,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../../domain/entities/line_sheet_entity.dart';
 import '../../../wishlist/domain/models/product_model.dart';
 
@@ -14,7 +15,7 @@ class LineSheetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sw = MediaQuery.of(context).size.width;
+    final sw = context.screenWidth;
 
     return GestureDetector(
       onTap: () {

@@ -5,6 +5,7 @@ import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
 import 'package:ecom_app/app/utils/constants.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../../controllers/auth_controller.dart';
 import 'document_picker_box.dart';
 
@@ -16,7 +17,7 @@ class VendorAuthView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final w = MediaQuery.of(context).size.width;
+    final w = context.screenWidth;
 
     return SingleChildScrollView(
       padding: .symmetric(horizontal: w * 0.06, vertical: w * 0.02),

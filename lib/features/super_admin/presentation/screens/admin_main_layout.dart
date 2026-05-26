@@ -12,6 +12,7 @@ import 'financial_ledger_screen.dart';
 import 'global_catalog_screen.dart';
 import 'user_management_screen.dart';
 import 'financial_rules_screen.dart';
+import 'monetization_dashboard_screen.dart';
 import '../controllers/admin_crud_controller.dart';
 
 class AdminMainLayout extends GetView<AdminController> {
@@ -49,6 +50,11 @@ class AdminMainLayout extends GetView<AdminController> {
       label: 'User Management',
     ),
     _SidebarItem(
+      icon: Icons.monetization_on_outlined,
+      activeIcon: Icons.monetization_on_rounded,
+      label: 'Monetization',
+    ),
+    _SidebarItem(
       icon: Icons.settings_suggest_outlined,
       activeIcon: Icons.settings_suggest_rounded,
       label: 'Platform Rules',
@@ -62,6 +68,7 @@ class AdminMainLayout extends GetView<AdminController> {
     FinancialLedgerScreen(),
     GlobalCatalogScreen(),
     UserManagementScreen(),
+    MonetizationDashboardScreen(),
     FinancialRulesScreen(),
   ];
 

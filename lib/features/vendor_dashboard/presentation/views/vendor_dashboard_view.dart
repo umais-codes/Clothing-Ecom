@@ -1,9 +1,11 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/vendor_dashboard_controller.dart';
 import '../widgets/metric_card.dart';
+import '../widgets/subscription_plan_details_card.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 
 class VendorDashboardView extends GetView<VendorDashboardController> {
@@ -11,8 +13,8 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.sizeOf(context).width;
-    final double sh = MediaQuery.sizeOf(context).height;
+    final double sw = context.screenWidth;
+    final double sh = context.screenHeight;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -30,6 +32,8 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
               _buildInventoryAction(context, sw),
               SizedBox(height: sh * 0.02),
               _buildFinancialOverview(context, sw),
+              SizedBox(height: sh * 0.02),
+              _buildSubscriptionPlanDetails(context, sw),
               SizedBox(height: sh * 0.02),
               _buildOperationalHealth(context, sw),
               SizedBox(height: sh * 0.02),
@@ -573,5 +577,18 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
       default:
         return AppColors.grey;
     }
+  }
+
+  Widget _buildSubscriptionPlanDetails(BuildContext context, double sw) {
+    return Obx(() => SubscriptionPlanDetailsCard(
+          planName: controller.activePlanName.value,
+          planFee: controller.planFee.value,
+          commissionRate: controller.commissionRate.value,
+          currentProducts: controller.currentProducts.value,
+          maxProducts: controller.maxProducts.value,
+          nextBillingDate: controller.nextPlanBillingDate.value,
+          billingStatus: controller.activePlanBillingStatus.value,
+          onUpgradePressed: () => Get.toNamed('/vendor-plans'),
+        ));
   }
 }

@@ -1,9 +1,3 @@
-// lib/features/super_admin/presentation/screens/admin_login_screen.dart
-//
-// Dedicated, premium Admin login screen.
-// Only accessible via the secret route '/admin-login'.
-// Validates a hardcoded admin credential and routes to /admin-panel.
-
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 
 class AdminFormField extends StatelessWidget {
@@ -139,9 +140,8 @@ class _AdminStatusDropdownState extends State<AdminStatusDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
+    final width = context.screenWidth;
+    final height = context.screenHeight;
     final Color focusColor = AppColors.camel;
 
     return Column(
@@ -150,7 +150,7 @@ class _AdminStatusDropdownState extends State<AdminStatusDropdown> {
         _FieldLabel(label: widget.label, icon: widget.labelIcon),
         const SizedBox(height: 7),
         DropdownButtonFormField<ProductStatus>(
-          value: _selected,
+          initialValue: _selected,
           decoration: InputDecoration(
             filled: true,
             fillColor: const Color(0xFFFAF9F7),
@@ -218,38 +218,73 @@ class AdminFormCardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double iconPadding = context.responsive(
+      mobile: 8.0,
+      tablet: 9.0,
+      desktop: 10.0,
+    );
+    final double iconSize = context.responsive(
+      mobile: 16.0,
+      tablet: 18.0,
+      desktop: 20.0,
+    );
+    final double borderRadius = context.responsive(
+      mobile: 8.0,
+      tablet: 10.0,
+      desktop: 10.0,
+    );
+    final double gapWidth = context.responsive(
+      mobile: 10.0,
+      tablet: 12.0,
+      desktop: 14.0,
+    );
+    final double titleFontSize = context.responsive(
+      mobile: 13.0,
+      tablet: 14.0,
+      desktop: 15.0,
+    );
+    final double subtitleFontSize = context.responsive(
+      mobile: 10.5,
+      tablet: 11.5,
+      desktop: 12.5,
+    );
+
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(iconPadding),
           decoration: BoxDecoration(
             color: AppColors.camelLight,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(borderRadius),
           ),
-          child: Icon(icon, size: 16, color: AppColors.camel),
+          child: Icon(icon, size: iconSize, color: AppColors.camel),
         ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.outfit(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700,
-                color: AppColors.charcoal,
-                letterSpacing: -0.1,
+        SizedBox(width: gapWidth),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.charcoal,
+                  letterSpacing: -0.1,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-            Text(
-              subtitle,
-              style: GoogleFonts.outfit(
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-                color: AppColors.grey,
+              Text(
+                subtitle,
+                style: GoogleFonts.outfit(
+                  fontSize: subtitleFontSize,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.grey,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

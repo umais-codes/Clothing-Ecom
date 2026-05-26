@@ -8,16 +8,19 @@ class ScreenHeader extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
+    this.leading,
     this.trailing,
   });
 
   final String title;
   final String subtitle;
+  final Widget? leading;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final trailingWidget = trailing;
+    final leadingWidget = leading;
 
     final horizontalPadding = context.wp(3).clamp(16.0, 28.0);
     final verticalPadding = context.isMobileView ? 12.0 : 16.0;
@@ -25,7 +28,7 @@ class ScreenHeader extends StatelessWidget {
     final subtitleSize = context.wp(2.2).clamp(10.0, 11.0);
 
     return Container(
-      padding: .symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
         vertical: verticalPadding,
       ),
@@ -37,6 +40,16 @@ class ScreenHeader extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
+          if (leadingWidget != null) ...[
+            leadingWidget,
+            SizedBox(
+              width: context.responsive(
+                mobile: 10.0,
+                tablet: 12.0,
+                desktop: 14.0,
+              ),
+            ),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

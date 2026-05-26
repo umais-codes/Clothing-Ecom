@@ -22,6 +22,7 @@ class AdminCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: double.infinity,
         margin: margin,
         padding: padding,
         decoration: BoxDecoration(

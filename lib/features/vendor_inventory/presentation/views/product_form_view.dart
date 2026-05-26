@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/features/vendor_inventory/presentation/views/variant_matrix_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,7 +16,7 @@ class ProductFormView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ProductCrudController>();
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,

@@ -32,6 +32,7 @@ import 'package:ecom_app/features/super_admin/bindings/admin_binding.dart';
 import 'package:ecom_app/features/super_admin/presentation/screens/admin_main_layout.dart';
 import 'package:ecom_app/features/super_admin/presentation/screens/admin_login_screen.dart';
 import 'package:ecom_app/app/middleware/admin_guard.dart';
+import 'package:ecom_app/features/vendor_dashboard/presentation/views/subscription_plans_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -130,6 +131,11 @@ class EcomApp extends StatelessWidget {
           name: '/admin-login',
           page: () => const AdminLoginScreen(),
           transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/vendor-plans',
+          page: () => const SubscriptionPlansView(),
+          transition: Transition.rightToLeft,
         ),
         GetPage(
           name: '/admin-panel',

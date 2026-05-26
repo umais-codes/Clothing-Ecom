@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 
@@ -21,7 +22,7 @@ class MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sw = MediaQuery.sizeOf(context).width;
+    final sw = context.screenWidth;
 
     return Container(
       height: isLarge ? sw * 0.18 : sw * 0.18,

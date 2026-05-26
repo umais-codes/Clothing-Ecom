@@ -1,6 +1,7 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class CustomDropdownField extends StatelessWidget {
   final String? label;
@@ -32,9 +33,8 @@ class CustomDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final width = size.width;
-    final height = size.height;
+    final width = context.screenWidth;
+    final height = context.screenHeight;
     final Color focusColor = AppColors.camel;
 
     return Container(
@@ -86,7 +86,7 @@ class CustomDropdownField extends StatelessWidget {
 
           // ── Dropdown Button ──────────────────────────────────────────────
           DropdownButtonFormField<String>(
-            value: items.contains(value) ? value : null,
+            initialValue: items.contains(value) ? value : null,
             items: items.map((item) {
               return DropdownMenuItem<String>(
                 value: item,

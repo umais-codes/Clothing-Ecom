@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../theme/app_colors.dart';
 import 'custom_button.dart';
 
@@ -24,7 +25,7 @@ class CustomConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sw = MediaQuery.sizeOf(context).width;
+    final sw = context.screenWidth;
 
     return Dialog(
       backgroundColor: AppColors.white,

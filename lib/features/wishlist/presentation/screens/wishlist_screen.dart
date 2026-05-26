@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,7 +13,7 @@ class WishlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final WishlistController controller = Get.put(WishlistController());
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAF9F6),

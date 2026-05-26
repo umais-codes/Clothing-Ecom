@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../theme/app_colors.dart';
 
 class CustomNetworkImage extends StatelessWidget {
@@ -77,7 +78,7 @@ class CustomNetworkImage extends StatelessWidget {
     required double width,
     required double height,
   }) {
-    final w = MediaQuery.of(context).size.width;
+    final w = context.screenWidth;
     return Container(
       width: width,
       height: height,

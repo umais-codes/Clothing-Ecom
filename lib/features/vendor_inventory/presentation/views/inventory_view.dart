@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/features/vendor_inventory/presentation/views/product_form_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,7 +15,7 @@ class InventoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ProductCrudController>();
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
@@ -50,7 +51,7 @@ class InventoryView extends StatelessWidget {
                   return SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.6,
+                      height: context.screenHeight * 0.6,
                       child: _buildEmptyState(sw, controller),
                     ),
                   );

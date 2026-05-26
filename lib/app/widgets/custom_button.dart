@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 enum ButtonVariant { primary, secondary, outlined, ghost }
 
@@ -36,7 +37,7 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.of(context).size.width;
+    final double sw = context.screenWidth;
     final bool isDisabled = onPressed == null || isLoading;
 
     final Color effectiveBgColor = _getBgColor();

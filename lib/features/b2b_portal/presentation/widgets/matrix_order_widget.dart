@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../controllers/b2b_portal_controller.dart';
 
 class MatrixOrderWidget extends GetView<B2BPortalController> {
@@ -8,7 +9,7 @@ class MatrixOrderWidget extends GetView<B2BPortalController> {
 
   @override
   Widget build(BuildContext context) {
-    final sw = MediaQuery.of(context).size.width;
+    final sw = context.screenWidth;
 
     return Container(
       padding: EdgeInsets.all(sw * 0.05),

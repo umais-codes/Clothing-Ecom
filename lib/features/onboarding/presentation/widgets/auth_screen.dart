@@ -6,6 +6,7 @@ import 'package:ecom_app/features/onboarding/presentation/widgets/pin_input_fiel
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class AuthScreen extends GetView<OnboardingController> {
   const AuthScreen({super.key});
@@ -13,9 +14,8 @@ class AuthScreen extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final w = size.width;
-    final h = size.height;
+    final w = context.screenWidth;
+    final h = context.screenHeight;
 
     return Scaffold(
       backgroundColor: AppColors.white,

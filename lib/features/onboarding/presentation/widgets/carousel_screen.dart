@@ -4,6 +4,7 @@ import 'package:ecom_app/app/widgets/custom_network_image.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class CarouselScreen extends GetView<OnboardingController> {
   const CarouselScreen({super.key});
@@ -11,9 +12,8 @@ class CarouselScreen extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final w = size.width;
-    final h = size.height;
+    final w = context.screenWidth;
+    final h = context.screenHeight;
 
     return Scaffold(
       backgroundColor: AppColors.charcoal,

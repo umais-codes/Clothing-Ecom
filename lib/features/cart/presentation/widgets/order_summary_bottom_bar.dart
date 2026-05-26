@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
 import '../controllers/cart_controller.dart';
@@ -11,7 +12,7 @@ class OrderSummaryBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CartController controller = Get.find<CartController>();
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
 
     return Container(
       padding: .symmetric(horizontal: sw * 0.04, vertical: sw * 0.02),

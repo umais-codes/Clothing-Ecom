@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -13,7 +14,7 @@ class HomeView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.of(context).size.width;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -52,7 +53,7 @@ class HomeView extends GetView<HomeController> {
                   size: sw * 0.12,
                   color: AppColors.grey.withValues(alpha: 0.5),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: sw * 0.03),
                 Text(
                   'No products found',
                   style: TextStyle(
@@ -61,14 +62,11 @@ class HomeView extends GetView<HomeController> {
                     color: AppColors.charcoal,
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: sw * 0.01),
                 Text(
                   'Try searching for something else or changing categories.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: sw * 0.03,
-                    color: AppColors.grey,
-                  ),
+                  style: TextStyle(fontSize: sw * 0.03, color: AppColors.grey),
                 ),
               ],
             ),

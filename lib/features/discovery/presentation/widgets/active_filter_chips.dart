@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import '../../../../app/utils/responsive.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
 import '../controllers/filter_controller.dart';
@@ -11,8 +12,7 @@ class ActiveFilterChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final FilterController controller = Get.find<FilterController>();
-    final Size size = MediaQuery.sizeOf(context);
-    final double sw = size.width;
+    final double sw = context.screenWidth;
 
     return Obx(() {
       final activeFilters = controller.activeFiltersList;

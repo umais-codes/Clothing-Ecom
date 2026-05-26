@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../controllers/main_navigation_controller.dart';
 
 class CustomFloatingNavBar extends StatelessWidget {
@@ -13,7 +14,7 @@ class CustomFloatingNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.sizeOf(context).width;
+    final double sw = context.screenWidth;
     final double navHeight = sw * 0.18;
     final double horizontalPadding = sw * 0.04;
 

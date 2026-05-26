@@ -1,5 +1,6 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class OnboardingProgressBar extends StatelessWidget {
   final int step;
@@ -13,7 +14,7 @@ class OnboardingProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
+    final w = context.screenWidth;
     return Row(
       children: List.generate(total, (i) {
         final bool filled = i < step;

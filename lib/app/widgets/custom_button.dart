@@ -99,13 +99,15 @@ class CustomButton extends StatelessWidget {
                             if (text != null) SizedBox(width: sw * 0.02),
                           ],
                           if (text != null)
-                            Text(
-                              text!,
-                              style: GoogleFonts.outfit(
-                                fontSize: fontSize ?? sw * 0.035,
-                                fontWeight: fontWeight ?? .w700,
-                                color: effectiveTextColor,
-                                letterSpacing: 0.5,
+                            Flexible(
+                              child: Text(
+                                text!,
+                                style: GoogleFonts.outfit(
+                                  fontSize: fontSize ?? sw * 0.035,
+                                  fontWeight: fontWeight ?? .w700,
+                                  color: effectiveTextColor,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                         ],

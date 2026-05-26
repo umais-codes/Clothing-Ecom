@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -37,8 +38,7 @@ class DiscoveryScreen extends StatelessWidget {
     _ensureDependenciesRegistered();
     final FilterController filterController = Get.find<FilterController>();
     final AuthController authController = Get.find<AuthController>();
-    final Size size = MediaQuery.sizeOf(context);
-    final double sw = size.width;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,

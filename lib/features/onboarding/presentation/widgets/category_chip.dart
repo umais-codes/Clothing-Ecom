@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class CategoryChip extends StatelessWidget {
   final String label;
@@ -18,7 +19,7 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
+    final w = context.screenWidth;
 
     return GestureDetector(
       onTap: onTap,

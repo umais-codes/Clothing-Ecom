@@ -12,8 +12,8 @@ class FilterController extends GetxController {
   // --- Real-time Search Text Controller ---
   late final TextEditingController searchController;
   final RxString searchQuery = ''.obs;
+  Worker? _roleWorker;
 
-  // --- Universal Filter States ---
   final RxString selectedCategory = ''.obs; // e.g. "Men's", "Women's"
 
   // sliderPriceRange updates in real-time (for smooth slider thumb and labels)
@@ -61,7 +61,7 @@ class FilterController extends GetxController {
 
     // Re-load and clear filters when user toggles B2C shopper <-> B2B corporate roles
     final authController = Get.find<AuthController>();
-    ever(authController.selectedRole, (_) {
+    _roleWorker = ever(authController.selectedRole, (_) {
       clearAll();
       loadProducts();
     });
@@ -69,6 +69,7 @@ class FilterController extends GetxController {
 
   @override
   void onClose() {
+    _roleWorker?.dispose();
     searchController.dispose();
     super.onClose();
   }

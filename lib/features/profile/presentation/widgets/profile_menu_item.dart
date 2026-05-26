@@ -18,22 +18,25 @@ class ProfileMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final w = context.screenWidth;
-    return ListTile(
-      leading: Icon(icon, color: AppColors.charcoal, size: w * 0.055),
-      title: Text(
-        title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          letterSpacing: 0.4,
-          fontWeight: .w500,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: Icon(icon, color: AppColors.charcoal, size: w * 0.055),
+        title: Text(
+          title,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            letterSpacing: 0.4,
+            fontWeight: FontWeight.w500,
+          ),
         ),
+        trailing: Icon(
+          Icons.chevron_right_rounded,
+          color: AppColors.grey,
+          size: w * 0.06,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+        onTap: onTap,
       ),
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: AppColors.grey,
-        size: w * 0.06,
-      ),
-      contentPadding: .symmetric(horizontal: w * 0.04, vertical: w * 0.00),
-      onTap: onTap,
     );
   }
 }

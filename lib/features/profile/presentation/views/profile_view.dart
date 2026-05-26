@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,16 +20,14 @@ class ProfileView extends GetView<ProfileController> {
       Get.put(ProfileController());
     }
 
-    final size = MediaQuery.sizeOf(context);
-
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: AppBar(
         title: Text(
           'My Account',
           style: GoogleFonts.outfit(
-            fontSize: size.width * 0.05,
-            fontWeight: .w600,
+            fontSize: context.wp(5),
+            fontWeight: FontWeight.w600,
             color: AppColors.charcoal,
           ),
         ),
@@ -37,33 +36,33 @@ class ProfileView extends GetView<ProfileController> {
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: .symmetric(
-          horizontal: size.width * 0.04,
-          vertical: size.height * 0.02,
+        padding: EdgeInsets.symmetric(
+          horizontal: context.wp(4),
+          vertical: context.hp(2),
         ),
         child: Column(
-          crossAxisAlignment: .center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const ProfileHeader(),
-            SizedBox(height: size.height * 0.02),
+            SizedBox(height: context.hp(2)),
             const FitProfileCard(),
-            SizedBox(height: size.height * 0.02),
+            SizedBox(height: context.hp(2)),
             const QuickActionGrid(),
-            SizedBox(height: size.height * 0.02),
+            SizedBox(height: context.hp(2)),
             const AccountMenuSection(),
-            SizedBox(height: size.height * 0.02),
+            SizedBox(height: context.hp(2)),
             const PerspectiveSwitcher(),
-            SizedBox(height: size.height * 0.02),
+            SizedBox(height: context.hp(2)),
             CustomButton(
               variant: ButtonVariant.secondary,
               text: 'Log Out',
               onPressed: controller.logout,
-              width: .infinity,
+              width: double.infinity,
               icon: Icons.logout_rounded,
               buttonColor: AppColors.error.withValues(alpha: 0.9),
               textColor: AppColors.white,
             ),
-            SizedBox(height: size.height * 0.12),
+            SizedBox(height: context.hp(12)),
           ],
         ),
       ),

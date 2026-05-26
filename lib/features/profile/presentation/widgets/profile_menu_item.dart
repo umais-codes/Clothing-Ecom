@@ -1,5 +1,6 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class ProfileMenuItem extends StatelessWidget {
   final IconData icon;
@@ -16,7 +17,7 @@ class ProfileMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final w = MediaQuery.sizeOf(context).width;
+    final w = context.screenWidth;
     return ListTile(
       leading: Icon(icon, color: AppColors.charcoal, size: w * 0.055),
       title: Text(

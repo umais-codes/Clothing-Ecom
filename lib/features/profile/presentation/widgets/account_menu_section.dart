@@ -2,6 +2,7 @@ import 'package:ecom_app/features/profile/presentation/widgets/profile_menu_item
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../controllers/profile_controller.dart';
 
 class AccountMenuSection extends GetView<ProfileController> {
@@ -10,7 +11,7 @@ class AccountMenuSection extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final w = MediaQuery.sizeOf(context).width;
+    final w = context.screenWidth;
 
     return Column(
       crossAxisAlignment: .start,

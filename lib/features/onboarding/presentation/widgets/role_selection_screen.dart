@@ -6,6 +6,7 @@ import 'package:ecom_app/features/onboarding/presentation/widgets/onboarding_pro
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class RoleSelectionScreen extends GetView<OnboardingController> {
   const RoleSelectionScreen({super.key});
@@ -13,9 +14,8 @@ class RoleSelectionScreen extends GetView<OnboardingController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final w = size.width;
-    final h = size.height;
+    final w = context.screenWidth;
+    final h = context.screenHeight;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -185,7 +185,7 @@ class _PremiumRoleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final w = MediaQuery.of(context).size.width;
+    final w = context.screenWidth;
 
     return AnimatedScale(
       scale: selected ? 1.02 : 1.0,

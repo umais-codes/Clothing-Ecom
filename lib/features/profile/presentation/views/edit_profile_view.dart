@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,8 +14,6 @@ class EditProfileView extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-
     final nameController = TextEditingController(
       text: controller.userName.value,
     );
@@ -31,7 +30,7 @@ class EditProfileView extends GetView<ProfileController> {
         title: Text(
           "Edit Profile",
           style: GoogleFonts.outfit(
-            fontSize: size.width * 0.05,
+            fontSize: context.wp(5),
             fontWeight: FontWeight.w600,
             color: AppColors.charcoal,
           ),
@@ -42,7 +41,7 @@ class EditProfileView extends GetView<ProfileController> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            size: size.width * 0.05,
+            size: context.wp(5),
             color: AppColors.charcoal,
           ),
           onPressed: () => Get.back(),
@@ -51,34 +50,34 @@ class EditProfileView extends GetView<ProfileController> {
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(
-          horizontal: size.width * 0.05,
-          vertical: size.height * 0.02,
+          horizontal: context.wp(5),
+          vertical: context.hp(2),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildAvatarEdit(context, size),
-            SizedBox(height: size.height * 0.05),
+            _buildAvatarEdit(context),
+            SizedBox(height: context.hp(5)),
             CustomTextField(
               label: 'Full Name',
               controller: nameController,
               icon: Icons.person_outline_rounded,
             ),
-            SizedBox(height: size.height * 0.015),
+            SizedBox(height: context.hp(1.5)),
             CustomTextField(
               label: 'Email Address',
               controller: emailController,
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
             ),
-            SizedBox(height: size.height * 0.015),
+            SizedBox(height: context.hp(1.5)),
             CustomTextField(
               label: 'Phone Number',
               controller: phoneController,
               icon: Icons.phone_android_rounded,
               keyboardType: TextInputType.phone,
             ),
-            SizedBox(height: size.height * 0.06),
+            SizedBox(height: context.hp(6)),
             CustomButton(
               text: 'Save Changes',
               onPressed: () {
@@ -98,14 +97,14 @@ class EditProfileView extends GetView<ProfileController> {
               },
               icon: Icons.check_circle_outline_rounded,
             ),
-            SizedBox(height: size.height * 0.05),
+            SizedBox(height: context.hp(5)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAvatarEdit(BuildContext context, Size size) {
+  Widget _buildAvatarEdit(BuildContext context) {
     return GestureDetector(
       onTap: () => _showImagePicker(context),
       child: Stack(
@@ -113,8 +112,8 @@ class EditProfileView extends GetView<ProfileController> {
           Obx(() {
             final imagePath = controller.profileImagePath.value;
             return Container(
-              width: size.width * 0.3,
-              height: size.width * 0.3,
+              width: context.wp(30),
+              height: context.wp(30),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.offWhite,
@@ -146,7 +145,7 @@ class EditProfileView extends GetView<ProfileController> {
               child: Icon(
                 Icons.camera_alt_rounded,
                 color: AppColors.white,
-                size: size.width * 0.05,
+                size: context.wp(5),
               ),
             ),
           ),

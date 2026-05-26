@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/features/product_details/presentation/widgets/product_detail_back_btn.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,7 +18,7 @@ class PdpView extends GetView<PdpController> {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = MediaQuery.of(context).size.width;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -25,8 +26,8 @@ class PdpView extends GetView<PdpController> {
         children: [
           _buildContent(sw),
           _buildBottomBar(sw),
-          ProductDetailBackButton(sw: sw),
-          _buildFavoriteButton(sw),
+          const ProductDetailBackButton(),
+          _buildFavoriteButton(context, sw),
         ],
       ),
     );
@@ -183,12 +184,12 @@ class PdpView extends GetView<PdpController> {
     );
   }
 
-  Widget _buildFavoriteButton(double sw) {
+  Widget _buildFavoriteButton(BuildContext context, double sw) {
     final wishlistController = Get.put(WishlistController());
     final product = Product.fromMap(controller.product);
 
     return Positioned(
-      top: MediaQuery.of(Get.context!).padding.top + sw * 0.015,
+      top: context.paddingTop + sw * 0.015,
       right: sw * 0.04,
       child: Obx(
         () => Container(

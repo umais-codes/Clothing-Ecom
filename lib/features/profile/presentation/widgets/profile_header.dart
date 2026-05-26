@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../controllers/profile_controller.dart';
 import '../views/edit_profile_view.dart';
 
@@ -10,7 +11,8 @@ class ProfileHeader extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
+    final w = context.screenWidth;
+    final h = context.screenHeight;
     final theme = Theme.of(context);
 
     return Column(
@@ -20,8 +22,8 @@ class ProfileHeader extends GetView<ProfileController> {
             Obx(() {
               final imagePath = controller.profileImagePath.value;
               return Container(
-                width: size.width * 0.22,
-                height: size.width * 0.22,
+                width: w * 0.22,
+                height: w * 0.22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.offWhite,
@@ -55,14 +57,14 @@ class ProfileHeader extends GetView<ProfileController> {
                   child: Icon(
                     Icons.edit_rounded,
                     color: AppColors.white,
-                    size: size.width * 0.05,
+                    size: w * 0.05,
                   ),
                 ),
               ),
             ),
           ],
         ),
-        SizedBox(height: size.height * 0.02),
+        SizedBox(height: h * 0.02),
         Obx(
           () => Text(
             controller.userName.value,
@@ -76,7 +78,7 @@ class ProfileHeader extends GetView<ProfileController> {
             style: theme.textTheme.bodyMedium,
           ),
         ),
-        SizedBox(height: size.height * 0.015),
+        SizedBox(height: h * 0.015),
         Obx(
           () => Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 import '../controllers/profile_controller.dart';
 
 class QuickActionGrid extends GetView<ProfileController> {
@@ -8,19 +9,20 @@ class QuickActionGrid extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
+    final w = context.screenWidth;
+    final h = context.screenHeight;
     final theme = Theme.of(context);
 
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Quick Actions', style: theme.textTheme.titleLarge),
-        SizedBox(height: size.height * 0.02),
+        SizedBox(height: h * 0.02),
         Obx(() {
           final showB2B = controller.showUniformAllowance;
           return Wrap(
-            spacing: size.width * 0.04,
-            runSpacing: size.width * 0.04,
+            spacing: w * 0.04,
+            runSpacing: w * 0.04,
             children: [
               const QuickActionCard(
                 icon: Icons.local_shipping_outlined,
@@ -55,13 +57,14 @@ class QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
+    final w = context.screenWidth;
+    final h = context.screenHeight;
     final theme = Theme.of(context);
-    final cardWidth = (size.width * 0.9 - (size.width * 0.04)) / 2;
+    final cardWidth = (w * 0.9 - (w * 0.04)) / 2;
 
     return Container(
       width: cardWidth,
-      padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
+      padding: EdgeInsets.symmetric(vertical: h * 0.02),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -71,7 +74,7 @@ class QuickActionCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: AppColors.camel, size: 28),
-          SizedBox(height: size.height * 0.01),
+          SizedBox(height: h * 0.01),
           Text(
             label,
             style: theme.textTheme.bodyMedium?.copyWith(

@@ -1,6 +1,7 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:ecom_app/app/utils/responsive.dart';
 
 class PinInputField extends StatefulWidget {
   final int length;
@@ -69,7 +70,7 @@ class _PinInputFieldState extends State<PinInputField> {
 
   @override
   Widget build(BuildContext context) {
-    final sw = MediaQuery.of(context).size.width;
+    final sw = context.screenWidth;
     return Row(
       mainAxisAlignment: .spaceBetween,
       children: List.generate(widget.length, (index) {

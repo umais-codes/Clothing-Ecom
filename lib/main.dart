@@ -40,6 +40,12 @@ import 'package:ecom_app/features/vendor_orders/bindings/vendor_orders_binding.d
 import 'package:ecom_app/features/vendor_orders/presentation/views/vendor_orders_view.dart';
 import 'package:ecom_app/features/vendor_orders/bindings/fulfillment_binding.dart';
 import 'package:ecom_app/features/vendor_orders/presentation/views/packing_checklist_view.dart';
+import 'package:ecom_app/features/vendor_orders/bindings/tracking_binding.dart';
+import 'package:ecom_app/features/vendor_orders/presentation/views/customer_tracking_view.dart';
+import 'package:ecom_app/features/vendor_orders/bindings/vendor_tracking_binding.dart';
+import 'package:ecom_app/features/vendor_orders/presentation/views/vendor_tracking_view.dart';
+import 'package:ecom_app/features/vendor_orders/bindings/dispatch_binding.dart';
+import 'package:ecom_app/features/vendor_orders/presentation/views/admin_dispatch_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -173,6 +179,24 @@ class EcomApp extends StatelessWidget {
           binding: AdminBinding(),
           middlewares: [AdminGuard()],
           transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/customer-tracking',
+          page: () => const CustomerTrackingView(),
+          binding: TrackingBinding(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/vendor-tracking',
+          page: () => const VendorTrackingView(),
+          binding: VendorTrackingBinding(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/admin-dispatch',
+          page: () => const AdminDispatchView(),
+          binding: DispatchBinding(),
+          transition: Transition.rightToLeft,
         ),
       ],
     );

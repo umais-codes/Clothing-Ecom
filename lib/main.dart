@@ -46,9 +46,12 @@ import 'package:ecom_app/features/vendor_orders/bindings/vendor_tracking_binding
 import 'package:ecom_app/features/vendor_orders/presentation/views/vendor_tracking_view.dart';
 import 'package:ecom_app/features/vendor_orders/bindings/dispatch_binding.dart';
 import 'package:ecom_app/features/vendor_orders/presentation/views/admin_dispatch_view.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Get.putAsync(() => SupabaseService().init());
 
   final cartRepo = CartRepository();
   await cartRepo.init();

@@ -4,12 +4,18 @@ import 'package:ecom_app/features/auth/presentation/screens/pending_approval_scr
 import 'package:file_picker/file_picker.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:uuid/uuid.dart';
 
 enum AuthRole { shopper, vendor, corporate, admin }
 
 enum AuthStatus { initial, loading, success, pendingApproval, error }
 
 class AuthController extends GetxController {
+  final SupabaseClient _supabase = Get.find<SupabaseService>().client;
+  final Uuid uuid = const Uuid();
+
   final Rx<AuthRole> selectedRole = AuthRole.shopper.obs;
 
   final Rx<AuthStatus> status = AuthStatus.initial.obs;
@@ -55,6 +61,19 @@ class AuthController extends GetxController {
     status.value = AuthStatus.initial;
   }
 
+  Future<void> _createProfile(String userId, String role, {String? fullName, String? vendorId}) async {
+    try {
+      await _supabase.from('profiles').upsert({
+        'id': userId,
+        'full_name': fullName ?? 'User',
+        'role': role,
+        'vendor_id': vendorId,
+      });
+    } catch (e) {
+      debugPrint('Error creating profile: $e');
+    }
+  }
+
   // Shopper Actions
   Future<void> sendShopperOtp() async {
     if (shopperPhoneController.text.length < 10) {
@@ -62,9 +81,15 @@ class AuthController extends GetxController {
       return;
     }
     status.value = AuthStatus.loading;
-    await Future.delayed(const Duration(seconds: 1)); // Mock
-    status.value = AuthStatus.initial;
-    showShopperOtpField.value = true;
+    try {
+      await _supabase.auth.signInWithOtp(
+        phone: shopperPhoneController.text.trim(),
+      );
+      status.value = AuthStatus.initial;
+      showShopperOtpField.value = true;
+    } catch (e) {
+      _showError('Failed to send OTP: $e');
+    }
   }
 
   Future<void> verifyShopperOtp() async {
@@ -73,18 +98,40 @@ class AuthController extends GetxController {
       return;
     }
     status.value = AuthStatus.loading;
-    await Future.delayed(const Duration(seconds: 1)); // Mock
-    status.value = AuthStatus.success;
-    selectedRole.value = AuthRole.shopper;
-    Get.offAllNamed('/main-navigation');
+    try {
+      final res = await _supabase.auth.verifyOTP(
+        type: OtpType.sms,
+        token: shopperOtpController.text.trim(),
+        phone: shopperPhoneController.text.trim(),
+      );
+      if (res.user != null) {
+        await _createProfile(res.user!.id, 'shopper', fullName: 'Shopper User');
+        status.value = AuthStatus.success;
+        selectedRole.value = AuthRole.shopper;
+        Get.offAllNamed('/main-navigation');
+      } else {
+        _showError('Invalid OTP code.');
+      }
+    } catch (e) {
+      _showError('OTP verification failed: $e');
+    }
   }
 
-  void continueWithSocial(String provider) {
+  void continueWithSocial(String provider) async {
     status.value = AuthStatus.loading;
-    Future.delayed(const Duration(seconds: 1), () {
-      status.value = AuthStatus.success;
-      Get.offAllNamed('/main-navigation');
-    });
+    try {
+      OAuthProvider oauthProvider;
+      if (provider.toLowerCase() == 'google') {
+        oauthProvider = OAuthProvider.google;
+      } else if (provider.toLowerCase() == 'apple') {
+        oauthProvider = OAuthProvider.apple;
+      } else {
+        throw 'Unsupported provider';
+      }
+      await _supabase.auth.signInWithOAuth(oauthProvider);
+    } catch (e) {
+      _showError('Social sign in failed: $e');
+    }
   }
 
   // Vendor Actions
@@ -123,42 +170,61 @@ class AuthController extends GetxController {
   Future<void> registerVendor() async {
     if (brandNameController.text.isEmpty ||
         vendorEmailController.text.isEmpty ||
-        !hasCnicUploaded.value ||
-        !hasSecpUploaded.value) {
-      _showError('Please complete all required fields and uploads.');
+        vendorPasswordController.text.isEmpty) {
+      _showError('Please complete all required fields.');
       return;
     }
     status.value = AuthStatus.loading;
-    await Future.delayed(const Duration(seconds: 2)); // Mock
-
     try {
-      final adminCtrl = Get.find<AdminController>();
-      final newVendor = KycVendorEntity(
-        id: 'kyc-${DateTime.now().millisecondsSinceEpoch}',
-        brandName: brandNameController.text,
-        ownerName: contactPersonController.text.isEmpty
-            ? 'Unknown'
-            : contactPersonController.text,
-        email: vendorEmailController.text,
-        phone: '+92-300-1234567',
-        category: selectedVendorCategory.value,
-        appliedDate: 'May 22, 2026',
-        status: KycStatus.pending,
-        cnicDocUrl: 'https://picsum.photos/seed/newcnic/800/600',
-        secpDocUrl: 'https://picsum.photos/seed/newsecp/800/600',
-        bio:
-            'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
-        city: 'Karachi',
+      final response = await _supabase.auth.signUp(
+        email: vendorEmailController.text.trim(),
+        password: vendorPasswordController.text.trim(),
       );
-      adminCtrl.kycQueue.insert(0, newVendor);
-    } catch (e) {
-      debugPrint(
-        'AdminController not registered yet, skipping kycQueue insertion: $e',
-      );
-    }
 
-    status.value = AuthStatus.pendingApproval;
-    Get.to(() => const PendingApprovalScreen(), transition: Transition.fadeIn);
+      if (response.user != null) {
+        final vendorId = uuid.v4();
+
+        await _supabase.from('vendors').insert({
+          'id': vendorId,
+          'brand_name': brandNameController.text.trim(),
+          'owner_id': response.user!.id,
+          'kyc_status': 'pending',
+        });
+
+        await _createProfile(
+          response.user!.id,
+          'vendor',
+          fullName: contactPersonController.text.trim(),
+          vendorId: vendorId,
+        );
+
+        try {
+          final adminCtrl = Get.find<AdminController>();
+          final newVendor = KycVendorEntity(
+            id: vendorId,
+            brandName: brandNameController.text,
+            ownerName: contactPersonController.text.isEmpty
+                ? 'Unknown'
+                : contactPersonController.text,
+            email: vendorEmailController.text,
+            phone: '+92-300-1234567',
+            category: selectedVendorCategory.value,
+            appliedDate: 'June 2, 2026',
+            status: KycStatus.pending,
+            cnicDocUrl: 'https://picsum.photos/seed/newcnic/800/600',
+            secpDocUrl: 'https://picsum.photos/seed/newsecp/800/600',
+            bio: 'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
+            city: 'Karachi',
+          );
+          adminCtrl.kycQueue.insert(0, newVendor);
+        } catch (_) {}
+
+        status.value = AuthStatus.pendingApproval;
+        Get.to(() => const PendingApprovalScreen(), transition: Transition.fadeIn);
+      }
+    } catch (e) {
+      _showError('Vendor registration failed: $e');
+    }
   }
 
   Future<void> signInVendor() async {
@@ -168,33 +234,53 @@ class AuthController extends GetxController {
       return;
     }
     status.value = AuthStatus.loading;
-    await Future.delayed(const Duration(seconds: 2)); // Mock
-    status.value = AuthStatus.success;
-    // Set role explicitly to ensure navigation logic picks it up
-    selectedRole.value = AuthRole.vendor;
-
-    Get.offAllNamed('/main-navigation');
-
-    Get.snackbar(
-      'Success',
-      'Welcome back to the Brand Portal',
-      backgroundColor: const Color(0xFFFAF9F6),
-    );
+    try {
+      final response = await _supabase.auth.signInWithPassword(
+        email: vendorEmailController.text.trim(),
+        password: vendorPasswordController.text.trim(),
+      );
+      if (response.user != null) {
+        status.value = AuthStatus.success;
+        selectedRole.value = AuthRole.vendor;
+        Get.offAllNamed('/main-navigation');
+        Get.snackbar(
+          'Success',
+          'Welcome back to the Brand Portal',
+          backgroundColor: const Color(0xFFFAF9F6),
+        );
+      }
+    } catch (e) {
+      _showError('Authentication failed: $e');
+    }
   }
 
   // Corporate Actions
   Future<void> registerCorporate() async {
     if (companyNameController.text.isEmpty ||
         corporateEmailController.text.isEmpty ||
-        ntnController.text.isEmpty) {
+        corporatePasswordController.text.isEmpty) {
       _showError('Please fill out all corporate details.');
       return;
     }
     status.value = AuthStatus.loading;
-    await Future.delayed(const Duration(seconds: 2)); // Mock
-    status.value = AuthStatus.success;
-    selectedRole.value = AuthRole.corporate;
-    Get.offAllNamed('/main-navigation');
+    try {
+      final response = await _supabase.auth.signUp(
+        email: corporateEmailController.text.trim(),
+        password: corporatePasswordController.text.trim(),
+      );
+      if (response.user != null) {
+        await _createProfile(
+          response.user!.id,
+          'corporate',
+          fullName: companyNameController.text.trim(),
+        );
+        status.value = AuthStatus.success;
+        selectedRole.value = AuthRole.corporate;
+        Get.offAllNamed('/main-navigation');
+      }
+    } catch (e) {
+      _showError('Corporate registration failed: $e');
+    }
   }
 
   Future<void> signInCorporate() async {
@@ -204,18 +290,24 @@ class AuthController extends GetxController {
       return;
     }
     status.value = AuthStatus.loading;
-    await Future.delayed(const Duration(seconds: 2)); // Mock
-    status.value = AuthStatus.success;
-    // Set role explicitly to ensure navigation logic picks it up
-    selectedRole.value = AuthRole.corporate;
-
-    Get.offAllNamed('/main-navigation');
-
-    Get.snackbar(
-      'Success',
-      'Welcome to Corporate Access',
-      backgroundColor: const Color(0xFFFAF9F6),
-    );
+    try {
+      final response = await _supabase.auth.signInWithPassword(
+        email: corporateEmailController.text.trim(),
+        password: corporatePasswordController.text.trim(),
+      );
+      if (response.user != null) {
+        status.value = AuthStatus.success;
+        selectedRole.value = AuthRole.corporate;
+        Get.offAllNamed('/main-navigation');
+        Get.snackbar(
+          'Success',
+          'Welcome to Corporate Access',
+          backgroundColor: const Color(0xFFFAF9F6),
+        );
+      }
+    } catch (e) {
+      _showError('Authentication failed: $e');
+    }
   }
 
   void _showError(String message) {

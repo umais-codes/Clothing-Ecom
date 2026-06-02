@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 import '../../domain/entities/vendor_order.dart';
 
 class VendorOrderController extends GetxController {
@@ -17,14 +19,19 @@ class VendorOrderController extends GetxController {
     'Returns (RMA)',
   ];
 
+  RealtimeChannel? _ordersSubscriptionChannel;
+  final SupabaseClient _supabase = Get.find<SupabaseService>().client;
+
   @override
   void onInit() {
     super.onInit();
     _loadMockOrders();
+    subscribeToOrders();
   }
 
   @override
   void onClose() {
+    _ordersSubscriptionChannel?.unsubscribe();
     trackingController.dispose();
     super.onClose();
   }
@@ -307,6 +314,48 @@ class VendorOrderController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFC0392B).withValues(alpha: 0.1),
         colorText: const Color(0xFFC0392B),
+      );
+    }
+  }
+
+  void subscribeToOrders() {
+    _ordersSubscriptionChannel = _supabase
+        .channel('public:orders')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'orders',
+          callback: (payload) {
+            _handleRealtimeOrderChange(payload);
+          },
+        );
+    _ordersSubscriptionChannel?.subscribe();
+  }
+
+  void _handleRealtimeOrderChange(dynamic payload) {
+    final record = payload.newRecord;
+    if (record == null || record.isEmpty) return;
+
+    final orderId = record['id']?.toString() ?? '';
+    final status = record['status']?.toString() ?? 'Pending';
+    final trackingNum = record['tracking_number']?.toString();
+    final courier = record['courier_partner']?.toString();
+
+    final index = orders.indexWhere((o) => o.id == orderId);
+    if (index != -1) {
+      final oldOrder = orders[index];
+      orders[index] = oldOrder.copyWith(
+        status: status,
+        trackingNumber: trackingNum,
+        courierPartner: courier,
+      );
+
+      Get.snackbar(
+        'Database Sync (Real-time)',
+        'Order $orderId status updated to: $status',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFF4A7C59).withValues(alpha: 0.15),
+        colorText: const Color(0xFF4A7C59),
       );
     }
   }

@@ -1,5 +1,6 @@
 import 'package:ecom_app/features/cart/presentation/screens/b2b_cart_screen.dart';
 import 'package:ecom_app/features/cart/presentation/screens/b2c_cart_screen.dart';
+import 'package:ecom_app/features/vendor_orders/presentation/views/vendor_orders_view.dart';
 import 'package:ecom_app/features/wishlist/presentation/screens/wishlist_screen.dart';
 import 'package:ecom_app/features/vendor_dashboard/presentation/views/vendor_dashboard_view.dart';
 import 'package:ecom_app/features/b2b_portal/presentation/views/b2b_portal_view.dart';
@@ -34,7 +35,7 @@ class MainNavigationController extends GetxController {
       pages.assignAll([
         const VendorDashboardView(),
         const InventoryView(),
-        const Center(child: Text('Active Orders (Coming Soon)')),
+        const VendorOrdersView(),
         const ProfileView(),
       ]);
     } else if (currentRole == AuthRole.corporate) {

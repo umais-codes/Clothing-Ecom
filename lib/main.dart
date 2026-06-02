@@ -34,6 +34,12 @@ import 'package:ecom_app/features/super_admin/presentation/screens/admin_login_s
 import 'package:ecom_app/app/middleware/admin_guard.dart';
 import 'package:ecom_app/features/vendor_dashboard/presentation/views/subscription_plans_view.dart';
 import 'package:ecom_app/features/super_admin/presentation/screens/subscription_plan_builder_screen.dart';
+import 'package:ecom_app/features/splash/bindings/splash_binding.dart';
+import 'package:ecom_app/features/splash/presentation/views/splash_view.dart';
+import 'package:ecom_app/features/vendor_orders/bindings/vendor_orders_binding.dart';
+import 'package:ecom_app/features/vendor_orders/presentation/views/vendor_orders_view.dart';
+import 'package:ecom_app/features/vendor_orders/bindings/fulfillment_binding.dart';
+import 'package:ecom_app/features/vendor_orders/presentation/views/packing_checklist_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,8 +64,14 @@ class EcomApp extends StatelessWidget {
       title: 'Premium Apparel E-commerce',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      initialRoute: '/onboarding',
+      initialRoute: '/splash',
       getPages: [
+        GetPage(
+          name: '/splash',
+          page: () => const SplashView(),
+          binding: SplashBinding(),
+          transition: Transition.fadeIn,
+        ),
         GetPage(
           name: '/main-navigation',
           page: () => const MainNavigationScreen(),
@@ -136,6 +148,18 @@ class EcomApp extends StatelessWidget {
         GetPage(
           name: '/vendor-plans',
           page: () => const SubscriptionPlansView(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/vendor-orders',
+          page: () => const VendorOrdersView(),
+          binding: VendorOrdersBinding(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/fulfillment-checklist',
+          page: () => const PackingChecklistView(),
+          binding: FulfillmentBinding(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

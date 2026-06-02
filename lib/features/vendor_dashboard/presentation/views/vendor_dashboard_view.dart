@@ -451,7 +451,7 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
             ),
             CustomButton(
               text: "See All",
-              onPressed: () {},
+              onPressed: () => Get.toNamed('/vendor-orders'),
               variant: ButtonVariant.ghost,
               textColor: AppColors.camel,
               height: 30,

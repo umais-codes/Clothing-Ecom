@@ -9,7 +9,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return CustomAppBar(
-      title: 'AURA',
+      title: 'Velvet Maison',
       showBackButton: false,
       actions: [
         IconButton(

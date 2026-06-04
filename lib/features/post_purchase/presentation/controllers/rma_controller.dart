@@ -47,7 +47,7 @@ class RmaController extends GetxController {
       // Fallback fallback mock order
       order = VendorOrder(
         id: '#ORD-8829',
-        customerName: 'Aura Premium Customer',
+        customerName: 'Velvet Maison Premium Customer',
         amount: 350.00,
         status: 'Delivered',
         orderDate: DateTime.now().subtract(const Duration(days: 3)),
@@ -60,7 +60,8 @@ class RmaController extends GetxController {
             unitPrice: 350.00,
             size: 'M',
             color: 'Sand',
-            imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=300&auto=format&fit=crop',
+            imageUrl:
+                'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=300&auto=format&fit=crop',
           ),
         ],
         timeline: [],
@@ -86,8 +87,10 @@ class RmaController extends GetxController {
         );
         return;
       }
-      if (currentStep.value == 2 && evidenceImages.isEmpty && 
-          (selectedReason.value == 'Damaged or defective' || selectedReason.value == 'Not as pictured / Incorrect item')) {
+      if (currentStep.value == 2 &&
+          evidenceImages.isEmpty &&
+          (selectedReason.value == 'Damaged or defective' ||
+              selectedReason.value == 'Not as pictured / Incorrect item')) {
         Get.snackbar(
           'Evidence Required',
           'Photo evidence is required for damaged or incorrect items.',
@@ -143,17 +146,22 @@ class RmaController extends GetxController {
       // 1. Upload images to Supabase Storage (rma-evidence bucket) if available
       for (var imageFile in evidenceImages) {
         final file = File(imageFile.path);
-        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${imageFile.name}';
+        final fileName =
+            '${DateTime.now().millisecondsSinceEpoch}_${imageFile.name}';
         final path = '${order.id}/$fileName';
 
         try {
           await _supabase.storage.from('rma-evidence').upload(path, file);
-          final String publicUrl = _supabase.storage.from('rma-evidence').getPublicUrl(path);
+          final String publicUrl = _supabase.storage
+              .from('rma-evidence')
+              .getPublicUrl(path);
           uploadedUrls.add(publicUrl);
         } catch (storageError) {
           debugPrint('Supabase storage upload failed: $storageError');
           // For sandbox / placeholder credentials, simulate storage public URL
-          uploadedUrls.add('https://picsum.photos/seed/${imageFile.name}/800/600');
+          uploadedUrls.add(
+            'https://picsum.photos/seed/${imageFile.name}/800/600',
+          );
         }
       }
 
@@ -163,11 +171,14 @@ class RmaController extends GetxController {
 
       // 2. Insert/Update order status in Postgres
       try {
-        await _supabase.from('orders').update({
-          'status': 'Return Pending',
-          'return_reason': fullReason,
-          'return_images': uploadedUrls,
-        }).eq('id', order.id);
+        await _supabase
+            .from('orders')
+            .update({
+              'status': 'Return Pending',
+              'return_reason': fullReason,
+              'return_images': uploadedUrls,
+            })
+            .eq('id', order.id);
       } catch (dbError) {
         debugPrint('Supabase db update failed: $dbError');
         // Handle gracefully, simulation proceeds
@@ -176,16 +187,20 @@ class RmaController extends GetxController {
       // 3. Synchronize state with vendor order controller if open
       try {
         final vendorOrderCtrl = Get.find<VendorOrderController>();
-        final index = vendorOrderCtrl.orders.indexWhere((o) => o.id == order.id);
+        final index = vendorOrderCtrl.orders.indexWhere(
+          (o) => o.id == order.id,
+        );
         if (index != -1) {
           final oldOrder = vendorOrderCtrl.orders[index];
-          final updatedTimeline = List<OrderTimelineStep>.from(oldOrder.timeline)
-            ..add(OrderTimelineStep(
-              title: 'Return Requested',
-              description: 'Customer requested return: "$fullReason"',
-              timestamp: DateTime.now(),
-              isCompleted: true,
-            ));
+          final updatedTimeline =
+              List<OrderTimelineStep>.from(oldOrder.timeline)..add(
+                OrderTimelineStep(
+                  title: 'Return Requested',
+                  description: 'Customer requested return: "$fullReason"',
+                  timestamp: DateTime.now(),
+                  isCompleted: true,
+                ),
+              );
           vendorOrderCtrl.orders[index] = oldOrder.copyWith(
             status: 'Return Pending',
             returnReason: fullReason,
@@ -200,8 +215,12 @@ class RmaController extends GetxController {
       // Show beautiful success dialog
       Get.defaultDialog(
         title: 'Return Requested',
-        titleStyle: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.charcoal),
-        middleText: 'Your return request for order ${order.id} has been submitted successfully. The brand vendor will review the request and approve refund within 24-48 hours.',
+        titleStyle: const TextStyle(
+          fontWeight: FontWeight.w800,
+          color: AppColors.charcoal,
+        ),
+        middleText:
+            'Your return request for order ${order.id} has been submitted successfully. The brand vendor will review the request and approve refund within 24-48 hours.',
         middleTextStyle: const TextStyle(color: AppColors.ink),
         backgroundColor: AppColors.white,
         radius: 12,
@@ -212,11 +231,13 @@ class RmaController extends GetxController {
           },
           child: const Text(
             'Go Back',
-            style: TextStyle(color: AppColors.camel, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.camel,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       );
-
     } catch (e) {
       isLoading.value = false;
       Get.snackbar(

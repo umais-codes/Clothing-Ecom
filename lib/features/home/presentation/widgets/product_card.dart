@@ -79,13 +79,49 @@ class ProductCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: sw * 0.008),
-                Text(
-                  '\$${product['price'].toStringAsFixed(0)}',
-                  style: Get.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    fontSize: sw * 0.034,
-                    color: AppColors.camel,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '\$${product['price'].toStringAsFixed(0)}',
+                      style: Get.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: sw * 0.034,
+                        color: AppColors.camel,
+                      ),
+                    ),
+                    if (product['isB2B'] != true) ...[
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            color: AppColors.camel,
+                            size: sw * 0.035,
+                          ),
+                          const SizedBox(width: 1),
+                          Text(
+                            _getProductRating(product['id'] ?? '').toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.charcoal,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          Text(
+                            '(${_getProductReviewsCount(product['id'] ?? '')})',
+                            style: const TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 10,
+                              color: AppColors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -94,5 +130,37 @@ class ProductCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  double _getProductRating(String id) {
+    switch (id) {
+      case 'b2c_1': return 4.9;
+      case 'b2c_2': return 4.8;
+      case 'b2c_3': return 4.5;
+      case 'b2c_4': return 4.7;
+      case 'b2c_5': return 4.6;
+      case 'b2c_6': return 4.8;
+      case 'b2c_7': return 4.4;
+      case 'b2c_8': return 4.9;
+      case 'b2c_9': return 4.7;
+      case 'b2c_10': return 4.3;
+      default: return 4.8;
+    }
+  }
+
+  int _getProductReviewsCount(String id) {
+    switch (id) {
+      case 'b2c_1': return 18;
+      case 'b2c_2': return 24;
+      case 'b2c_3': return 15;
+      case 'b2c_4': return 9;
+      case 'b2c_5': return 11;
+      case 'b2c_6': return 31;
+      case 'b2c_7': return 8;
+      case 'b2c_8': return 14;
+      case 'b2c_9': return 22;
+      case 'b2c_10': return 7;
+      default: return 12;
+    }
   }
 }

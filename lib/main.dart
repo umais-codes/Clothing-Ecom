@@ -49,6 +49,8 @@ import 'package:ecom_app/features/vendor_orders/presentation/views/admin_dispatc
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/features/post_purchase/bindings/post_purchase_binding.dart';
 import 'package:ecom_app/features/post_purchase/presentation/views/rma_request_view.dart';
+import 'package:ecom_app/features/checkout/bindings/checkout_binding.dart';
+import 'package:ecom_app/features/checkout/presentation/views/checkout_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -132,6 +134,12 @@ class EcomApp extends StatelessWidget {
         GetPage(
           name: '/b2b-cart',
           page: () => const B2BCartScreen(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/checkout',
+          page: () => const CheckoutView(),
+          binding: CheckoutBinding(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

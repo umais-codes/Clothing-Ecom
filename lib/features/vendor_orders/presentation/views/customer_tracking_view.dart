@@ -103,7 +103,7 @@ class CustomerTrackingView extends GetView<TrackingController> {
                                   onPressed: () {
                                     final vendorOrder = VendorOrder(
                                       id: controller.orderId,
-                                      customerName: "Aura Shopper",
+                                      customerName: "Velvet Maison Shopper",
                                       amount: 350.00,
                                       status: "Delivered",
                                       orderDate: DateTime.now().subtract(
@@ -141,7 +141,7 @@ class CustomerTrackingView extends GetView<TrackingController> {
                                     Get.bottomSheet(
                                       ReviewSubmissionSheet(
                                         orderId: controller.orderId,
-                                        productId: "item_wool_blazer",
+                                        productId: "b2c_1",
                                         productName: controller.itemName,
                                         productImageUrl:
                                             controller.itemImageUrl,

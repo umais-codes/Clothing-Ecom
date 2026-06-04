@@ -319,6 +319,10 @@ class VendorOrderController extends GetxController {
   }
 
   void subscribeToOrders() {
+    if (SupabaseService.supabaseUrl.contains('placeholder')) {
+      debugPrint('Supabase placeholder URL detected; skipping realtime orders subscription.');
+      return;
+    }
     _ordersSubscriptionChannel = _supabase
         .channel('public:orders')
         .onPostgresChanges(

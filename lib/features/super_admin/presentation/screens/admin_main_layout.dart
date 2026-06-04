@@ -202,14 +202,16 @@ class _FullSidebar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 24),
+            SizedBox(height: sw * 0.04),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(
+                horizontal: context.wp(2.5).clamp(sw * 0.03, sw * 0.05),
+              ),
               child: Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: sw * 0.08,
+                    height: sw * 0.08,
                     decoration: BoxDecoration(
                       color: AppColors.camel,
                       borderRadius: BorderRadius.circular(8),
@@ -220,14 +222,14 @@ class _FullSidebar extends StatelessWidget {
                       size: 18,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: sw * 0.02),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Aura',
+                        'Velvet Maison',
                         style: GoogleFonts.outfit(
-                          fontSize: 18,
+                          fontSize: sw * 0.04,
                           fontWeight: FontWeight.w600,
                           color: AppColors.charcoal,
                           letterSpacing: -0.3,
@@ -247,13 +249,15 @@ class _FullSidebar extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: sw * 0.03),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(
+                horizontal: context.wp(2.5).clamp(sw * 0.03, sw * 0.05),
+              ),
               child: Text(
-                'NAVIGATION',
+                'Navigation',
                 style: GoogleFonts.outfit(
-                  fontSize: 8.5,
+                  fontSize: sw * 0.02,
                   fontWeight: FontWeight.w800,
                   color: AppColors.grey,
                   letterSpacing: 1.2,
@@ -304,29 +308,30 @@ class _CollapsedRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sw = context.screenWidth;
     return Container(
-      width: 68,
+      width: sw * 0.1,
       decoration: const BoxDecoration(
         color: AppColors.white,
         border: Border(right: BorderSide(color: AppColors.greyLight, width: 1)),
       ),
       child: Column(
         children: [
-          const SizedBox(height: 18),
+          SizedBox(height: sw * 0.04),
           Container(
-            width: 36,
-            height: 36,
+            width: sw * 0.08,
+            height: sw * 0.08,
             decoration: BoxDecoration(
               color: AppColors.camel,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.shield_outlined,
               color: AppColors.white,
-              size: 18,
+              size: sw * 0.05,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: sw * 0.05),
           Expanded(
             child: ListView.builder(
               itemCount: items.length,
@@ -340,11 +345,11 @@ class _CollapsedRail extends StatelessWidget {
                     child: InkWell(
                       onTap: () => controller.changeSidebarIndex(i),
                       child: Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 10,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: sw * 0.025,
                           vertical: 4,
                         ),
-                        padding: const EdgeInsets.all(10),
+                        padding: EdgeInsets.all(sw * 0.025),
                         decoration: BoxDecoration(
                           color: isActive
                               ? AppColors.camel.withValues(alpha: 0.12)
@@ -364,11 +369,11 @@ class _CollapsedRail extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.only(bottom: sw * 0.04),
             child: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.logout_rounded,
-                size: 20,
+                size: sw * 0.05,
                 color: AppColors.grey,
               ),
               tooltip: 'Sign Out',
@@ -395,8 +400,9 @@ class _SidebarTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double sw = context.screenWidth;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
+      padding: EdgeInsets.only(bottom: sw * 0.005),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(10),
@@ -405,7 +411,10 @@ class _SidebarTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: EdgeInsets.symmetric(
+              horizontal: sw * 0.03,
+              vertical: sw * 0.025,
+            ),
             decoration: BoxDecoration(
               color: isActive
                   ? AppColors.camel.withValues(alpha: 0.1)
@@ -416,15 +425,15 @@ class _SidebarTile extends StatelessWidget {
               children: [
                 Icon(
                   isActive ? item.activeIcon : item.icon,
-                  size: 17,
+                  size: sw * 0.045,
                   color: isActive ? AppColors.camel : AppColors.grey,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: sw * 0.025),
                 Expanded(
                   child: Text(
                     item.label,
                     style: GoogleFonts.outfit(
-                      fontSize: 12.5,
+                      fontSize: context.sp(sw * 0.015),
                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                       color: isActive ? AppColors.camel : AppColors.ink,
                     ),
@@ -432,8 +441,8 @@ class _SidebarTile extends StatelessWidget {
                 ),
                 if (isActive)
                   Container(
-                    width: 4,
-                    height: 4,
+                    width: sw * 0.01,
+                    height: sw * 0.01,
                     decoration: const BoxDecoration(
                       color: AppColors.camel,
                       shape: BoxShape.circle,
@@ -452,8 +461,12 @@ class _SidebarTile extends StatelessWidget {
 class _SidebarFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final double sw = context.screenWidth;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: sw * 0.03,
+        vertical: sw * 0.015,
+      ),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(10),
@@ -461,23 +474,26 @@ class _SidebarFooter extends StatelessWidget {
           onTap: _signOut,
           borderRadius: BorderRadius.circular(10),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: EdgeInsets.symmetric(
+              horizontal: sw * 0.03,
+              vertical: sw * 0.015,
+            ),
             child: Row(
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: sw * 0.08,
+                  height: sw * 0.08,
                   decoration: BoxDecoration(
                     color: AppColors.camel.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.person_outline_rounded,
-                    size: 16,
+                    size: sw * 0.045,
                     color: AppColors.camel,
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: sw * 0.025),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -491,7 +507,7 @@ class _SidebarFooter extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'admin@aura.pk',
+                        'admin@velvetmaison.pk',
                         style: GoogleFonts.outfit(
                           fontSize: 10,
                           color: AppColors.grey,
@@ -500,9 +516,9 @@ class _SidebarFooter extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.logout_rounded,
-                  size: 16,
+                  size: sw * 0.045,
                   color: AppColors.grey,
                 ),
               ],
@@ -537,9 +553,10 @@ class _AdminProfileBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double sw = context.screenWidth;
     return Container(
-      width: 32,
-      height: 32,
+      width: sw * 0.08,
+      height: sw * 0.08,
       decoration: BoxDecoration(
         color: AppColors.camel.withValues(alpha: 0.1),
         shape: BoxShape.circle,
@@ -548,11 +565,11 @@ class _AdminProfileBadge extends StatelessWidget {
           width: 1,
         ),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
           'SA',
-          style: TextStyle(
-            fontSize: 10,
+          style: GoogleFonts.outfit(
+            fontSize: sw * 0.025,
             fontWeight: FontWeight.w700,
             color: AppColors.camel,
           ),

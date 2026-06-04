@@ -15,7 +15,7 @@ class AdminLoginScreen extends StatefulWidget {
 class _AdminLoginScreenState extends State<AdminLoginScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _emailCtrl = TextEditingController(
-    text: 'admin@aura.pk',
+    text: 'admin@velvetmaison.pk',
   );
   final TextEditingController _passCtrl = TextEditingController(
     text: 'Admin@1234',
@@ -26,7 +26,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
   late final Animation<double> _fadeAnim;
 
   // ── Hardcoded admin credentials (replace with secure backend auth in production) ──
-  static const String _adminEmail = 'admin@aura.pk';
+  static const String _adminEmail = 'admin@velvetmaison.pk';
   static const String _adminPassword = 'Admin@1234';
 
   @override
@@ -164,7 +164,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
                       const SizedBox(height: 8),
                       _buildTextField(
                         controller: _emailCtrl,
-                        hint: 'admin@aura.pk',
+                        hint: 'admin@velvetmaison.pk',
                         icon: Icons.alternate_email_rounded,
                         keyboardType: TextInputType.emailAddress,
                       ),

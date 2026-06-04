@@ -47,7 +47,6 @@ class AppTheme {
           fontSize: 13,
         ),
       ),
-
       textTheme: GoogleFonts.outfitTextTheme().copyWith(
         displayLarge: GoogleFonts.cormorantGaramond(
           fontSize: 36,

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,9 +13,9 @@ class TrackingController extends GetxController {
   // Mock Order Details for tracking view
   final String orderId = '#ORD-8829';
   final String expectedDelivery = 'June 9, 2026';
-  final String itemName = 'Cashmere Wool Blazer';
+  final String itemName = 'Tailored Linen Blazer';
   final String itemImageUrl =
-      'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=300&auto=format&fit=crop';
+      'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop';
   final String courierName = 'Trax Logistics';
   final String trackingId = 'AWB9928172';
 
@@ -86,6 +87,12 @@ class TrackingController extends GetxController {
   }
 
   void subscribeToTrackingChanges() {
+    if (SupabaseService.supabaseUrl.contains('placeholder')) {
+      debugPrint(
+        'Supabase placeholder URL detected; skipping realtime tracking subscription.',
+      );
+      return;
+    }
     _trackingSubscriptionChannel = _supabase
         .channel('public:orders_tracking')
         .onPostgresChanges(
@@ -94,7 +101,8 @@ class TrackingController extends GetxController {
           table: 'orders',
           callback: (payload) {
             final record = payload.newRecord;
-            if (record.containsKey('id') && record['id']?.toString() == orderId) {
+            if (record.containsKey('id') &&
+                record['id']?.toString() == orderId) {
               final status = record['status']?.toString() ?? 'Pending';
               _updateStepperIndexFromStatus(status);
             }

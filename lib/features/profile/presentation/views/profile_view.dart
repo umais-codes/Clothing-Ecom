@@ -3,7 +3,7 @@ import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/fit_profile_card.dart';
 import '../widgets/profile_header.dart';
@@ -22,17 +22,9 @@ class ProfileView extends GetView<ProfileController> {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBar(
-        title: Text(
-          'My Account',
-          style: GoogleFonts.outfit(
-            fontSize: context.wp(5),
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-          ),
-        ),
-        backgroundColor: AppColors.white,
-        centerTitle: true,
+      appBar: const CustomAppBar(
+        title: 'My Account',
+        showBackButton: false,
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),

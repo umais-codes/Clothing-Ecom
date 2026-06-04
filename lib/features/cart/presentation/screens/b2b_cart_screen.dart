@@ -4,6 +4,7 @@ import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../controllers/b2b_cart_controller.dart';
 
@@ -17,17 +18,8 @@ class B2BCartScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        title: Text(
-          "Corporate Procurement",
-          style: GoogleFonts.outfit(
-            fontSize: sw * 0.05,
-            fontWeight: .w600,
-            color: AppColors.charcoal,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: "Corporate Procurement",
         actions: [
           CustomButton(
             text: "Import CSV",

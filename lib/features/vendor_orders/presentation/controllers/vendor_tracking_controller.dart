@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
@@ -51,8 +52,8 @@ class VendorTrackingController extends GetxController {
         'Webhook Simulation Triggered',
         'Status updated to: "${steps[activeStepIndex.value]['title']}"',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFC19A6B).withValues(alpha: 0.15),
-        colorText: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.camel.withValues(alpha: 0.15),
+        colorText: AppColors.charcoal,
       );
     } else {
       activeStepIndex.value = 0;
@@ -60,8 +61,8 @@ class VendorTrackingController extends GetxController {
         'Webhook Reset',
         'Logistics timeline reset to label generation.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF1A1A1A).withValues(alpha: 0.1),
-        colorText: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.camel.withValues(alpha: 0.1),
+        colorText: AppColors.charcoal,
       );
     }
   }

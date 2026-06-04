@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'package:ecom_app/features/super_admin/domain/models/subscription_plan.dart';
 import '../controllers/vendor_dashboard_controller.dart';
 
@@ -17,23 +18,8 @@ class SubscriptionPlansView extends GetView<VendorDashboardController> {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
-        title: Text(
-          'Choose Selling Plan',
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.w600,
-            fontSize: sw * 0.055,
-            color: AppColors.charcoal,
-          ),
-        ),
-        backgroundColor: AppColors.white,
-        elevation: 1,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded),
-          iconSize: sw * 0.06,
-          onPressed: () => Get.back(),
-          color: AppColors.charcoal,
-        ),
+      appBar: const CustomAppBar(
+        title: 'Choose Selling Plan',
       ),
       body: SafeArea(
         child: SingleChildScrollView(

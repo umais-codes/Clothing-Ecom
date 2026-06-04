@@ -6,6 +6,7 @@ import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../controllers/dispatch_controller.dart';
 
 class AdminDispatchView extends GetView<DispatchController> {
@@ -17,26 +18,10 @@ class AdminDispatchView extends GetView<DispatchController> {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
+      appBar: const CustomAppBar(
+        title: "Shipment Booking",
         backgroundColor: AppColors.offWhite,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.charcoal,
-          ),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          "Shipment Booking",
-          style: GoogleFonts.cormorantGaramond(
-            fontSize: context.sp(22),
-            fontWeight: FontWeight.w800,
-            color: AppColors.charcoal,
-          ),
-        ),
-        centerTitle: true,
       ),
       body: SafeArea(
         child: Obx(() {
@@ -55,15 +40,21 @@ class AdminDispatchView extends GetView<DispatchController> {
   Widget _buildBookingFormState(BuildContext context, double sw) {
     return SingleChildScrollView(
       key: const ValueKey('booking_form'),
-      padding: EdgeInsets.all(sw * 0.05),
+      padding: EdgeInsets.symmetric(
+        horizontal: sw * 0.03,
+        vertical: sw * 0.015,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(sw * 0.05),
+            padding: EdgeInsets.symmetric(
+              horizontal: sw * 0.03,
+              vertical: sw * 0.015,
+            ),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.charcoal.withValues(alpha: 0.02),
@@ -77,13 +68,14 @@ class AdminDispatchView extends GetView<DispatchController> {
               children: [
                 Text(
                   "Logistics Booking Details",
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: context.sp(18),
-                    fontWeight: FontWeight.w700,
+                  style: GoogleFonts.outfit(
+                    fontSize: context.sp(sw * 0.045),
+                    fontWeight: FontWeight.w600,
                     color: AppColors.charcoal,
                   ),
                 ),
-                const Divider(color: AppColors.greySubtle, height: 20),
+
+                Divider(color: AppColors.greySubtle, height: sw * 0.03),
 
                 // 1. Courier Selection Dropdown
                 CustomDropdownField(
@@ -117,7 +109,7 @@ class AdminDispatchView extends GetView<DispatchController> {
                 Text(
                   "Package Dimensions (CM)",
                   style: GoogleFonts.outfit(
-                    fontSize: sw * 0.033,
+                    fontSize: sw * 0.035,
                     fontWeight: FontWeight.w600,
                     color: AppColors.ink,
                   ),
@@ -226,47 +218,51 @@ class AdminDispatchView extends GetView<DispatchController> {
                 SizedBox(height: sw * 0.04),
                 Text(
                   "Logistics Booking Confirmed",
-                  style: GoogleFonts.cormorantGaramond(
-                    fontSize: context.sp(20),
-                    fontWeight: FontWeight.w700,
+                  style: GoogleFonts.outfit(
+                    fontSize: context.sp(sw * 0.045),
+                    fontWeight: FontWeight.w600,
                     color: AppColors.charcoal,
                   ),
                 ),
                 Text(
                   "Courier pickup booked and AWB generated",
                   style: GoogleFonts.outfit(
-                    fontSize: context.sp(11),
+                    fontSize: context.sp(sw * 0.03),
                     color: AppColors.grey,
                   ),
                 ),
-                const Divider(color: AppColors.greySubtle, height: 32),
+                Divider(color: AppColors.greySubtle, height: sw * 0.03),
 
                 // AWB Details
                 _buildDetailsRow(
                   context,
                   "Courier Selected",
                   "${controller.selectedCourier.value} Express",
+                  sw: sw,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: sw * 0.02),
                 _buildDetailsRow(
                   context,
                   "AWB Tracking ID",
                   controller.generatedAwb.value,
                   isBold: true,
+                  sw: sw,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: sw * 0.02),
                 _buildDetailsRow(
                   context,
                   "Weight Booked",
                   "${controller.weightController.text} kg",
+                  sw: sw,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: sw * 0.02),
                 _buildDetailsRow(
                   context,
                   "Dimensions (L x W x H)",
                   "${controller.lengthController.text}x${controller.widthController.text}x${controller.heightController.text} cm",
+                  sw: sw,
                 ),
-                const Divider(color: AppColors.greySubtle, height: 32),
+                Divider(color: AppColors.greySubtle, height: sw * 0.03),
 
                 // Customer Notification Toggle Option
                 Row(
@@ -274,16 +270,16 @@ class AdminDispatchView extends GetView<DispatchController> {
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.notifications_active_outlined,
                           color: AppColors.camel,
-                          size: 18,
+                          size: sw * 0.05,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: sw * 0.02),
                         Text(
                           "Notify Customer",
                           style: GoogleFonts.outfit(
-                            fontSize: context.sp(12),
+                            fontSize: context.sp(sw * 0.035),
                             fontWeight: FontWeight.w600,
                             color: AppColors.charcoal,
                           ),
@@ -291,18 +287,21 @@ class AdminDispatchView extends GetView<DispatchController> {
                       ],
                     ),
                     Obx(() {
-                      return Switch(
-                        value: controller.notifyCustomer.value,
-                        activeThumbColor: AppColors.camel,
-                        activeTrackColor: AppColors.camelLight,
-                        onChanged: (val) {
-                          controller.notifyCustomer.value = val;
-                        },
+                      return Transform.scale(
+                        scale: 0.8,
+                        child: Switch(
+                          value: controller.notifyCustomer.value,
+                          activeThumbColor: AppColors.camel,
+                          activeTrackColor: AppColors.camelLight,
+                          onChanged: (val) {
+                            controller.notifyCustomer.value = val;
+                          },
+                        ),
                       );
                     }),
                   ],
                 ),
-                SizedBox(height: sw * 0.06),
+                SizedBox(height: sw * 0.02),
 
                 // Main download action button
                 Row(
@@ -356,6 +355,7 @@ class AdminDispatchView extends GetView<DispatchController> {
     String title,
     String val, {
     bool isBold = false,
+    required double sw,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -363,7 +363,7 @@ class AdminDispatchView extends GetView<DispatchController> {
         Text(
           title,
           style: GoogleFonts.outfit(
-            fontSize: context.sp(11),
+            fontSize: context.sp(sw * 0.03),
             color: AppColors.grey,
             fontWeight: FontWeight.w500,
           ),
@@ -371,7 +371,7 @@ class AdminDispatchView extends GetView<DispatchController> {
         Text(
           val,
           style: GoogleFonts.outfit(
-            fontSize: context.sp(12),
+            fontSize: context.sp(sw * 0.035),
             color: isBold ? AppColors.camel : AppColors.charcoal,
             fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
           ),

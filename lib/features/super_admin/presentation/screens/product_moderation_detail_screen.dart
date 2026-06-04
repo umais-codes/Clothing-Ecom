@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
@@ -21,29 +22,12 @@ class ProductModerationDetailScreen extends GetView<AdminController> {
     final isMobile = context.isMobileView;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
-          color: AppColors.charcoal,
-          splashRadius: 20,
-        ),
-        leadingWidth: 38,
-        title: Text(
-          'Product Moderation',
-          style: GoogleFonts.outfit(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-            letterSpacing: -0.3,
-          ),
-        ),
+      appBar: const CustomAppBar(
+        title: 'Product Moderation',
         actions: [
-          const Center(child: AdminStatusBadge(status: 'pending')),
-          const SizedBox(width: 12),
+          Center(child: AdminStatusBadge(status: 'pending')),
+          SizedBox(width: 12),
         ],
-        backgroundColor: AppColors.white,
-        elevation: 0,
       ),
       backgroundColor: AppColors.offWhite,
       body: Column(

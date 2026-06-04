@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'admin_dashboard_screen.dart';
 import 'kyc_queue_screen.dart';
 import 'catalog_moderation_screen.dart';
@@ -78,6 +79,7 @@ class AdminMainLayout extends GetView<AdminController> {
     final isDesktop = context.isDesktopView;
     final isTablet = context.isTabletView;
     final isMobile = context.isMobileView;
+    final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
@@ -89,29 +91,28 @@ class AdminMainLayout extends GetView<AdminController> {
             )
           : null,
       appBar: isMobile
-          ? AppBar(
-              backgroundColor: AppColors.white,
+          ? CustomAppBar(
               elevation: 0,
-              scrolledUnderElevation: 0,
-              iconTheme: const IconThemeData(
-                color: AppColors.charcoal,
-                size: 20,
+              showBackButton: false,
+              leading: Builder(
+                builder: (innerContext) => IconButton(
+                  icon: const Icon(Icons.menu_rounded),
+                  color: AppColors.charcoal,
+                  iconSize: context.sp(sw * 0.06),
+                  onPressed: () => Scaffold.of(innerContext).openDrawer(),
+                ),
               ),
-              title: Obx(
+              titleWidget: Obx(
                 () => Text(
                   _items[controller.selectedSidebarIndex.value].label
                       .toUpperCase(),
                   style: GoogleFonts.outfit(
-                    fontSize: context.wp(2.5).clamp(16, 20),
+                    fontSize: context.sp(sw * 0.05),
                     fontWeight: FontWeight.w700,
                     color: AppColors.charcoal,
                     letterSpacing: 1.2,
                   ),
                 ),
-              ),
-              centerTitle: true,
-              shape: const Border(
-                bottom: BorderSide(color: AppColors.greyLight, width: 0.5),
               ),
             )
           : null,
@@ -188,6 +189,7 @@ class _FullSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double sw = context.screenWidth;
     return SafeArea(
       child: Container(
         width: context.wp(18).clamp(200, 260),
@@ -271,7 +273,12 @@ class _FullSidebar extends StatelessWidget {
                     return _SidebarTile(
                       item: items[i],
                       isActive: isActive,
-                      onTap: () => controller.changeSidebarIndex(i),
+                      onTap: () {
+                        controller.changeSidebarIndex(i);
+                        if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                          Get.back();
+                        }
+                      },
                     );
                   });
                 },
@@ -281,7 +288,7 @@ class _FullSidebar extends StatelessWidget {
             // Footer
             const Divider(color: AppColors.greyLight, height: 1),
             _SidebarFooter(),
-            const SizedBox(height: 20),
+            SizedBox(height: sw * 0.03),
           ],
         ),
       ),

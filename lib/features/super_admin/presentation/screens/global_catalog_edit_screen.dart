@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 import '../controllers/global_catalog_edit_controller.dart';
 import 'package:ecom_app/app/utils/constants.dart';
@@ -54,36 +55,19 @@ class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
   // ── AppBar ──────────────────────────────────────────────────────────────────
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
+    final double sw = context.screenWidth;
+    return CustomAppBar(
       backgroundColor: AppColors.white,
       elevation: 0,
-      surfaceTintColor: Colors.transparent,
-      leading: GestureDetector(
-        onTap: () => Get.back(),
-        child: Container(
-          margin: .symmetric(
-            horizontal: context.wp(2).clamp(8, 12),
-            vertical: context.wp(2).clamp(8, 12),
-          ),
-          decoration: BoxDecoration(
-            color: AppColors.offWhite,
-            borderRadius: BorderRadius.circular(10),
-            border: .all(color: AppColors.greyLight, width: 1),
-          ),
-          child: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: 15,
-            color: AppColors.charcoal,
-          ),
-        ),
-      ),
-      title: Column(
-        crossAxisAlignment: .start,
+      showBackButton: true,
+      titleWidget: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             controller.product == null ? 'New Catalog Entry' : 'Catalog Audit',
             style: GoogleFonts.outfit(
-              fontSize: 16,
+              fontSize: context.sp(sw * 0.045),
               fontWeight: FontWeight.w700,
               color: AppColors.charcoal,
               letterSpacing: -0.2,
@@ -93,7 +77,7 @@ class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
             Text(
               controller.product!.name,
               style: GoogleFonts.outfit(
-                fontSize: 11,
+                fontSize: context.sp(sw * 0.03),
                 fontWeight: FontWeight.w500,
                 color: AppColors.grey,
               ),

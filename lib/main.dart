@@ -47,6 +47,8 @@ import 'package:ecom_app/features/vendor_orders/presentation/views/vendor_tracki
 import 'package:ecom_app/features/vendor_orders/bindings/dispatch_binding.dart';
 import 'package:ecom_app/features/vendor_orders/presentation/views/admin_dispatch_view.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/features/post_purchase/bindings/post_purchase_binding.dart';
+import 'package:ecom_app/features/post_purchase/presentation/views/rma_request_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -187,6 +189,12 @@ class EcomApp extends StatelessWidget {
           name: '/customer-tracking',
           page: () => const CustomerTrackingView(),
           binding: TrackingBinding(),
+          transition: Transition.rightToLeft,
+        ),
+        GetPage(
+          name: '/rma-request',
+          page: () => const RmaRequestView(),
+          binding: PostPurchaseBinding(),
           transition: Transition.rightToLeft,
         ),
         GetPage(

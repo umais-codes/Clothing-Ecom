@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -42,7 +43,7 @@ class DiscoveryScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: _buildAppBar(sw, authController),
+      appBar: _buildAppBar(context, sw, authController),
       body: Column(
         children: [
           _buildSearchHeader(filterController, sw),
@@ -96,27 +97,18 @@ class DiscoveryScreen extends StatelessWidget {
   }
 
   // --- App Bar ---
-  AppBar _buildAppBar(double sw, AuthController authController) {
-    return AppBar(
-      backgroundColor: AppColors.white,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      centerTitle: false,
-      title: Text(
-        'Discover Collections',
-        style: GoogleFonts.cormorantGaramond(
-          fontSize: sw * 0.055,
-          fontWeight: FontWeight.w700,
-          color: AppColors.charcoal,
-        ),
-      ),
+  PreferredSizeWidget _buildAppBar(BuildContext context, double sw, AuthController authController) {
+    return CustomAppBar(
+      title: 'DISCOVER',
+      showBackButton: false,
       actions: [
         // Role Switch Indicator for easy testing
         Obx(() {
           final role = authController.selectedRole.value;
           final isB2B = role == AuthRole.corporate;
           return Container(
-            margin: EdgeInsets.only(right: sw * 0.01),
+            alignment: Alignment.center,
+            margin: EdgeInsets.only(right: sw * 0.02),
             padding: EdgeInsets.symmetric(
               horizontal: sw * 0.025,
               vertical: sw * 0.01,
@@ -130,7 +122,7 @@ class DiscoveryScreen extends StatelessWidget {
               ),
             ),
             child: Text(
-              isB2B ? 'B2B Portal' : 'B2C Shopper',
+              isB2B ? 'B2B' : 'B2C',
               style: GoogleFonts.outfit(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,

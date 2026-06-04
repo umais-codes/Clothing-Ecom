@@ -3,6 +3,7 @@ import 'package:ecom_app/features/vendor_inventory/presentation/views/product_fo
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
 import '../controllers/product_crud_controller.dart';
@@ -19,19 +20,9 @@ class InventoryView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
-        leading: Container(),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        title: Text(
-          'Inventory Overview',
-          style: GoogleFonts.outfit(
-            fontSize: sw * 0.05,
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-          ),
-        ),
-        centerTitle: true,
+      appBar: const CustomAppBar(
+        title: 'Inventory Overview',
+        showBackButton: false,
       ),
 
       body: Column(

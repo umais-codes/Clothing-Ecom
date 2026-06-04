@@ -3,6 +3,7 @@ import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../controllers/b2c_cart_controller.dart';
 import '../widgets/retail_cart_view.dart';
@@ -17,22 +18,12 @@ class B2CCartScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        title: Text(
-          "Shopping Cart",
-          style: GoogleFonts.outfit(
-            fontSize: sw * 0.05,
-            fontWeight: .w600,
-            color: AppColors.charcoal,
-          ),
-        ),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: "Shopping Cart",
         actions: [
           IconButton(
             onPressed: () => controller.clearCart(),
-            icon: Icon(Icons.delete_forever, color: AppColors.charcoal),
+            icon: const Icon(Icons.delete_forever, color: AppColors.charcoal),
           ),
         ],
       ),

@@ -111,6 +111,12 @@ class FulfillmentController extends GetxController {
     }
   }
 
+  void markAllPacked(bool packed) {
+    for (final key in packedStates.keys) {
+      packedStates[key] = packed;
+    }
+  }
+
   bool get isAllPacked {
     return !packedStates.values.contains(false);
   }

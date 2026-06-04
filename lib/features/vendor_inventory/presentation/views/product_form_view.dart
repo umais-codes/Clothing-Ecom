@@ -7,6 +7,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
 import '../../../../app/widgets/custom_text_field.dart';
 import '../../../../app/widgets/custom_dropdown_field.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../../../../app/utils/constants.dart';
 import '../controllers/product_crud_controller.dart';
 
@@ -20,19 +21,10 @@ class ProductFormView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
+      appBar: CustomAppBar(
+        title: 'Product Details',
         backgroundColor: AppColors.white,
         elevation: 0,
-        title: Text(
-          'Product Details',
-          style: GoogleFonts.outfit(
-            fontSize: sw * 0.05,
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-          ),
-        ),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: AppColors.charcoal),
         actions: [
           CustomButton(
             text: 'Save',

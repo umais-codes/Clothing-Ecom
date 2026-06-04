@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../controllers/b2b_portal_controller.dart';
 import '../widgets/line_sheet_card.dart';
 import '../widgets/matrix_order_widget.dart';
@@ -19,17 +20,10 @@ class B2BPortalView extends GetView<B2BPortalController> {
       length: 3,
       child: Scaffold(
         backgroundColor: AppColors.offWhite,
-        appBar: AppBar(
-          backgroundColor: AppColors.white,
+        appBar: CustomAppBar(
+          title: "CORPORATE HUB",
+          showBackButton: false,
           elevation: 0,
-          title: Text(
-            "CORPORATE HUB",
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              letterSpacing: 2.0,
-              fontWeight: .w800,
-              fontSize: sw * 0.035,
-            ),
-          ),
           bottom: TabBar(
             indicatorColor: AppColors.camel,
             indicatorWeight: 3,

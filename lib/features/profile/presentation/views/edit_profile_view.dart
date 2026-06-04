@@ -3,6 +3,7 @@ import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
@@ -26,26 +27,8 @@ class EditProfileView extends GetView<ProfileController> {
 
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: AppBar(
-        title: Text(
-          "Edit Profile",
-          style: GoogleFonts.outfit(
-            fontSize: context.wp(5),
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            size: context.wp(5),
-            color: AppColors.charcoal,
-          ),
-          onPressed: () => Get.back(),
-        ),
+      appBar: const CustomAppBar(
+        title: "Edit Profile",
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),

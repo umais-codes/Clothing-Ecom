@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double sw;
@@ -7,31 +8,19 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: Text(
-        'Aura',
-        style: Get.textTheme.displayMedium?.copyWith(
-          fontSize: sw * 0.05,
-          letterSpacing: 0.5,
-          fontWeight: .w700,
-        ),
-      ),
-      centerTitle: false,
+    return CustomAppBar(
+      title: 'AURA',
+      showBackButton: false,
       actions: [
         IconButton(
           onPressed: () => Get.toNamed('/vendor-dashboard'),
-          icon: Icon(Icons.storefront_outlined, size: sw * 0.055),
-          padding: .zero,
-          constraints: const BoxConstraints(),
+          icon: const Icon(Icons.storefront_outlined),
         ),
-        SizedBox(width: sw * 0.03),
         IconButton(
           onPressed: () => Get.toNamed('/cart'),
-          icon: Icon(Icons.shopping_bag_outlined, size: sw * 0.055),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
+          icon: const Icon(Icons.shopping_bag_outlined),
         ),
-        SizedBox(width: sw * 0.045),
+        SizedBox(width: sw * 0.02),
       ],
     );
   }

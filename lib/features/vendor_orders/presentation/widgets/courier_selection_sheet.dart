@@ -5,14 +5,13 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import '../controllers/fulfillment_controller.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_text_field.dart';
+import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
 
 class CourierSelectionSheet extends StatelessWidget {
   final FulfillmentController controller;
 
-  const CourierSelectionSheet({
-    super.key,
-    required this.controller,
-  });
+  const CourierSelectionSheet({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +23,7 @@ class CourierSelectionSheet extends StatelessWidget {
         top: sw * 0.05,
         left: sw * 0.05,
         right: sw * 0.05,
-        bottom: context.paddingBottom + sw * 0.05,
+        bottom: context.paddingBottom + sw * 0.02,
       ),
       decoration: const BoxDecoration(
         color: AppColors.white,
@@ -53,14 +52,18 @@ class CourierSelectionSheet extends StatelessWidget {
             children: [
               Text(
                 "Courier Dispatch Setup",
-                style: GoogleFonts.cormorantGaramond(
-                  fontSize: context.sp(22),
-                  fontWeight: FontWeight.w800,
+                style: GoogleFonts.outfit(
+                  fontSize: context.sp(sw * 0.045),
+                  fontWeight: FontWeight.w700,
                   color: AppColors.charcoal,
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.charcoal),
+                icon: Icon(
+                  Icons.close_rounded,
+                  color: AppColors.charcoal,
+                  size: sw * 0.06,
+                ),
                 onPressed: () => Get.back(),
               ),
             ],
@@ -68,41 +71,13 @@ class CourierSelectionSheet extends StatelessWidget {
           const Divider(color: AppColors.greySubtle, height: 20),
 
           // Logistics Dropdown
-          Text(
-            "COURIER PARTNER",
-            style: GoogleFonts.outfit(
-              fontSize: context.sp(10),
-              fontWeight: FontWeight.w800,
-              color: AppColors.grey,
-              letterSpacing: 1.0,
-            ),
-          ),
-          SizedBox(height: sw * 0.02),
           Obx(() {
-            return DropdownButtonFormField<String>(
+            return CustomDropdownField(
+              label: "Courier Partner",
+              icon: Icons.local_shipping_outlined,
               value: controller.selectedCourier.value,
-              decoration: InputDecoration(
-                fillColor: AppColors.offWhite,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.greyLight),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              style: GoogleFonts.outfit(
-                color: AppColors.charcoal,
-                fontSize: context.sp(13),
-                fontWeight: FontWeight.w600,
-              ),
-              dropdownColor: AppColors.white,
-              iconEnabledColor: AppColors.camel,
-              items: controller.couriers.map((String courier) {
-                return DropdownMenuItem<String>(
-                  value: courier,
-                  child: Text(courier),
-                );
-              }).toList(),
+              items: controller.couriers,
+              isRequired: true,
               onChanged: (val) {
                 if (val != null) {
                   controller.selectedCourier.value = val;
@@ -110,68 +85,74 @@ class CourierSelectionSheet extends StatelessWidget {
               },
             );
           }),
-          SizedBox(height: sw * 0.05),
+          SizedBox(height: sw * 0.02),
 
           // Input: Weight
-          Text(
-            "PACKAGE WEIGHT (KG)",
-            style: GoogleFonts.outfit(
-              fontSize: context.sp(10),
-              fontWeight: FontWeight.w800,
-              color: AppColors.grey,
-              letterSpacing: 1.0,
-            ),
-          ),
-          SizedBox(height: sw * 0.02),
-          TextField(
+          CustomTextField(
+            label: "Package Weight (KG)",
+            icon: Icons.scale_outlined,
             controller: controller.weightController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            style: GoogleFonts.outfit(color: AppColors.charcoal, fontSize: context.sp(13)),
-            decoration: InputDecoration(
-              hintText: "e.g. 1.5",
-              hintStyle: GoogleFonts.outfit(color: AppColors.grey, fontSize: context.sp(12)),
-              fillColor: AppColors.offWhite,
-              filled: true,
-              prefixIcon: const Icon(Icons.scale_outlined, color: AppColors.camel, size: 20),
-            ),
-          ),
-          SizedBox(height: sw * 0.05),
-
-          // Input: Tracking Number
-          Text(
-            "AWB TRACKING NUMBER",
-            style: GoogleFonts.outfit(
-              fontSize: context.sp(10),
-              fontWeight: FontWeight.w800,
-              color: AppColors.grey,
-              letterSpacing: 1.0,
-            ),
+            hinttext: "e.g. 1.5",
+            isRequired: true,
           ),
           SizedBox(height: sw * 0.02),
-          TextField(
+
+          // Input: Tracking Number
+          CustomTextField(
+            label: "AWB Tracking No",
+            icon: Icons.qr_code_scanner_rounded,
             controller: controller.trackingController,
-            style: GoogleFonts.outfit(color: AppColors.charcoal, fontSize: context.sp(13)),
-            decoration: InputDecoration(
-              hintText: "Enter shipping label bar code number",
-              hintStyle: GoogleFonts.outfit(color: AppColors.grey, fontSize: context.sp(12)),
-              fillColor: AppColors.offWhite,
-              filled: true,
-              prefixIcon: const Icon(Icons.qr_code_scanner_rounded, color: AppColors.camel, size: 20),
-            ),
+            hinttext: "Enter shipping label bar code number",
+            isRequired: true,
           ),
-          SizedBox(height: sw * 0.08),
+          SizedBox(height: sw * 0.04),
 
           // Submit button
           Row(
             children: [
               Expanded(
                 child: CustomButton(
-                  text: "CONFIRM SHIPMENT & NOTIFY CUSTOMER",
+                  text: "Confirm Shipment & Notify Customer",
                   variant: ButtonVariant.primary,
                   buttonColor: AppColors.camel,
                   textColor: AppColors.white,
                   onPressed: () {
                     controller.confirmShipment();
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: sw * 0.04),
+          Row(
+            children: [
+              const Expanded(child: Divider(color: AppColors.greySubtle)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Text(
+                  "OR",
+                  style: GoogleFonts.outfit(
+                    fontSize: context.sp(10),
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.grey,
+                  ),
+                ),
+              ),
+              const Expanded(child: Divider(color: AppColors.greySubtle)),
+            ],
+          ),
+          SizedBox(height: sw * 0.04),
+          Row(
+            children: [
+              Expanded(
+                child: CustomButton(
+                  text: "Book Via Courier Api",
+                  variant: ButtonVariant.outlined,
+                  textColor: AppColors.camel,
+                  onPressed: () {
+                    Get.back();
+                    Get.toNamed('/admin-dispatch');
                   },
                 ),
               ),

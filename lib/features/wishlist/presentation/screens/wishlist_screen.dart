@@ -2,6 +2,7 @@ import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
 import '../controllers/wishlist_controller.dart';
@@ -17,17 +18,8 @@ class WishlistScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAF9F6),
-      appBar: AppBar(
-        backgroundColor: AppColors.white,
-        title: Text(
-          'My Wishlist',
-          style: GoogleFonts.outfit(
-            fontSize: sw * 0.05,
-            fontWeight: .w600,
-            color: AppColors.charcoal,
-          ),
-        ),
-        centerTitle: true,
+      appBar: const CustomAppBar(
+        title: 'My Wishlist',
       ),
       body: Obx(() {
         if (controller.wishlistItems.isEmpty) {

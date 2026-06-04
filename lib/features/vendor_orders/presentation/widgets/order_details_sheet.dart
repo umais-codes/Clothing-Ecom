@@ -49,7 +49,7 @@ class OrderDetailsSheet extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: sw * 0.04),
+          SizedBox(height: sw * 0.02),
 
           // Header
           Row(
@@ -69,7 +69,7 @@ class OrderDetailsSheet extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: sw * 0.02),
-                      _buildB2bBadge(context),
+                      _buildB2bBadge(context, sw),
                     ],
                   ),
                   Text(
@@ -101,20 +101,20 @@ class OrderDetailsSheet extends StatelessWidget {
                 children: [
                   if (order.status == 'Returned') ...[
                     RmaHandlingCard(order: order, controller: controller),
-                    SizedBox(height: sw * 0.06),
+                    SizedBox(height: sw * 0.03),
                   ],
 
                   // Items section
                   Text(
                     "Items Summary",
                     style: GoogleFonts.outfit(
-                      fontSize: context.sp(11),
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.grey,
+                      fontSize: context.sp(sw * 0.035),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.charcoal,
                       letterSpacing: 1.5,
                     ),
                   ),
-                  SizedBox(height: sw * 0.02),
+                  SizedBox(height: sw * 0.015),
 
                   if (order.isB2B)
                     _buildB2bVariantMatrix(context, sw)
@@ -127,16 +127,16 @@ class OrderDetailsSheet extends StatelessWidget {
                   Text(
                     "Fulfillment Timeline",
                     style: GoogleFonts.outfit(
-                      fontSize: context.sp(11),
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.grey,
+                      fontSize: context.sp(sw * 0.035),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.charcoal,
                       letterSpacing: 1.5,
                     ),
                   ),
-                  SizedBox(height: sw * 0.04),
+                  SizedBox(height: sw * 0.02),
                   _buildTimeline(context, sw),
 
-                  SizedBox(height: sw * 0.06),
+                  SizedBox(height: sw * 0.03),
                 ],
               ),
             ),
@@ -149,10 +149,10 @@ class OrderDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildB2bBadge(BuildContext context) {
+  Widget _buildB2bBadge(BuildContext context, double sw) {
     if (!order.isB2B) return const SizedBox.shrink();
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: sw * 0.02, vertical: sw * 0.01),
       decoration: BoxDecoration(
         color: AppColors.camelLight,
         borderRadius: BorderRadius.circular(4),
@@ -179,7 +179,10 @@ class OrderDetailsSheet extends StatelessWidget {
         final item = order.items[index];
         return Container(
           margin: EdgeInsets.only(bottom: sw * 0.03),
-          padding: EdgeInsets.all(sw * 0.03),
+          padding: EdgeInsets.symmetric(
+            vertical: sw * 0.015,
+            horizontal: sw * 0.03,
+          ),
           decoration: BoxDecoration(
             color: AppColors.offWhite,
             borderRadius: BorderRadius.circular(12),
@@ -213,7 +216,7 @@ class OrderDetailsSheet extends StatelessWidget {
                       item.name,
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w700,
-                        fontSize: context.sp(14),
+                        fontSize: context.sp(sw * 0.034),
                         color: AppColors.charcoal,
                       ),
                     ),
@@ -221,7 +224,7 @@ class OrderDetailsSheet extends StatelessWidget {
                     Text(
                       "Color: ${item.color ?? 'N/A'}  •  Size: ${item.size ?? 'N/A'}",
                       style: GoogleFonts.outfit(
-                        fontSize: context.sp(12),
+                        fontSize: context.sp(sw * 0.03),
                         color: AppColors.grey,
                       ),
                     ),
@@ -235,14 +238,14 @@ class OrderDetailsSheet extends StatelessWidget {
                     "\$${(item.unitPrice * item.quantity).toStringAsFixed(2)}",
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.w800,
-                      fontSize: context.sp(14),
+                      fontSize: context.sp(sw * 0.034),
                       color: AppColors.charcoal,
                     ),
                   ),
                   Text(
                     "${item.quantity}x @ \$${item.unitPrice.toStringAsFixed(2)}",
                     style: GoogleFonts.outfit(
-                      fontSize: context.sp(11),
+                      fontSize: context.sp(sw * 0.03),
                       color: AppColors.grey,
                     ),
                   ),
@@ -283,7 +286,7 @@ class OrderDetailsSheet extends StatelessWidget {
                     "Color / Size",
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.w800,
-                      fontSize: context.sp(10),
+                      fontSize: context.sp(sw * 0.027),
                       color: AppColors.charcoal,
                     ),
                   ),
@@ -298,7 +301,7 @@ class OrderDetailsSheet extends StatelessWidget {
                         size,
                         style: GoogleFonts.outfit(
                           fontWeight: FontWeight.w800,
-                          fontSize: context.sp(10),
+                          fontSize: context.sp(sw * 0.027),
                           color: AppColors.charcoal,
                         ),
                       ),
@@ -314,7 +317,7 @@ class OrderDetailsSheet extends StatelessWidget {
                       "Total",
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w800,
-                        fontSize: context.sp(10),
+                        fontSize: context.sp(sw * 0.027),
                         color: AppColors.camel,
                       ),
                     ),
@@ -339,7 +342,7 @@ class OrderDetailsSheet extends StatelessWidget {
                           color,
                           style: GoogleFonts.outfit(
                             fontWeight: FontWeight.w600,
-                            fontSize: context.sp(12),
+                            fontSize: context.sp(sw * 0.027),
                             color: AppColors.charcoal,
                           ),
                         ),
@@ -357,7 +360,7 @@ class OrderDetailsSheet extends StatelessWidget {
                                 fontWeight: count > 0
                                     ? FontWeight.w700
                                     : FontWeight.w400,
-                                fontSize: context.sp(12),
+                                fontSize: context.sp(sw * 0.03),
                                 color: count > 0
                                     ? AppColors.charcoal
                                     : AppColors.grey,
@@ -393,7 +396,7 @@ class OrderDetailsSheet extends StatelessWidget {
                       "Grand Total",
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w800,
-                        fontSize: context.sp(10),
+                        fontSize: context.sp(sw * 0.027),
                         color: AppColors.camel,
                       ),
                     ),
@@ -409,7 +412,7 @@ class OrderDetailsSheet extends StatelessWidget {
                           sizeTotal.toString(),
                           style: GoogleFonts.outfit(
                             fontWeight: FontWeight.w800,
-                            fontSize: context.sp(12),
+                            fontSize: context.sp(sw * 0.03),
                             color: AppColors.charcoal,
                           ),
                         ),
@@ -499,7 +502,7 @@ class OrderDetailsSheet extends StatelessWidget {
                     step.title,
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.w700,
-                      fontSize: context.sp(13),
+                      fontSize: context.sp(sw * 0.033),
                       color: step.isCompleted
                           ? AppColors.charcoal
                           : AppColors.grey,
@@ -608,7 +611,7 @@ class OrderDetailsSheet extends StatelessWidget {
         children: [
           Expanded(
             child: CustomButton(
-              text: "Print Packing Slip",
+              text: "Print Slip",
               variant: ButtonVariant.outlined,
               onPressed: () {
                 Get.snackbar(
@@ -618,6 +621,19 @@ class OrderDetailsSheet extends StatelessWidget {
                   backgroundColor: AppColors.success.withValues(alpha: 0.1),
                   colorText: AppColors.success,
                 );
+              },
+            ),
+          ),
+          SizedBox(width: sw * 0.025),
+          Expanded(
+            child: CustomButton(
+              text: "Track Shipment",
+              variant: ButtonVariant.primary,
+              buttonColor: AppColors.camel,
+              textColor: AppColors.white,
+              onPressed: () {
+                Get.back();
+                Get.toNamed('/vendor-tracking');
               },
             ),
           ),

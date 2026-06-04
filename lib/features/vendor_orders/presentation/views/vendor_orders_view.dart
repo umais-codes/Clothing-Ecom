@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../controllers/vendor_order_controller.dart';
 import '../../domain/entities/vendor_order.dart';
 import '../widgets/order_details_sheet.dart';
@@ -17,19 +18,11 @@ class VendorOrdersView extends GetView<VendorOrderController> {
 
     return Scaffold(
       backgroundColor: AppColors.offWhite,
-      appBar: AppBar(
+      appBar: const CustomAppBar(
+        title: "Fulfillment Workspace",
         backgroundColor: AppColors.offWhite,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          "Fulfillment Workspace",
-          style: GoogleFonts.outfit(
-            fontSize: context.sp(sw * 0.055),
-            fontWeight: FontWeight.w700,
-            color: AppColors.charcoal,
-          ),
-        ),
-        centerTitle: true,
+        showBackButton: false,
       ),
       body: SafeArea(
         child: Column(
@@ -370,13 +363,14 @@ class VendorOrdersView extends GetView<VendorOrderController> {
       );
     } else if (order.status == 'Processing') {
       return CustomButton(
-        text: "FULFILL & SHIP",
+        text: "Fulfill & Ship",
         variant: ButtonVariant.primary,
         buttonColor: AppColors.camel,
         textColor: AppColors.white,
         height: sw * 0.1,
         fontSize: context.sp(12),
-        onPressed: () => Get.toNamed('/fulfillment-checklist', arguments: order),
+        onPressed: () =>
+            Get.toNamed('/fulfillment-checklist', arguments: order),
       );
     } else if (order.status == 'Returned') {
       return CustomButton(
@@ -410,22 +404,40 @@ class VendorOrdersView extends GetView<VendorOrderController> {
               ),
             ],
           ),
-          CustomButton(
-            text: "Slip",
-            variant: ButtonVariant.outlined,
-            height: 32,
-            width: sw * 0.18,
-            fontSize: context.sp(11),
-            fontWeight: FontWeight.w600,
-            onPressed: () {
-              Get.snackbar(
-                'Slip Generated',
-                'Fulfillment slip for ${order.id} sent to printer.',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: AppColors.success.withValues(alpha: 0.1),
-                colorText: AppColors.success,
-              );
-            },
+          Row(
+            children: [
+              CustomButton(
+                text: "Slip",
+                variant: ButtonVariant.outlined,
+                height: 32,
+                width: sw * 0.16,
+                fontSize: context.sp(10),
+                fontWeight: FontWeight.w600,
+                onPressed: () {
+                  Get.snackbar(
+                    'Slip Generated',
+                    'Fulfillment slip for ${order.id} sent to printer.',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: AppColors.success.withValues(alpha: 0.1),
+                    colorText: AppColors.success,
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              CustomButton(
+                text: "Track",
+                variant: ButtonVariant.primary,
+                buttonColor: AppColors.camel,
+                textColor: AppColors.white,
+                height: 32,
+                width: sw * 0.16,
+                fontSize: context.sp(10),
+                fontWeight: FontWeight.w600,
+                onPressed: () {
+                  Get.toNamed('/vendor-tracking');
+                },
+              ),
+            ],
           ),
         ],
       );

@@ -42,16 +42,16 @@ class RmaHandlingCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.assignment_return_outlined,
                 color: AppColors.error,
-                size: 20,
+                size: sw * 0.05,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: sw * 0.01),
               Text(
                 "Return Details",
                 style: GoogleFonts.outfit(
-                  fontSize: context.sp(11),
+                  fontSize: context.sp(sw * 0.035),
                   fontWeight: FontWeight.w800,
                   color: AppColors.error,
                   letterSpacing: 1.0,
@@ -59,27 +59,26 @@ class RmaHandlingCard extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(color: AppColors.greySubtle, height: 20),
-
+          SizedBox(height: sw * 0.02),
           // Return Reason
           Text(
             "Customer Reason:",
             style: GoogleFonts.outfit(
               fontWeight: FontWeight.w700,
-              fontSize: context.sp(12),
+              fontSize: context.sp(sw * 0.035),
               color: AppColors.charcoal,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: sw * 0.01),
           Text(
             order.returnReason!,
             style: GoogleFonts.outfit(
-              fontSize: context.sp(12),
+              fontSize: context.sp(sw * 0.03),
               color: AppColors.ink,
               height: 1.3,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: sw * 0.03),
 
           // Evidence Photos
           if (order.returnImages != null && order.returnImages!.isNotEmpty) ...[
@@ -87,11 +86,11 @@ class RmaHandlingCard extends StatelessWidget {
               "Customer Uploaded Evidence:",
               style: GoogleFonts.outfit(
                 fontWeight: FontWeight.w700,
-                fontSize: context.sp(11),
+                fontSize: context.sp(sw * 0.035),
                 color: AppColors.charcoal,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: sw * 0.01),
             SizedBox(
               height: sw * 0.22,
               child: ListView.builder(
@@ -100,7 +99,7 @@ class RmaHandlingCard extends StatelessWidget {
                 itemBuilder: (context, idx) {
                   final img = order.returnImages![idx];
                   return Container(
-                    margin: const EdgeInsets.only(right: 8),
+                    margin: EdgeInsets.only(right: sw * 0.02),
                     decoration: BoxDecoration(
                       border: Border.all(color: AppColors.greyLight),
                       borderRadius: BorderRadius.circular(8),
@@ -126,7 +125,7 @@ class RmaHandlingCard extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: sw * 0.03),
           ],
 
           // Decision Actions
@@ -134,7 +133,7 @@ class RmaHandlingCard extends StatelessWidget {
             children: [
               Expanded(
                 child: CustomButton(
-                  text: "REJECT",
+                  text: "Reject Return",
                   variant: ButtonVariant.outlined,
                   textColor: AppColors.error,
                   borderRadius: sw * 0.025,
@@ -145,10 +144,10 @@ class RmaHandlingCard extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: sw * 0.03),
               Expanded(
                 child: CustomButton(
-                  text: "APPROVE RETURN",
+                  text: "Approve Return",
                   variant: ButtonVariant.primary,
                   buttonColor: AppColors.camel,
                   textColor: AppColors.white,

@@ -97,36 +97,46 @@ class DiscoveryScreen extends StatelessWidget {
   }
 
   // --- App Bar ---
-  PreferredSizeWidget _buildAppBar(BuildContext context, double sw, AuthController authController) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    double sw,
+    AuthController authController,
+  ) {
     return CustomAppBar(
-      title: 'DISCOVER',
+      title: 'Discover',
       showBackButton: false,
       actions: [
         // Role Switch Indicator for easy testing
         Obx(() {
           final role = authController.selectedRole.value;
           final isB2B = role == AuthRole.corporate;
-          return Container(
-            alignment: Alignment.center,
-            margin: EdgeInsets.only(right: sw * 0.02),
-            padding: EdgeInsets.symmetric(
-              horizontal: sw * 0.025,
-              vertical: sw * 0.01,
-            ),
-            decoration: BoxDecoration(
-              color: isB2B ? AppColors.camelLight : AppColors.greySubtle,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isB2B ? AppColors.camel : AppColors.greyLight,
-                width: 1,
+          return Center(
+            child: Container(
+              margin: EdgeInsets.only(right: sw * 0.01),
+              padding: EdgeInsets.symmetric(
+                horizontal: sw * 0.025,
+                vertical: 6,
               ),
-            ),
-            child: Text(
-              isB2B ? 'B2B' : 'B2C',
-              style: GoogleFonts.outfit(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: isB2B ? AppColors.camel : AppColors.charcoal,
+              decoration: BoxDecoration(
+                color: isB2B
+                    ? AppColors.camel.withValues(alpha: 0.08)
+                    : AppColors.charcoal.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isB2B
+                      ? AppColors.camel.withValues(alpha: 0.2)
+                      : AppColors.charcoal.withValues(alpha: 0.15),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                isB2B ? 'B2B' : 'B2C',
+                style: GoogleFonts.outfit(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: isB2B ? AppColors.camel : AppColors.charcoal,
+                ),
               ),
             ),
           );

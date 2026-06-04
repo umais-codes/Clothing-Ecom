@@ -1,6 +1,6 @@
 // lib/features/super_admin/presentation/screens/financial_ledger_screen.dart
 //
-// Stripe Connect split-payment master ledger.
+// Safepay Connect split-payment master ledger.
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,13 +30,16 @@ class FinancialLedgerScreen extends GetView<AdminController> {
           // ── Header ─────────────────────────────────────────────────────────
           ScreenHeader(
             title: 'Financial & Commission Ledger',
-            subtitle: 'Stripe Connect split-payment routing overview',
+            subtitle: 'Safepay Connect split-payment routing overview',
           ),
 
           // ── Summary Strip ──────────────────────────────────────────────────
           Obx(
             () => Container(
-              margin: EdgeInsets.symmetric(horizontal: outerMargin, vertical: 8),
+              margin: EdgeInsets.symmetric(
+                horizontal: outerMargin,
+                vertical: 8,
+              ),
               padding: EdgeInsets.symmetric(
                 horizontal: innerPadding,
                 vertical: context.hp(1.2).clamp(8.0, 14.0),

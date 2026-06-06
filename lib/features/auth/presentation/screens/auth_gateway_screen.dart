@@ -72,7 +72,7 @@ class AuthGatewayScreen extends StatelessWidget {
                     ),
                     SizedBox(height: w * 0.01),
                     Text(
-                      'Welcome to Aura',
+                      'Welcome to Velvet Maison',
                       style: theme.textTheme.displayMedium?.copyWith(
                         color: AppColors.charcoal,
                         fontWeight: FontWeight.w600,
@@ -131,7 +131,9 @@ class AuthGatewayScreen extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.white,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(w * 0.05)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(w * 0.05),
+                    ),
                     boxShadow: const [
                       BoxShadow(
                         color: Color(0x08000000),
@@ -141,7 +143,9 @@ class AuthGatewayScreen extends StatelessWidget {
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(w * 0.05)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(w * 0.05),
+                    ),
                     child: TabBarView(
                       physics: const NeverScrollableScrollPhysics(),
                       children: [

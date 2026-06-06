@@ -53,7 +53,7 @@ class PendingApprovalScreen extends StatelessWidget {
               SizedBox(height: h * 0.01),
 
               Text(
-                'Thank you for applying to be an Aura Partner. Our team will review your KYC documents and get back to you within 24-48 hours.',
+                'Thank you for applying to be an Velvet Maison Partner. Our team will review your KYC documents and get back to you within 24-48 hours.',
                 style: GoogleFonts.outfit(
                   fontSize: w * 0.032,
                   color: AppColors.grey,

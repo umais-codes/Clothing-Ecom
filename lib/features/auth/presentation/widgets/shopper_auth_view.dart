@@ -59,7 +59,7 @@ class ShopperAuthView extends StatelessWidget {
 
           // Rich Typography
           Text(
-            'Welcome to Aura',
+            'Welcome to Velvet Maison',
             style: theme.textTheme.displayMedium?.copyWith(
               color: AppColors.charcoal,
               fontWeight: .w700,

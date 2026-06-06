@@ -117,13 +117,13 @@ class OrderSummaryBottomBar extends StatelessWidget {
             Obx(
               () => CustomButton(
                 height: sw * 0.12,
-                text: 'Proceed to Stripe Checkout',
+                text: 'Proceed to Safepay Checkout',
                 onPressed: controller.cartItems.isEmpty
                     ? null
                     : () {
                         Get.snackbar(
                           'Checkout',
-                          'Navigating to Stripe...',
+                          'Navigating to Safepay...',
                           backgroundColor: AppColors.camel,
                           colorText: AppColors.white,
                           snackPosition: .TOP,

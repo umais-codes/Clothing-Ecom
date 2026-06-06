@@ -73,7 +73,7 @@ class VendorAuthView extends StatelessWidget {
             () => Text(
               controller.isVendorLogin.value
                   ? 'Log in to manage your brand portal.'
-                  : 'Reach millions of shoppers with Aura.',
+                  : 'Reach millions of shoppers with Velvet Maison.',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: AppColors.grey,
                 height: 1.5,

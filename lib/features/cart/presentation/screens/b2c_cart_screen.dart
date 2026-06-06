@@ -93,7 +93,7 @@ class B2CCartScreen extends StatelessWidget {
                   text: "Checkout",
                   width: sw * 0.3,
                   height: sw * 0.11,
-                  onPressed: () {},
+                  onPressed: () => Get.toNamed('/checkout', arguments: {'isB2B': false}),
                   textColor: AppColors.white,
                   buttonColor: AppColors.camel,
                 ),

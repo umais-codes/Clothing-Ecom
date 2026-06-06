@@ -29,9 +29,24 @@ class CartItemTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(sw * 0.03),
         border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.4)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: InkWell(
+        borderRadius: BorderRadius.circular(sw * 0.03),
+        onTap: () {
+          final parts = item.id.split('_');
+          final productId = (parts.length >= 2) ? "${parts[0]}_${parts[1]}" : item.id;
+          final productMap = {
+            'id': productId,
+            'name': item.name,
+            'price': item.price,
+            'image': item.imageUrl,
+            'isB2B': item.isB2B,
+            'vendor': item.vendorName,
+          };
+          Get.toNamed('/product-details', arguments: productMap);
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           ///  IMAGE (TIGHTER)
           CustomNetworkImage(
             imageUrl: item.imageUrl,
@@ -119,8 +134,9 @@ class CartItemTile extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildQuantityControl(CartController controller, double sw) {
     return Obx(() {

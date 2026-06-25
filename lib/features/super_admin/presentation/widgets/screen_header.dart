@@ -56,7 +56,7 @@ class ScreenHeader extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.cormorantGaramond(
+                  style: GoogleFonts.playfairDisplay(
                     fontSize: titleSize,
                     fontWeight: FontWeight.w700,
                     color: AppColors.charcoal,

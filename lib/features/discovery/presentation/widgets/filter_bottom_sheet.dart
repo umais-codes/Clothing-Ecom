@@ -55,7 +55,7 @@ class FilterBottomSheet extends StatelessWidget {
                 children: [
                   Text(
                     'Refine Selection',
-                    style: GoogleFonts.cormorantGaramond(
+                    style: GoogleFonts.playfairDisplay(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
                       color: AppColors.charcoal,
@@ -144,7 +144,7 @@ class FilterBottomSheet extends StatelessWidget {
                     const Divider(color: AppColors.greyLight, height: 32),
                     Text(
                       'Corporate Sourcing',
-                      style: GoogleFonts.cormorantGaramond(
+                      style: GoogleFonts.playfairDisplay(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         color: AppColors.camel,
@@ -198,7 +198,7 @@ class FilterBottomSheet extends StatelessWidget {
   Widget _buildSectionTitle(String title, double sw) {
     return Text(
       title,
-      style: GoogleFonts.cormorantGaramond(
+      style: GoogleFonts.playfairDisplay(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         color: AppColors.charcoal,

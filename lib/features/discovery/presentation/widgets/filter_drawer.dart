@@ -10,6 +10,7 @@ class FilterDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
     final DiscoveryController controller = Get.find<DiscoveryController>();
 
     return Drawer(
@@ -19,13 +20,13 @@ class FilterDrawer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(w * 0.04),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     'Filters',
-                    style: GoogleFonts.cormorantGaramond(
+                    style: GoogleFonts.playfairDisplay(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
                       color: AppColors.charcoal,
@@ -39,30 +40,30 @@ class FilterDrawer extends StatelessWidget {
               ),
             ),
             const Divider(color: AppColors.greyLight, height: 1),
-            
+
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(24.0),
+                padding: EdgeInsets.all(w * 0.04),
                 children: [
                   _buildSectionTitle('Size'),
-                  const SizedBox(height: 16),
+                  SizedBox(height: w * 0.02),
                   _buildSizeOptions(controller),
-                  
-                  const SizedBox(height: 32),
-                  
+
+                  SizedBox(height: w * 0.04),
+
                   _buildSectionTitle('Color'),
-                  const SizedBox(height: 16),
+                  SizedBox(height: w * 0.02),
                   _buildColorOptions(controller),
-                  
-                  const SizedBox(height: 32),
-                  
+
+                  SizedBox(height: w * 0.04),
+
                   _buildSectionTitle('Price Range'),
-                  const SizedBox(height: 16),
+                  SizedBox(height: w * 0.02),
                   _buildPriceSlider(controller),
                 ],
               ),
             ),
-            
+
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: CustomButton(
@@ -142,7 +143,7 @@ class FilterDrawer extends StatelessWidget {
       children: colors.map((c) {
         final colorName = c['name'] as String;
         final colorValue = c['color'] as Color;
-        
+
         return Obx(() {
           final isSelected = controller.selectedColors.contains(colorName);
           return GestureDetector(
@@ -155,17 +156,14 @@ class FilterDrawer extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: colorValue,
-                    border: Border.all(
-                      color: AppColors.greyLight,
-                      width: 1,
-                    ),
+                    border: Border.all(color: AppColors.greyLight, width: 1),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
                               color: colorValue.withValues(alpha: 0.4),
                               blurRadius: 8,
                               spreadRadius: 2,
-                            )
+                            ),
                           ]
                         : null,
                   ),
@@ -173,7 +171,9 @@ class FilterDrawer extends StatelessWidget {
                       ? Icon(
                           Icons.check,
                           size: 16,
-                          color: colorValue == Colors.white ? Colors.black : Colors.white,
+                          color: colorValue == Colors.white
+                              ? Colors.black
+                              : Colors.white,
                         )
                       : null,
                 ),
@@ -194,26 +194,43 @@ class FilterDrawer extends StatelessWidget {
   }
 
   Widget _buildPriceSlider(DiscoveryController controller) {
-    return Obx(() => Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('\$${controller.priceMin.value.toStringAsFixed(0)}', style: GoogleFonts.outfit(color: AppColors.charcoal, fontWeight: FontWeight.w500)),
-            Text('\$${controller.priceMax.value.toStringAsFixed(0)}', style: GoogleFonts.outfit(color: AppColors.charcoal, fontWeight: FontWeight.w500)),
-          ],
-        ),
-        RangeSlider(
-          values: RangeValues(controller.priceMin.value, controller.priceMax.value),
-          min: 0,
-          max: 1000,
-          activeColor: AppColors.camel,
-          inactiveColor: AppColors.greyLight,
-          onChanged: (values) {
-            controller.updatePriceRange(values.start, values.end);
-          },
-        ),
-      ],
-    ));
+    return Obx(
+      () => Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '\$${controller.priceMin.value.toStringAsFixed(0)}',
+                style: GoogleFonts.outfit(
+                  color: AppColors.charcoal,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                '\$${controller.priceMax.value.toStringAsFixed(0)}',
+                style: GoogleFonts.outfit(
+                  color: AppColors.charcoal,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          RangeSlider(
+            values: RangeValues(
+              controller.priceMin.value,
+              controller.priceMax.value,
+            ),
+            min: 0,
+            max: 1000,
+            activeColor: AppColors.camel,
+            inactiveColor: AppColors.greyLight,
+            onChanged: (values) {
+              controller.updatePriceRange(values.start, values.end);
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

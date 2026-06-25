@@ -27,6 +27,7 @@ class OnboardingController extends GetxController {
   final RxDouble height = 170.0.obs;
   final RxDouble weight = 65.0.obs;
   final RxString selectedFit = 'Regular'.obs;
+  final RxBool hasPersonalized = false.obs;
 
   // --- Auth ---
   final TextEditingController phoneController = TextEditingController();

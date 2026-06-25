@@ -7,6 +7,7 @@ import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dar
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:uuid/uuid.dart';
 
 enum AuthRole { shopper, vendor, corporate, admin }
@@ -62,13 +63,37 @@ class AuthController extends GetxController {
     status.value = AuthStatus.initial;
   }
 
-  Future<void> _createProfile(String userId, String role, {String? fullName, String? vendorId}) async {
+  Future<void> _createProfile(
+    String userId,
+    String role, {
+    String? fullName,
+    String? vendorId,
+  }) async {
+    double? heightVal;
+    double? weightVal;
+    String? fitPreferenceVal;
+    List<String>? categoriesVal;
+
+    if (Get.isRegistered<OnboardingController>()) {
+      final onboarding = Get.find<OnboardingController>();
+      if (onboarding.hasPersonalized.value) {
+        heightVal = onboarding.height.value;
+        weightVal = onboarding.weight.value;
+        fitPreferenceVal = onboarding.selectedFit.value;
+        categoriesVal = onboarding.selectedCategories.toList();
+      }
+    }
+
     try {
       await _supabase.from('profiles').upsert({
         'id': userId,
         'full_name': fullName ?? 'User',
         'role': role,
         'vendor_id': vendorId,
+        'height': heightVal,
+        'weight': weightVal,
+        'fit_preference': fitPreferenceVal,
+        'shopping_categories': categoriesVal,
       });
     } catch (e) {
       debugPrint('Error creating profile: $e');
@@ -138,7 +163,8 @@ class AuthController extends GetxController {
             return; // User canceled the native sign-in dialog
           }
 
-          final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication;
           final idToken = googleAuth.idToken;
           final accessToken = googleAuth.accessToken;
 
@@ -156,7 +182,9 @@ class AuthController extends GetxController {
             await _createProfile(
               response.user!.id,
               'shopper',
-              fullName: response.user!.userMetadata?['full_name'] ?? googleUser.displayName,
+              fullName:
+                  response.user!.userMetadata?['full_name'] ??
+                  googleUser.displayName,
             );
             status.value = AuthStatus.success;
             selectedRole.value = AuthRole.shopper;
@@ -164,8 +192,9 @@ class AuthController extends GetxController {
             return;
           }
         } catch (nativeError) {
-          debugPrint('Native Google Sign-In failed or was unconfigured, falling back to Web OAuth: $nativeError');
-          // If native Google Sign-In fails or is unconfigured, fall back to browser OAuth flow
+          debugPrint(
+            'Native Google Sign-In failed or was unconfigured, falling back to Web OAuth: $nativeError',
+          );
         }
       }
 
@@ -177,7 +206,7 @@ class AuthController extends GetxController {
       } else {
         throw 'Unsupported provider';
       }
-      
+
       // Web-based OAuth Redirect fallback
       await _supabase.auth.signInWithOAuth(
         oauthProvider,
@@ -267,14 +296,18 @@ class AuthController extends GetxController {
             status: KycStatus.pending,
             cnicDocUrl: 'https://picsum.photos/seed/newcnic/800/600',
             secpDocUrl: 'https://picsum.photos/seed/newsecp/800/600',
-            bio: 'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
+            bio:
+                'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
             city: 'Karachi',
           );
           adminCtrl.kycQueue.insert(0, newVendor);
         } catch (_) {}
 
         status.value = AuthStatus.pendingApproval;
-        Get.to(() => const PendingApprovalScreen(), transition: Transition.fadeIn);
+        Get.to(
+          () => const PendingApprovalScreen(),
+          transition: Transition.fadeIn,
+        );
       }
     } catch (e) {
       _showError('Vendor registration failed: $e');

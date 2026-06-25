@@ -189,20 +189,26 @@ class PersonalizationScreen extends GetView<OnboardingController> {
                     // ── CTA ─────────────────────────────────────────────────
                     CustomButton(
                       text: 'Continue',
-                      onPressed: controller.nextPage,
+                      onPressed: () {
+                        controller.hasPersonalized.value = true;
+                        controller.nextPage();
+                      },
                     ),
 
                     SizedBox(height: h * 0.01),
 
                     Center(
                       child: GestureDetector(
-                        onTap: controller.nextPage,
+                        onTap: () {
+                          controller.hasPersonalized.value = false;
+                          controller.nextPage();
+                        },
                         child: Text(
                           'Skip for now',
                           style: GoogleFonts.outfit(
                             fontSize: w * 0.03,
                             color: AppColors.grey,
-                            decoration: .underline,
+                            decoration: TextDecoration.underline,
                             decorationColor: AppColors.grey,
                           ),
                         ),

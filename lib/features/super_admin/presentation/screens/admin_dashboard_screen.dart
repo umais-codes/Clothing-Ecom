@@ -36,7 +36,7 @@ class AdminDashboardScreen extends GetView<AdminController> {
                       Expanded(
                         child: Text(
                           'Good evening, Admin.',
-                          style: GoogleFonts.cormorantGaramond(
+                          style: GoogleFonts.playfairDisplay(
                             fontSize: titleSize,
                             fontWeight: FontWeight.w700,
                             color: AppColors.charcoal,

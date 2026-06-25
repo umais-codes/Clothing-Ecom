@@ -114,7 +114,7 @@ class MonetizationDashboardScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.cormorantGaramond(
+            style: GoogleFonts.playfairDisplay(
               fontSize: context.responsive(
                 mobile: w * 0.045,
                 tablet: w * 0.055,

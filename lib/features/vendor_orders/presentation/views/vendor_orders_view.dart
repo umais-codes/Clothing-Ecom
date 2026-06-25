@@ -131,7 +131,7 @@ class VendorOrdersView extends GetView<VendorOrderController> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(sw * 0.05),
+            padding: EdgeInsets.all(sw * 0.04),
             decoration: BoxDecoration(
               color: AppColors.white,
               shape: BoxShape.circle,
@@ -151,7 +151,7 @@ class VendorOrdersView extends GetView<VendorOrderController> {
           SizedBox(height: sw * 0.05),
           Text(
             "No Orders Found",
-            style: GoogleFonts.cormorantGaramond(
+            style: GoogleFonts.playfairDisplay(
               fontSize: context.sp(20),
               fontWeight: FontWeight.w700,
               color: AppColors.charcoal,

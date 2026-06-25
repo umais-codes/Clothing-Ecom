@@ -27,7 +27,7 @@ class AdminController extends GetxController {
     ),
     const ActivityFeedItem(
       id: 'act-002',
-      title: 'Stripe payout processed',
+      title: 'Safepay payout processed',
       subtitle: 'PKR 45,200 routed to Zara Couture.',
       type: ActivityType.payout,
       time: '14 mins ago',

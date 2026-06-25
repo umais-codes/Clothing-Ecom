@@ -76,8 +76,9 @@ class PdpView extends GetView<PdpController> {
                 /// 🌟 RATING SUMMARY BADGE (CLICKABLE)
                 if (controller.product['isB2B'] != true) ...[
                   Obx(() {
-                    if (controller.reviews.isEmpty)
+                    if (controller.reviews.isEmpty) {
                       return const SizedBox.shrink();
+                    }
                     return InkWell(
                       onTap: () => _scrollToReviews(scrollController),
                       borderRadius: BorderRadius.circular(8),

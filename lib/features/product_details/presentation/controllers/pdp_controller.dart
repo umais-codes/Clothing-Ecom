@@ -100,8 +100,9 @@ class PdpController extends GetxController {
   }
 
   List<Map<String, dynamic>> _getMockReviewsForProduct(String id) {
-    if (product['isB2B'] == true)
+    if (product['isB2B'] == true) {
       return []; // No reviews for wholesale B2B items
+    }
 
     final List<Map<String, dynamic>> baseReviews = [
       {

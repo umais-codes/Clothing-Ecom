@@ -230,7 +230,7 @@ class ReviewController extends GetxController {
             ),
           );
         },
-        transitionBuilder: (context, anim, __, child) {
+        transitionBuilder: (context, anim, _, child) {
           return ScaleTransition(
             scale: CurvedAnimation(parent: anim, curve: Curves.elasticOut),
             child: child,

@@ -281,7 +281,7 @@ class B2BCartScreen extends StatelessWidget {
                   child: CustomButton(
                     text: "Request Quote",
                     variant: ButtonVariant.outlined,
-                    onPressed: () => controller.requestQuote(),
+                    onPressed: () => Get.toNamed('/checkout', arguments: {'isB2B': true, 'initialOption': 'Quote'}),
                   ),
                 ),
                 SizedBox(width: sw * 0.03),
@@ -289,7 +289,7 @@ class B2BCartScreen extends StatelessWidget {
                   child: CustomButton(
                     text: "Submit PO",
                     variant: ButtonVariant.primary,
-                    onPressed: () => controller.submitPurchaseOrder(),
+                    onPressed: () => Get.toNamed('/checkout', arguments: {'isB2B': true, 'initialOption': 'PO'}),
                   ),
                 ),
               ],

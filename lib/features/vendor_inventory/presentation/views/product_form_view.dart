@@ -71,6 +71,10 @@ class ProductFormView extends StatelessWidget {
               _buildPricingCard(controller, sw),
               SizedBox(height: sw * 0.012),
 
+              _buildSectionTitle('Wholesale Options (B2B)', sw),
+              _buildB2BConfigCard(controller, sw),
+              SizedBox(height: sw * 0.012),
+
               CustomButton(
                 text: 'Publish Product',
                 onPressed: controller.saveProduct,
@@ -268,6 +272,66 @@ class ProductFormView extends StatelessWidget {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         prefixIcon: Icon(Icons.attach_money, color: AppColors.charcoal),
         onChanged: (_) => controller.saveDraft(),
+      ),
+    );
+  }
+
+  Widget _buildB2BConfigCard(ProductCrudController controller, double sw) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: sw * 0.02, horizontal: sw * 0.03),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(sw * 0.03),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.charcoal.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: Offset.zero,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Obx(
+            () => SwitchListTile(
+              title: Text(
+                'List as B2B Product',
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.charcoal,
+                ),
+              ),
+              subtitle: Text(
+                'Show this product on the B2B Sourcing Portal instead of the B2C shop.',
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: AppColors.grey,
+                ),
+              ),
+              value: controller.isB2B.value,
+              activeThumbColor: AppColors.camel,
+              onChanged: (val) {
+                controller.isB2B.value = val;
+                controller.saveDraft();
+              },
+            ),
+          ),
+          Obx(() {
+            if (!controller.isB2B.value) return const SizedBox.shrink();
+            return Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: CustomTextField(
+                controller: controller.moqController,
+                hinttext: 'Minimum Order Quantity (MOQ)',
+                textAlign: TextAlign.left,
+                keyboardType: TextInputType.number,
+                prefixIcon: Icon(Icons.production_quantity_limits_rounded, color: AppColors.charcoal),
+                onChanged: (_) => controller.saveDraft(),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

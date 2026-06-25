@@ -19,6 +19,8 @@ class ProductCrudController extends GetxController {
   late final TextEditingController descriptionController;
   final RxString selectedCategory = "Men's".obs;
   late final TextEditingController basePriceController;
+  final RxBool isB2B = false.obs;
+  late final TextEditingController moqController;
 
   final RxList<ProductVariant> variants = <ProductVariant>[].obs;
   final RxList<String> imageUrls = <String>[].obs;
@@ -29,6 +31,7 @@ class ProductCrudController extends GetxController {
     titleController = TextEditingController();
     descriptionController = TextEditingController();
     basePriceController = TextEditingController();
+    moqController = TextEditingController(text: '1');
 
     _loadProducts();
     _loadDraft();
@@ -39,6 +42,7 @@ class ProductCrudController extends GetxController {
     titleController.dispose();
     descriptionController.dispose();
     basePriceController.dispose();
+    moqController.dispose();
     super.onClose();
   }
 
@@ -72,6 +76,8 @@ class ProductCrudController extends GetxController {
         basePriceController.text =
             draft.basePrice > 0 ? draft.basePrice.toString() : '';
       }
+      isB2B.value = draft.isB2B;
+      moqController.text = draft.moq.toString();
       variants.assignAll(draft.variants);
       imageUrls.assignAll(draft.imageUrls);
     }
@@ -87,6 +93,9 @@ class ProductCrudController extends GetxController {
       variants: variants.toList(),
       imageUrls: imageUrls.toList(),
       isDraft: true,
+      isB2B: isB2B.value,
+      moq: int.tryParse(moqController.text) ?? 1,
+      sourcingType: isB2B.value ? 'Private Label' : 'Ready to Ship',
     );
     _repository.saveDraft(draft);
   }
@@ -143,6 +152,9 @@ class ProductCrudController extends GetxController {
         variants: variants.toList(),
         imageUrls: imageUrls.toList(),
         isDraft: false,
+        isB2B: isB2B.value,
+        moq: int.tryParse(moqController.text) ?? 1,
+        sourcingType: isB2B.value ? 'Private Label' : 'Ready to Ship',
       );
 
       await _repository.saveProduct(product);
@@ -169,6 +181,8 @@ class ProductCrudController extends GetxController {
     descriptionController.clear();
     selectedCategory.value = AppConstants.categories.first;
     basePriceController.clear();
+    isB2B.value = false;
+    moqController.text = '1';
     variants.clear();
     imageUrls.clear();
     await _repository.clearDraft();

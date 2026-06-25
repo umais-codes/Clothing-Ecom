@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 
 class SplashController extends GetxController {
@@ -20,14 +20,10 @@ class SplashController extends GetxController {
 
   Future<void> _navigateToNextScreen() async {
     try {
-      final supabase = Get.find<SupabaseService>().client;
-      final user = supabase.auth.currentUser;
+      final authRepo = Get.find<AuthRepository>();
+      final user = authRepo.currentUser;
       if (user != null) {
-        final data = await supabase
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .maybeSingle();
+        final data = await authRepo.getProfile(user.id);
         if (data != null) {
           final authCtrl = Get.find<AuthController>();
           final roleStr = data['role']?.toString();

@@ -4,9 +4,7 @@ import 'package:ecom_app/features/auth/presentation/screens/pending_approval_scr
 import 'package:file_picker/file_picker.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,8 +13,10 @@ enum AuthRole { shopper, vendor, corporate, admin }
 enum AuthStatus { initial, loading, success, pendingApproval, error }
 
 class AuthController extends GetxController {
-  final SupabaseClient _supabase = Get.find<SupabaseService>().client;
+  final AuthRepository _authRepository;
   final Uuid uuid = const Uuid();
+
+  AuthController(this._authRepository);
 
   final Rx<AuthRole> selectedRole = AuthRole.shopper.obs;
 
@@ -85,16 +85,16 @@ class AuthController extends GetxController {
     }
 
     try {
-      await _supabase.from('profiles').upsert({
-        'id': userId,
-        'full_name': fullName ?? 'User',
-        'role': role,
-        'vendor_id': vendorId,
-        'height': heightVal,
-        'weight': weightVal,
-        'fit_preference': fitPreferenceVal,
-        'shopping_categories': categoriesVal,
-      });
+      await _authRepository.createProfile(
+        userId: userId,
+        role: role,
+        fullName: fullName,
+        vendorId: vendorId,
+        height: heightVal,
+        weight: weightVal,
+        fitPreference: fitPreferenceVal,
+        categories: categoriesVal,
+      );
     } catch (e) {
       debugPrint('Error creating profile: $e');
     }
@@ -108,13 +108,11 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
-      await _supabase.auth.signInWithOtp(
-        phone: shopperPhoneController.text.trim(),
-      );
+      await _authRepository.sendOtp(shopperPhoneController.text.trim());
       status.value = AuthStatus.initial;
       showShopperOtpField.value = true;
     } catch (e) {
-      _showError('Failed to send OTP: $e');
+      _showError(_cleanMessage(e));
     }
   }
 
@@ -125,13 +123,12 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
-      final res = await _supabase.auth.verifyOTP(
-        type: OtpType.sms,
-        token: shopperOtpController.text.trim(),
-        phone: shopperPhoneController.text.trim(),
+      final user = await _authRepository.verifyOtp(
+        shopperPhoneController.text.trim(),
+        shopperOtpController.text.trim(),
       );
-      if (res.user != null) {
-        await _createProfile(res.user!.id, 'shopper', fullName: 'Shopper User');
+      if (user != null) {
+        await _createProfile(user.id, 'shopper', fullName: 'Shopper User');
         status.value = AuthStatus.success;
         selectedRole.value = AuthRole.shopper;
         Get.offAllNamed('/main-navigation');
@@ -139,81 +136,28 @@ class AuthController extends GetxController {
         _showError('Invalid OTP code.');
       }
     } catch (e) {
-      _showError('OTP verification failed: $e');
+      _showError(_cleanMessage(e));
     }
   }
 
   void continueWithSocial(String provider) async {
     status.value = AuthStatus.loading;
     try {
-      if (provider.toLowerCase() == 'google') {
-        try {
-          // Native Google Sign-In Setup (can be customized via environment defines)
-          const webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
-          const iosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
-
-          final GoogleSignIn googleSignIn = GoogleSignIn(
-            clientId: iosClientId.isNotEmpty ? iosClientId : null,
-            serverClientId: webClientId.isNotEmpty ? webClientId : null,
-          );
-
-          final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-          if (googleUser == null) {
-            status.value = AuthStatus.initial;
-            return; // User canceled the native sign-in dialog
-          }
-
-          final GoogleSignInAuthentication googleAuth =
-              await googleUser.authentication;
-          final idToken = googleAuth.idToken;
-          final accessToken = googleAuth.accessToken;
-
-          if (idToken == null) {
-            throw 'Google Sign-In succeeded but did not return an ID Token.';
-          }
-
-          final response = await _supabase.auth.signInWithIdToken(
-            provider: OAuthProvider.google,
-            idToken: idToken,
-            accessToken: accessToken,
-          );
-
-          if (response.user != null) {
-            await _createProfile(
-              response.user!.id,
-              'shopper',
-              fullName:
-                  response.user!.userMetadata?['full_name'] ??
-                  googleUser.displayName,
-            );
-            status.value = AuthStatus.success;
-            selectedRole.value = AuthRole.shopper;
-            Get.offAllNamed('/main-navigation');
-            return;
-          }
-        } catch (nativeError) {
-          debugPrint(
-            'Native Google Sign-In failed or was unconfigured, falling back to Web OAuth: $nativeError',
-          );
-        }
-      }
-
-      OAuthProvider oauthProvider;
-      if (provider.toLowerCase() == 'google') {
-        oauthProvider = OAuthProvider.google;
-      } else if (provider.toLowerCase() == 'apple') {
-        oauthProvider = OAuthProvider.apple;
+      final user = await _authRepository.signInWithSocialProvider(provider);
+      if (user != null) {
+        await _createProfile(
+          user.id,
+          'shopper',
+          fullName: user.userMetadata?['full_name'] ?? 'Shopper User',
+        );
+        status.value = AuthStatus.success;
+        selectedRole.value = AuthRole.shopper;
+        Get.offAllNamed('/main-navigation');
       } else {
-        throw 'Unsupported provider';
+        status.value = AuthStatus.initial;
       }
-
-      // Web-based OAuth Redirect fallback
-      await _supabase.auth.signInWithOAuth(
-        oauthProvider,
-        redirectTo: 'io.supabase.ecomapp://login-callback',
-      );
     } catch (e) {
-      _showError('Social sign in failed: $e');
+      _showError(_cleanMessage(e));
     }
   }
 
@@ -259,23 +203,23 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
-      final response = await _supabase.auth.signUp(
+      final user = await _authRepository.signUp(
         email: vendorEmailController.text.trim(),
         password: vendorPasswordController.text.trim(),
       );
 
-      if (response.user != null) {
+      if (user != null) {
         final vendorId = uuid.v4();
 
-        await _supabase.from('vendors').insert({
-          'id': vendorId,
-          'brand_name': brandNameController.text.trim(),
-          'owner_id': response.user!.id,
-          'kyc_status': 'pending',
-        });
+        await _authRepository.createVendor(
+          id: vendorId,
+          brandName: brandNameController.text.trim(),
+          ownerId: user.id,
+          kycStatus: 'pending',
+        );
 
         await _createProfile(
-          response.user!.id,
+          user.id,
           'vendor',
           fullName: contactPersonController.text.trim(),
           vendorId: vendorId,
@@ -310,7 +254,7 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
-      _showError('Vendor registration failed: $e');
+      _showError(_cleanMessage(e));
     }
   }
 
@@ -322,11 +266,11 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
-      final response = await _supabase.auth.signInWithPassword(
+      final user = await _authRepository.signInWithPassword(
         email: vendorEmailController.text.trim(),
         password: vendorPasswordController.text.trim(),
       );
-      if (response.user != null) {
+      if (user != null) {
         status.value = AuthStatus.success;
         selectedRole.value = AuthRole.vendor;
         Get.offAllNamed('/main-navigation');
@@ -337,7 +281,7 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
-      _showError('Authentication failed: $e');
+      _showError(_cleanMessage(e));
     }
   }
 
@@ -351,13 +295,13 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
-      final response = await _supabase.auth.signUp(
+      final user = await _authRepository.signUp(
         email: corporateEmailController.text.trim(),
         password: corporatePasswordController.text.trim(),
       );
-      if (response.user != null) {
+      if (user != null) {
         await _createProfile(
-          response.user!.id,
+          user.id,
           'corporate',
           fullName: companyNameController.text.trim(),
         );
@@ -366,7 +310,7 @@ class AuthController extends GetxController {
         Get.offAllNamed('/main-navigation');
       }
     } catch (e) {
-      _showError('Corporate registration failed: $e');
+      _showError(_cleanMessage(e));
     }
   }
 
@@ -378,11 +322,11 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
-      final response = await _supabase.auth.signInWithPassword(
+      final user = await _authRepository.signInWithPassword(
         email: corporateEmailController.text.trim(),
         password: corporatePasswordController.text.trim(),
       );
-      if (response.user != null) {
+      if (user != null) {
         status.value = AuthStatus.success;
         selectedRole.value = AuthRole.corporate;
         Get.offAllNamed('/main-navigation');
@@ -393,7 +337,7 @@ class AuthController extends GetxController {
         );
       }
     } catch (e) {
-      _showError('Authentication failed: $e');
+      _showError(_cleanMessage(e));
     }
   }
 
@@ -409,6 +353,14 @@ class AuthController extends GetxController {
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
     );
+  }
+
+  String _cleanMessage(dynamic e) {
+    final str = e.toString();
+    if (str.startsWith('Exception: ')) {
+      return str.substring(11);
+    }
+    return str;
   }
 
   @override

@@ -13,9 +13,18 @@ class MainNavigationScreen extends GetView<MainNavigationController> {
       backgroundColor: AppColors.offWhite,
       extendBody: true,
       body: Obx(
-        () => IndexedStack(
-          index: controller.selectedIndex.value,
-          children: controller.pages,
+        () => PopScope(
+          canPop: controller.selectedIndex.value == 0,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            if (controller.selectedIndex.value != 0) {
+              controller.changeTab(0);
+            }
+          },
+          child: IndexedStack(
+            index: controller.selectedIndex.value,
+            children: controller.pages,
+          ),
         ),
       ),
       bottomNavigationBar: CustomFloatingNavBar(controller: controller),

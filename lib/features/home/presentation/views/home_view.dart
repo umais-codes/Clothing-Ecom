@@ -38,6 +38,16 @@ class HomeView extends GetView<HomeController> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: sw * 0.04),
       child: Obx(() {
+        if (controller.isLoading.value) {
+          return Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: sw * 0.15),
+            child: const Center(
+              child: CircularProgressIndicator(color: AppColors.camel),
+            ),
+          );
+        }
+
         final products = controller.filteredProducts;
 
         if (products.isEmpty) {

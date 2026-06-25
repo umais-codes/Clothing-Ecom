@@ -9,7 +9,6 @@ import '../../../../features/vendor_inventory/domain/repositories/inventory_repo
 import '../../../../features/vendor_inventory/data/repositories/inventory_repository_impl.dart';
 import '../../../../features/vendor_inventory/presentation/controllers/product_crud_controller.dart';
 import '../../../../features/discovery/domain/repositories/discovery_repository.dart';
-import '../../../../features/discovery/data/repositories/discovery_repository_impl.dart';
 import '../../../../features/discovery/presentation/controllers/filter_controller.dart';
 import '../../../../features/discovery/presentation/controllers/discovery_controller.dart';
 
@@ -27,7 +26,6 @@ class MainNavigationBinding extends Bindings {
     Get.lazyPut<ProductCrudController>(() => ProductCrudController(Get.find()));
 
     // Discovery Dependencies
-    Get.lazyPut<DiscoveryRepository>(() => DiscoveryRepositoryImpl());
     Get.lazyPut<FilterController>(
       () => FilterController(Get.find<DiscoveryRepository>()),
     );

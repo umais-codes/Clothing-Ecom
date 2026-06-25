@@ -32,6 +32,11 @@ class VendorProduct {
   @HiveField(8)
   final bool isDraft;
 
+  // Non-Hive fields for Supabase mapping
+  final bool isB2B;
+  final int moq;
+  final String sourcingType;
+
   VendorProduct({
     required this.id,
     required this.title,
@@ -42,6 +47,9 @@ class VendorProduct {
     required this.variants,
     required this.imageUrls,
     required this.isDraft,
+    this.isB2B = false,
+    this.moq = 1,
+    this.sourcingType = 'Ready to Ship',
   });
 
   VendorProduct copyWith({
@@ -54,6 +62,9 @@ class VendorProduct {
     List<ProductVariant>? variants,
     List<String>? imageUrls,
     bool? isDraft,
+    bool? isB2B,
+    int? moq,
+    String? sourcingType,
   }) {
     return VendorProduct(
       id: id ?? this.id,
@@ -65,6 +76,9 @@ class VendorProduct {
       variants: variants ?? this.variants,
       imageUrls: imageUrls ?? this.imageUrls,
       isDraft: isDraft ?? this.isDraft,
+      isB2B: isB2B ?? this.isB2B,
+      moq: moq ?? this.moq,
+      sourcingType: sourcingType ?? this.sourcingType,
     );
   }
 }

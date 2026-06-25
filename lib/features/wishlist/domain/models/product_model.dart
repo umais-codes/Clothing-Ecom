@@ -59,21 +59,21 @@ class Product {
 
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
-      id: map['id'] ?? '',
+      id: map['id']?.toString() ?? '',
       name: map['name'] ?? '',
-      vendorName: map['vendor'] ?? (map['vendorName'] ?? 'Boutique Apparel'),
+      vendorName: map['vendor_name'] ?? map['vendor'] ?? map['vendorName'] ?? 'Boutique Apparel',
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
-      imageUrl: map['image'] ?? (map['imageUrl'] ?? ''),
-      inStock: map['inStock'] ?? true,
+      imageUrl: map['image_url'] ?? map['image'] ?? map['imageUrl'] ?? '',
+      inStock: map['in_stock'] ?? map['inStock'] ?? true,
       description: map['description'] ?? '',
-      isB2B: map['isB2B'] ?? false,
+      isB2B: map['is_b2b'] ?? map['isB2B'] ?? false,
       category: map['category'] ?? '',
       sizes: List<String>.from(map['sizes'] ?? []),
       colors: List<String>.from(map['colors'] ?? []),
-      moq: map['moq'] ?? 1,
-      sourcingType: map['sourcingType'] ?? 'Ready to Ship',
+      moq: (map['moq'] as num?)?.toInt() ?? 1,
+      sourcingType: map['sourcing_type'] ?? map['sourcingType'] ?? 'Ready to Ship',
       location: map['location'] ?? 'Pakistan',
-      isNew: map['isNew'] ?? false,
+      isNew: map['is_new'] ?? map['isNew'] ?? false,
     );
   }
 

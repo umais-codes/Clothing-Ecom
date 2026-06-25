@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/utils/constants.dart';
+import 'package:ecom_app/features/discovery/domain/repositories/discovery_repository.dart';
+import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
 
 class HomeController extends GetxController {
+  final DiscoveryRepository _discoveryRepository = Get.find<DiscoveryRepository>();
+
   final RxString selectedCategory = 'All'.obs;
   final TextEditingController searchController = TextEditingController();
   final RxString searchQuery = ''.obs;
+
+  final RxList<Map<String, dynamic>> trendingProducts = <Map<String, dynamic>>[].obs;
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
@@ -13,6 +20,7 @@ class HomeController extends GetxController {
     searchController.addListener(() {
       searchQuery.value = searchController.text;
     });
+    loadTrendingProducts();
   }
 
   @override
@@ -26,44 +34,18 @@ class HomeController extends GetxController {
     ...AppConstants.categories,
   ];
 
-  final List<Map<String, dynamic>> trendingProducts = [
-    {
-      'id': '1',
-      'name': 'Silk Abaya with Gold Embroidery',
-      'price': 1250.00,
-      'category': 'Modest Wear',
-      'image':
-          'https://images.unsplash.com/photo-1583391733956-6c78276477e2?q=80&w=1000&auto=format&fit=crop',
-      'isNew': true,
-    },
-    {
-      'id': '2',
-      'name': 'Bespoke Executive Suit',
-      'price': 4500.00,
-      'category': "Men's",
-      'image':
-          'https://images.unsplash.com/photo-1594932224011-042041c6f9fa?q=80&w=1000&auto=format&fit=crop',
-      'isNew': false,
-    },
-    {
-      'id': '3',
-      'name': 'Corporate Aviation Uniform',
-      'price': 850.00,
-      'category': 'Workwear',
-      'image':
-          'https://images.unsplash.com/photo-1562147138-b193f538562d?q=80&w=1000&auto=format&fit=crop',
-      'isNew': true,
-    },
-    {
-      'id': '4',
-      'name': 'Premium Cashmere Scarf',
-      'price': 220.00,
-      'category': 'Accessories',
-      'image':
-          'https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=1000&auto=format&fit=crop',
-      'isNew': false,
-    },
-  ];
+  Future<void> loadTrendingProducts() async {
+    isLoading.value = true;
+    try {
+      final List<Product> list = await _discoveryRepository.getProducts(isB2B: false);
+      final maps = list.map((p) => p.toMap()).toList();
+      trendingProducts.assignAll(maps);
+    } catch (e) {
+      debugPrint('Error loading trending products on home screen: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void setCategory(String category) {
     selectedCategory.value = category;

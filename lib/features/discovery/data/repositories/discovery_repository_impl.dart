@@ -1,17 +1,36 @@
 import '../../domain/repositories/discovery_repository.dart';
 import '../../../wishlist/domain/models/product_model.dart';
+import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:flutter/material.dart';
 
 class DiscoveryRepositoryImpl implements DiscoveryRepository {
+  final SupabaseClient _supabase = Get.find<SupabaseService>().client;
+
   @override
   Future<List<Product>> getProducts({required bool isB2B}) async {
-    // Simulate minor network delay
-    await Future.delayed(const Duration(milliseconds: 150));
-    
-    if (isB2B) {
-      return _mockB2BProducts;
-    } else {
-      return _mockB2CProducts;
+    try {
+      final response = await _supabase
+          .from('products')
+          .select()
+          .eq('is_b2b', isB2B);
+
+      final List<Product> list = (response as List).map((map) {
+        return Product.fromMap(map);
+      }).toList();
+
+      // Fallback to static mock products if database table is empty (brand new setup)
+      if (list.isEmpty) {
+        return isB2B ? _mockB2BProducts : _mockB2CProducts;
+      }
+      return list;
+    } catch (e) {
+      debugPrint('Error fetching products from Supabase: $e');
     }
+
+    // Fallback to static mock products on error (offline mode)
+    return isB2B ? _mockB2BProducts : _mockB2CProducts;
   }
 
   // --- Mock B2C Shopper Products ---

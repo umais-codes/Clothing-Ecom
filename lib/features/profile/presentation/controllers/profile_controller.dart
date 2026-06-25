@@ -2,15 +2,14 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 
 class ProfileController extends GetxController {
   final AuthController _authController = Get.find<AuthController>();
   final ImagePicker _picker = ImagePicker();
-  final SupabaseClient _supabase = Get.find<SupabaseService>().client;
+  final AuthRepository _authRepository = Get.find<AuthRepository>();
 
   // Observables for instant UI updates
   final RxString userName = 'Eleanor Fitzgerald'.obs;
@@ -51,7 +50,7 @@ class ProfileController extends GetxController {
 
   Future<void> loadUserProfile() async {
     try {
-      final user = _supabase.auth.currentUser;
+      final user = _authRepository.currentUser;
       if (user != null) {
         userEmail.value = user.email ?? '';
         userPhone.value = user.phone ?? '';
@@ -65,12 +64,8 @@ class ProfileController extends GetxController {
           }
         }
 
-        // Fetch custom profile metrics from Supabase DB
-        final data = await _supabase
-            .from('profiles')
-            .select()
-            .eq('id', user.id)
-            .maybeSingle();
+        // Fetch custom profile metrics from Supabase DB via repository
+        final data = await _authRepository.getProfile(user.id);
         if (data != null) {
           if (data['full_name'] != null) {
             userName.value = data['full_name'].toString();
@@ -119,7 +114,7 @@ class ProfileController extends GetxController {
   }
 
   void updateBodyMetrics() {
-    final user = _supabase.auth.currentUser;
+    final user = _authRepository.currentUser;
     if (user == null) {
       Get.snackbar('Error', 'No user logged in.');
       return;
@@ -324,14 +319,12 @@ class ProfileController extends GetxController {
                     Get.back(); // Close bottom sheet
                     Get.showOverlay(
                       asyncFunction: () async {
-                        await _supabase
-                            .from('profiles')
-                            .update({
-                              'height': tempHeight.value,
-                              'weight': tempWeight.value,
-                              'fit_preference': tempFit.value,
-                            })
-                            .eq('id', user.id);
+                        await _authRepository.updateBodyMetrics(
+                          userId: user.id,
+                          height: tempHeight.value,
+                          weight: tempWeight.value,
+                          fitPreference: tempFit.value,
+                        );
 
                         // Update locally
                         height.value = '${tempHeight.value.round()}cm';
@@ -373,7 +366,7 @@ class ProfileController extends GetxController {
 
   Future<void> logout() async {
     try {
-      await _supabase.auth.signOut();
+      await _authRepository.signOut();
     } catch (e) {
       debugPrint('Error signing out of Supabase: $e');
     }

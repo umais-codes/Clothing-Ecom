@@ -122,7 +122,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
                 SizedBox(height: isMobile ? 18 : 24),
                 Text(
                   'Platform Administration',
-                  style: GoogleFonts.cormorantGaramond(
+                  style: GoogleFonts.playfairDisplay(
                     fontSize: isMobile ? 26 : 30,
                     fontWeight: FontWeight.w700,
                     color: AppColors.charcoal,

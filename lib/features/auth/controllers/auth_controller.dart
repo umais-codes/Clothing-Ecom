@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:uuid/uuid.dart';
 
@@ -120,6 +121,54 @@ class AuthController extends GetxController {
   void continueWithSocial(String provider) async {
     status.value = AuthStatus.loading;
     try {
+      if (provider.toLowerCase() == 'google') {
+        try {
+          // Native Google Sign-In Setup (can be customized via environment defines)
+          const webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+          const iosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
+
+          final GoogleSignIn googleSignIn = GoogleSignIn(
+            clientId: iosClientId.isNotEmpty ? iosClientId : null,
+            serverClientId: webClientId.isNotEmpty ? webClientId : null,
+          );
+
+          final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+          if (googleUser == null) {
+            status.value = AuthStatus.initial;
+            return; // User canceled the native sign-in dialog
+          }
+
+          final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+          final idToken = googleAuth.idToken;
+          final accessToken = googleAuth.accessToken;
+
+          if (idToken == null) {
+            throw 'Google Sign-In succeeded but did not return an ID Token.';
+          }
+
+          final response = await _supabase.auth.signInWithIdToken(
+            provider: OAuthProvider.google,
+            idToken: idToken,
+            accessToken: accessToken,
+          );
+
+          if (response.user != null) {
+            await _createProfile(
+              response.user!.id,
+              'shopper',
+              fullName: response.user!.userMetadata?['full_name'] ?? googleUser.displayName,
+            );
+            status.value = AuthStatus.success;
+            selectedRole.value = AuthRole.shopper;
+            Get.offAllNamed('/main-navigation');
+            return;
+          }
+        } catch (nativeError) {
+          debugPrint('Native Google Sign-In failed or was unconfigured, falling back to Web OAuth: $nativeError');
+          // If native Google Sign-In fails or is unconfigured, fall back to browser OAuth flow
+        }
+      }
+
       OAuthProvider oauthProvider;
       if (provider.toLowerCase() == 'google') {
         oauthProvider = OAuthProvider.google;
@@ -128,7 +177,12 @@ class AuthController extends GetxController {
       } else {
         throw 'Unsupported provider';
       }
-      await _supabase.auth.signInWithOAuth(oauthProvider);
+      
+      // Web-based OAuth Redirect fallback
+      await _supabase.auth.signInWithOAuth(
+        oauthProvider,
+        redirectTo: 'io.supabase.ecomapp://login-callback',
+      );
     } catch (e) {
       _showError('Social sign in failed: $e');
     }

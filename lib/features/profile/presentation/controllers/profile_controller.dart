@@ -1,10 +1,14 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
+import 'package:flutter/material.dart';
 
 class ProfileController extends GetxController {
   final AuthController _authController = Get.find<AuthController>();
   final ImagePicker _picker = ImagePicker();
+  final SupabaseClient _supabase = Get.find<SupabaseService>().client;
 
   // Observables for instant UI updates
   final RxString userName = 'Eleanor Fitzgerald'.obs;
@@ -37,6 +41,33 @@ class ProfileController extends GetxController {
 
   bool get showUniformAllowance => currentRole == AuthRole.corporate;
 
+  @override
+  void onInit() {
+    super.onInit();
+    loadUserProfile();
+  }
+
+  void loadUserProfile() {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user != null) {
+        userEmail.value = user.email ?? '';
+        userPhone.value = user.phone ?? '';
+        
+        final metadata = user.userMetadata;
+        if (metadata != null) {
+          userName.value = metadata['full_name']?.toString() ?? userName.value;
+          final avatarUrl = metadata['avatar_url']?.toString() ?? '';
+          if (avatarUrl.isNotEmpty) {
+            profileImagePath.value = avatarUrl;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading user profile: $e');
+    }
+  }
+
   void toggleNotifications(bool value) {
     notificationsEnabled.value = value;
   }
@@ -64,7 +95,12 @@ class ProfileController extends GetxController {
     );
   }
 
-  void logout() {
+  Future<void> logout() async {
+    try {
+      await _supabase.auth.signOut();
+    } catch (e) {
+      debugPrint('Error signing out of Supabase: $e');
+    }
     Get.offAllNamed('/onboarding');
   }
 }

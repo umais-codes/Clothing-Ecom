@@ -48,27 +48,27 @@ class AppTheme {
         ),
       ),
       textTheme: GoogleFonts.outfitTextTheme().copyWith(
-        displayLarge: GoogleFonts.cormorantGaramond(
+        displayLarge: GoogleFonts.playfairDisplay(
           fontSize: 36,
           fontWeight: .w800,
           color: AppColors.charcoal,
           letterSpacing: -0.5,
           height: 1.1,
         ),
-        displayMedium: GoogleFonts.cormorantGaramond(
+        displayMedium: GoogleFonts.playfairDisplay(
           fontSize: 30,
           fontWeight: .w800,
           color: AppColors.charcoal,
           letterSpacing: -0.3,
           height: 1.1,
         ),
-        displaySmall: GoogleFonts.cormorantGaramond(
+        displaySmall: GoogleFonts.playfairDisplay(
           fontSize: 24,
           fontWeight: .w700,
           color: AppColors.charcoal,
           letterSpacing: -0.2,
         ),
-        headlineMedium: GoogleFonts.cormorantGaramond(
+        headlineMedium: GoogleFonts.playfairDisplay(
           fontSize: 22,
           fontWeight: .w600,
           color: AppColors.charcoal,

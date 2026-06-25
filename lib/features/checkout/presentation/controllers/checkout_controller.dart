@@ -313,11 +313,9 @@ class CheckoutController extends GetxController {
         'Inserting Order Items Payload into Supabase [public.order_items]: $itemsPayload',
       );
 
-      // Insert securely into Supabase PostgreSQL (Commented out in sandbox mock view)
-      /*
+      // Insert securely into Supabase PostgreSQL
       await _supabase.from('orders').insert(orderPayload);
       await _supabase.from('order_items').insert(itemsPayload);
-      */
 
       // Link to local vendor order system for real-time frontend verification in the prototype
       final List<VendorOrderItem> vendorItems =

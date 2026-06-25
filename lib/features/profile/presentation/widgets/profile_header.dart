@@ -32,10 +32,15 @@ class ProfileHeader extends GetView<ProfileController> {
                     width: 2,
                   ),
                   image: imagePath.isNotEmpty
-                      ? DecorationImage(
-                          image: FileImage(File(imagePath)),
-                          fit: BoxFit.cover,
-                        )
+                      ? (imagePath.startsWith('http')
+                          ? DecorationImage(
+                              image: NetworkImage(imagePath),
+                              fit: BoxFit.cover,
+                            )
+                          : DecorationImage(
+                              image: FileImage(File(imagePath)),
+                              fit: BoxFit.cover,
+                            ))
                       : const DecorationImage(
                           image: NetworkImage('https://i.pravatar.cc/150?img=47'),
                           fit: BoxFit.cover,

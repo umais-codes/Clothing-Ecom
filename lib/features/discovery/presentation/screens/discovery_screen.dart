@@ -258,7 +258,7 @@ class DiscoveryScreen extends StatelessWidget {
               SizedBox(height: sw * 0.01),
               Text(
                 'No Match Found',
-                style: GoogleFonts.cormorantGaramond(
+                style: GoogleFonts.playfairDisplay(
                   fontSize: sw * 0.06,
                   fontWeight: FontWeight.w700,
                   color: AppColors.charcoal,

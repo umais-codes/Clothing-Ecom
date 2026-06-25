@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
@@ -24,78 +25,82 @@ class VendorAuthView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: .stretch,
         children: [
-          // Premium Graphic Anchor
+          // Premium Graphic Anchor (Matches Admin design badge, uses brand logo image)
           Center(
             child: Container(
-              padding: .all(w * 0.02),
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
-                color: AppColors.camelLight.withValues(alpha: 0.1),
-                shape: .circle,
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.greyLight, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.charcoal.withValues(alpha: 0.05),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-              child: Container(
-                padding: .all(w * 0.02),
-                decoration: BoxDecoration(
-                  color: AppColors.camelLight.withValues(alpha: 0.2),
-                  shape: .circle,
-                ),
-                child: Container(
-                  padding: .all(w * 0.035),
-                  decoration: const BoxDecoration(
-                    color: AppColors.camel,
-                    shape: .circle,
-                  ),
-                  child: Icon(
+              padding: const EdgeInsets.all(8),
+              child: Image.asset(
+                'assets/logo/logo.png',
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
                     Icons.storefront_outlined,
-                    size: w * 0.08,
-                    color: AppColors.white,
-                  ),
-                ),
+                    color: AppColors.camel,
+                    size: 28,
+                  );
+                },
               ),
             ),
           ),
-          SizedBox(height: w * 0.02),
+          SizedBox(height: w * 0.04),
 
-          // Rich Typography
+          // Rich Typography (Matches Admin styling)
           Obx(
             () => Text(
               controller.isVendorLogin.value
                   ? 'Partner Access'
                   : 'Partner with Us',
-              style: theme.textTheme.displayMedium?.copyWith(
+              style: GoogleFonts.playfairDisplay(
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
                 color: AppColors.charcoal,
-                fontWeight: .w700,
+                letterSpacing: -0.5,
               ),
-              textAlign: .center,
+              textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: w * 0.005),
+          const SizedBox(height: 4),
           Obx(
             () => Text(
               controller.isVendorLogin.value
                   ? 'Log in to manage your brand portal.'
                   : 'Reach millions of shoppers with Velvet Maison.',
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: GoogleFonts.outfit(
+                fontSize: 12.5,
                 color: AppColors.grey,
-                height: 1.5,
-                fontSize: w * 0.035,
+                fontWeight: FontWeight.w400,
               ),
-              textAlign: .center,
+              textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: w * 0.04),
+          SizedBox(height: w * 0.06),
 
-          // Elevated Content Area (Grouped Card)
+          // Elevated Content Area (Grouped Card - Styled to match Admin Card)
           Container(
-            padding: .symmetric(horizontal: w * 0.05, vertical: w * 0.03),
+            padding: EdgeInsets.all(w * 0.04),
             decoration: BoxDecoration(
               color: AppColors.white,
-              borderRadius: .circular(w * 0.04),
-              border: .all(color: AppColors.greyLight.withValues(alpha: 0.5)),
+              borderRadius: BorderRadius.circular(w * 0.05),
+              border: Border.all(color: AppColors.greyLight, width: 1),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.charcoal.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color: AppColors.charcoal.withValues(alpha: 0.05),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),

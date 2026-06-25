@@ -256,6 +256,20 @@ class VendorOrderController extends GetxController {
       );
       orders[index] = updatedOrder;
       
+      if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+        _supabase.from('orders').update({
+          'status': 'Processing',
+          'timeline': updatedTimeline.map((t) => {
+            'title': t.title,
+            'description': t.description,
+            'timestamp': t.timestamp?.toIso8601String(),
+            'isCompleted': t.isCompleted,
+          }).toList(),
+        }).eq('id', orderId).catchError((e) {
+          debugPrint('Error updating order in Supabase: $e');
+        });
+      }
+      
       Get.snackbar(
         'Order Accepted',
         'Order $orderId has been moved to Processing.',
@@ -292,6 +306,21 @@ class VendorOrderController extends GetxController {
         timeline: updatedTimeline,
       );
 
+      if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+        _supabase.from('orders').update({
+          'status': 'Shipped',
+          'tracking_number': trackingNumber,
+          'timeline': updatedTimeline.map((t) => {
+            'title': t.title,
+            'description': t.description,
+            'timestamp': t.timestamp?.toIso8601String(),
+            'isCompleted': t.isCompleted,
+          }).toList(),
+        }).eq('id', orderId).catchError((e) {
+          debugPrint('Error marking order as shipped in Supabase: $e');
+        });
+      }
+
       Get.snackbar(
         'Order Shipped',
         'Order $orderId marked as Shipped. Tracking ID added.',
@@ -307,6 +336,14 @@ class VendorOrderController extends GetxController {
     if (index != -1) {
       // Simulate completing the refund
       orders.removeAt(index);
+
+      if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+        _supabase.from('orders').update({
+          'status': 'Returned',
+        }).eq('id', orderId).catchError((e) {
+          debugPrint('Error updating return status in Supabase: $e');
+        });
+      }
       
       Get.snackbar(
         'Refund Completed',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
@@ -45,53 +46,52 @@ class AuthGatewayScreen extends StatelessWidget {
               // Premium Header
               Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: w * 0.02,
-                  vertical: h * 0.02,
+                  horizontal: w * 0.04,
+                  vertical: h * 0.015,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: Row(
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () {
-                          if (Get.isRegistered<OnboardingController>()) {
-                            Get.find<OnboardingController>().prevPage();
-                          } else {
-                            Get.back();
-                          }
-                        },
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 18,
-                        ),
-                        color: AppColors.charcoal,
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () {
+                        if (Get.isRegistered<OnboardingController>()) {
+                          Get.find<OnboardingController>().prevPage();
+                        } else {
+                          Get.back();
+                        }
+                      },
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
                       ),
+                      color: AppColors.charcoal,
                     ),
-                    SizedBox(height: w * 0.01),
-                    Text(
-                      'Welcome to Velvet Maison',
-                      style: theme.textTheme.displayMedium?.copyWith(
-                        color: AppColors.charcoal,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
+                    const Spacer(),
+                    Image.asset(
+                      'assets/logo/logo.png',
+                      height: 38,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Text(
+                          'VELVET MAISON',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.charcoal,
+                            letterSpacing: 1.5,
+                          ),
+                        );
+                      },
                     ),
-                    if (!isRoleLocked) ...[
-                      SizedBox(height: w * 0.015),
-                      Text(
-                        'Select your account type to continue',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.grey,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                    const Spacer(),
+                    const SizedBox(
+                      width: 32,
+                    ), // Spacer to balance back button width
                   ],
                 ),
               ),
+              SizedBox(height: h * 0.01),
 
               // TabBar for Role Selection
               if (!isRoleLocked) ...[
@@ -128,33 +128,13 @@ class AuthGatewayScreen extends StatelessWidget {
 
               // TabBarView for specific flows
               Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(w * 0.05),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x08000000),
-                        blurRadius: 20,
-                        offset: Offset(0, -5),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(w * 0.05),
-                    ),
-                    child: TabBarView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        ShopperAuthView(controller: controller),
-                        VendorAuthView(controller: controller),
-                        CorporateAuthView(controller: controller),
-                      ],
-                    ),
-                  ),
+                child: TabBarView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    ShopperAuthView(controller: controller),
+                    VendorAuthView(controller: controller),
+                    CorporateAuthView(controller: controller),
+                  ],
                 ),
               ),
             ],

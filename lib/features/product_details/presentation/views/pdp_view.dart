@@ -152,7 +152,7 @@ class PdpView extends GetView<PdpController> {
                         controller.product['name'],
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.cormorantGaramond(
+                        style: GoogleFonts.playfairDisplay(
                           fontSize: sw * 0.055,
                           fontWeight: FontWeight.w700,
                           height: 1.15,

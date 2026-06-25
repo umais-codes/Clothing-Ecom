@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
@@ -19,75 +20,85 @@ class ShopperAuthView extends StatelessWidget {
     final h = context.screenHeight;
 
     return SingleChildScrollView(
-      padding: .symmetric(horizontal: w * 0.06, vertical: w * 0.02),
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: w * 0.04, vertical: h * 0.02),
       child: Column(
-        crossAxisAlignment: .stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Premium Graphic Anchor
           Center(
             child: Container(
-              padding: .symmetric(horizontal: w * 0.02, vertical: w * 0.02),
+              width: 60,
+              height: 60,
               decoration: BoxDecoration(
-                color: AppColors.camelLight.withValues(alpha: 0.1),
-                shape: .circle,
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.greyLight, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.charcoal.withValues(alpha: 0.05),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
-              child: Container(
-                padding: .symmetric(horizontal: w * 0.02, vertical: w * 0.02),
-                decoration: BoxDecoration(
-                  color: AppColors.camelLight.withValues(alpha: 0.2),
-                  shape: .circle,
-                ),
-                child: Container(
-                  padding: .symmetric(
-                    horizontal: w * 0.035,
-                    vertical: w * 0.035,
-                  ),
-                  decoration: const BoxDecoration(
-                    color: AppColors.camel,
-                    shape: .circle,
-                  ),
-                  child: Icon(
+              child: Image.asset(
+                'assets/logo/logo.png',
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
                     Icons.shopping_bag_outlined,
-                    size: w * 0.08,
-                    color: AppColors.white,
-                  ),
-                ),
+                    color: AppColors.camel,
+                    size: 28,
+                  );
+                },
               ),
             ),
-          ),
-          SizedBox(height: w * 0.02),
-
-          // Rich Typography
-          Text(
-            'Welcome to Velvet Maison',
-            style: theme.textTheme.displayMedium?.copyWith(
-              color: AppColors.charcoal,
-              fontWeight: .w700,
-            ),
-            textAlign: .center,
-          ),
-          SizedBox(height: w * 0.005),
-          Text(
-            'Sign in to access exclusive collections.',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: AppColors.grey,
-              height: 1.5,
-              fontSize: w * 0.035,
-            ),
-            textAlign: .center,
           ),
           SizedBox(height: w * 0.04),
 
-          // Grouped Social Area (Soft Tint)
+          // Rich Typography (Matches Admin styling)
+          Text(
+            'Welcome to Velvet Maison',
+            style: GoogleFonts.playfairDisplay(
+              fontSize: w * 0.06,
+              fontWeight: FontWeight.w700,
+              color: AppColors.charcoal,
+              letterSpacing: -0.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Sign in to access exclusive collections.',
+            style: GoogleFonts.outfit(
+              fontSize: 12.5,
+              color: AppColors.grey,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: w * 0.06),
+
+          // Single Elegant Card (Matches Admin card style)
           Container(
-            padding: .all(w * 0.02),
+            padding: EdgeInsets.all(w * 0.04),
             decoration: BoxDecoration(
-              color: AppColors.offWhite,
-              borderRadius: .circular(w * 0.04),
-              border: .all(color: AppColors.camelLight.withValues(alpha: 0.3)),
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(w * 0.05),
+              border: Border.all(color: AppColors.greyLight, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Social logins inside card
                 _SocialButton(
                   icon: Icons.g_mobiledata_rounded,
                   label: 'Continue with Google',
@@ -103,61 +114,48 @@ class ShopperAuthView extends StatelessWidget {
                   w: w,
                   isGoogle: false,
                 ),
-              ],
-            ),
-          ),
+                SizedBox(height: w * 0.045),
 
-          SizedBox(height: w * 0.02),
-          Row(
-            children: [
-              const Expanded(
-                child: Divider(color: AppColors.greyLight, thickness: 1),
-              ),
-              Padding(
-                padding: .symmetric(horizontal: w * 0.02),
-                child: Text(
-                  'or use your mobile',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.grey,
-                    fontWeight: .w600,
+                // Divider inside card
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Divider(color: AppColors.greyLight, thickness: 1),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: w * 0.025),
+                      child: Text(
+                        'or use your mobile',
+                        style: GoogleFonts.outfit(
+                          color: AppColors.grey,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Divider(color: AppColors.greyLight, thickness: 1),
+                    ),
+                  ],
+                ),
+                SizedBox(height: w * 0.045),
+
+                // Input and Action button
+                Obx(
+                  () => AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: controller.showShopperOtpField.value
+                        ? _buildOtpState(context, w, h)
+                        : _buildPhoneState(context, w, h),
                   ),
                 ),
-              ),
-              const Expanded(
-                child: Divider(color: AppColors.greyLight, thickness: 1),
-              ),
-            ],
-          ),
-          SizedBox(height: h * 0.01),
-
-          // Elevated Form Area
-          Container(
-            padding: .symmetric(horizontal: w * 0.05, vertical: w * 0.02),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: .circular(w * 0.04),
-              border: .all(color: AppColors.greyLight),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.charcoal.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
               ],
             ),
-            child: Obx(
-              () => AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                switchInCurve: Curves.easeOut,
-                switchOutCurve: Curves.easeIn,
-                child: controller.showShopperOtpField.value
-                    ? _buildOtpState(context, w, h)
-                    : _buildPhoneState(context, w, h),
-              ),
-            ),
           ),
 
-          SizedBox(height: h * 0.02),
+          SizedBox(height: h * 0.03),
 
           // Privacy and Terms
           Center(

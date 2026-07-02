@@ -121,7 +121,9 @@ class AuthController extends GetxController {
   }
 
   void _markOnboardingComplete() {
-    Hive.box('settings').put('hasSeenOnboarding', true);
+    final box = Hive.box('settings');
+    box.put('hasSeenOnboarding', true);
+    box.put('login_time', DateTime.now().millisecondsSinceEpoch);
   }
 
   Future<void> signInShopper() async {

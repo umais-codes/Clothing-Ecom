@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -199,6 +200,59 @@ class AuthRepositoryImpl implements AuthRepository {
         'weight': weight,
         'fit_preference': fitPreference,
       }).eq('id', userId);
+    } catch (e) {
+      throw Exception(ErrorHandler.getErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<void> updateProfileDetails({
+    required String userId,
+    required String fullName,
+    String? phone,
+    String? avatarUrl,
+  }) async {
+    try {
+      // Update metadata in Supabase Auth user record
+      await _supabase.auth.updateUser(
+        UserAttributes(
+          data: {
+            'full_name': fullName,
+            'phone': ?phone,
+            'avatar_url': ?avatarUrl,
+          },
+        ),
+      );
+
+      // Update profiles database table
+      await _supabase.from('profiles').update({
+        'full_name': fullName,
+        'phone': ?phone,
+        'avatar_url': ?avatarUrl,
+      }).eq('id', userId);
+    } catch (e) {
+      throw Exception(ErrorHandler.getErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<String> uploadAvatar({
+    required String userId,
+    required File file,
+  }) async {
+    try {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_avatar.png';
+      final path = '$userId/$fileName';
+      
+      try {
+        await _supabase.storage.from('avatars').upload(path, file);
+        return _supabase.storage.from('avatars').getPublicUrl(path);
+      } catch (storageError) {
+        debugPrint('Uploading to avatars bucket failed, using fallback rma-evidence: $storageError');
+        // Fallback bucket
+        await _supabase.storage.from('rma-evidence').upload(path, file);
+        return _supabase.storage.from('rma-evidence').getPublicUrl(path);
+      }
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));
     }

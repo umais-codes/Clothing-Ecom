@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:get/get.dart';
@@ -16,6 +17,7 @@ class ProfileController extends GetxController {
   final RxString userEmail = 'eleanor.fitz@example.com'.obs;
   final RxString userPhone = '+1 234 567 890'.obs;
   final RxString profileImagePath = ''.obs;
+  final RxBool isSaving = false.obs;
 
   // Fit Profile Metrics
   final RxString height = '175cm'.obs;
@@ -369,6 +371,53 @@ class ProfileController extends GetxController {
       ),
       isScrollControlled: true,
     );
+  }
+
+  Future<void> saveProfileChanges({
+    required String name,
+    required String email,
+    required String phone,
+  }) async {
+    try {
+      final user = _authRepository.currentUser;
+      if (user == null) return;
+
+      isSaving.value = true;
+
+      String? uploadedAvatarUrl;
+      final localPath = profileImagePath.value;
+      
+      if (localPath.isNotEmpty && !localPath.startsWith('http')) {
+        final file = File(localPath);
+        try {
+          uploadedAvatarUrl = await _authRepository.uploadAvatar(
+            userId: user.id,
+            file: file,
+          );
+        } catch (e) {
+          debugPrint('Failed to upload avatar to Supabase: $e');
+        }
+      }
+
+      await _authRepository.updateProfileDetails(
+        userId: user.id,
+        fullName: name,
+        phone: phone,
+        avatarUrl: uploadedAvatarUrl,
+      );
+
+      userName.value = name;
+      userEmail.value = email;
+      userPhone.value = phone;
+      if (uploadedAvatarUrl != null) {
+        profileImagePath.value = uploadedAvatarUrl;
+      }
+    } catch (e) {
+      debugPrint('Error saving profile changes: $e');
+      rethrow;
+    } finally {
+      isSaving.value = false;
+    }
   }
 
   void _resetProfileData() {

@@ -61,24 +61,43 @@ class EditProfileView extends GetView<ProfileController> {
               keyboardType: TextInputType.phone,
             ),
             SizedBox(height: context.hp(6)),
-            CustomButton(
-              text: 'Save Changes',
-              onPressed: () {
-                controller.userName.value = nameController.text;
-                controller.userEmail.value = emailController.text;
-                controller.userPhone.value = phoneController.text;
-                Get.back();
-                Get.snackbar(
-                  'Success',
-                  'Profile updated successfully',
-                  snackPosition: SnackPosition.TOP,
-                  backgroundColor: AppColors.offWhite,
-                  colorText: AppColors.charcoal,
-                  margin: const EdgeInsets.all(16),
-                  borderRadius: 12,
-                );
-              },
-              icon: Icons.check_circle_outline_rounded,
+            Obx(
+              () => CustomButton(
+                text: 'Save Changes',
+                isLoading: controller.isSaving.value,
+                onPressed: controller.isSaving.value
+                    ? null
+                    : () async {
+                        try {
+                          await controller.saveProfileChanges(
+                            name: nameController.text.trim(),
+                            email: emailController.text.trim(),
+                            phone: phoneController.text.trim(),
+                          );
+                          Get.back();
+                          Get.snackbar(
+                            'Success',
+                            'Profile updated successfully',
+                            snackPosition: SnackPosition.TOP,
+                            backgroundColor: AppColors.offWhite,
+                            colorText: AppColors.charcoal,
+                            margin: const EdgeInsets.all(16),
+                            borderRadius: 12,
+                          );
+                        } catch (e) {
+                          Get.snackbar(
+                            'Error',
+                            'Failed to update profile: $e',
+                            snackPosition: SnackPosition.TOP,
+                            backgroundColor: AppColors.error,
+                            colorText: AppColors.white,
+                            margin: const EdgeInsets.all(16),
+                            borderRadius: 12,
+                          );
+                        }
+                      },
+                icon: Icons.check_circle_outline_rounded,
+              ),
             ),
             SizedBox(height: context.hp(5)),
           ],

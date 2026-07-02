@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
 
 abstract class AuthRepository {
   /// Check if there is a current user logged in.
@@ -51,5 +52,19 @@ abstract class AuthRepository {
     required double height,
     required double weight,
     required String fitPreference,
+  });
+
+  /// Update user profile details.
+  Future<void> updateProfileDetails({
+    required String userId,
+    required String fullName,
+    String? phone,
+    String? avatarUrl,
+  });
+
+  /// Upload avatar file.
+  Future<String> uploadAvatar({
+    required String userId,
+    required File file,
   });
 }

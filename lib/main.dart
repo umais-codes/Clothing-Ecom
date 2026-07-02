@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ecom_app/app/theme/app_theme.dart';
 import 'package:ecom_app/features/home/bindings/home_binding.dart';
 import 'package:ecom_app/features/home/presentation/views/home_view.dart';
@@ -63,6 +64,7 @@ void main() async {
 
   final cartRepo = CartRepository();
   await cartRepo.init();
+  await Hive.openBox('settings');
 
   Get.put(B2CCartController(cartRepo), permanent: true);
   Get.put(B2BCartController(cartRepo), permanent: true);

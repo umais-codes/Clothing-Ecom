@@ -46,6 +46,13 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     loadUserProfile();
+    
+    // Automatically reload profile info when login status succeeds
+    ever(_authController.status, (status) {
+      if (status == AuthStatus.success) {
+        loadUserProfile();
+      }
+    });
   }
 
   Future<void> loadUserProfile() async {
@@ -364,9 +371,20 @@ class ProfileController extends GetxController {
     );
   }
 
+  void _resetProfileData() {
+    userName.value = 'Eleanor Fitzgerald';
+    userEmail.value = 'eleanor.fitz@example.com';
+    userPhone.value = '+1 234 567 890';
+    profileImagePath.value = '';
+    height.value = '175cm';
+    weight.value = '62kg';
+    fitPreference.value = 'Tailored Slim';
+  }
+
   Future<void> logout() async {
     try {
       await _authRepository.signOut();
+      _resetProfileData();
     } catch (e) {
       debugPrint('Error signing out of Supabase: $e');
     }

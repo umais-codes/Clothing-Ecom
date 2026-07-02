@@ -17,7 +17,7 @@ abstract class AuthRepository {
   Future<User?> signInWithSocialProvider(String provider);
 
   /// Sign up a user with email and password.
-  Future<User?> signUp({required String email, required String password});
+  Future<User?> signUp({required String email, required String password, String? fullName});
 
   /// Sign in a user with email and password.
   Future<User?> signInWithPassword({required String email, required String password});

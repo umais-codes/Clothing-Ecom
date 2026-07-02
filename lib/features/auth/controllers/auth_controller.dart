@@ -7,6 +7,7 @@ import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dar
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:uuid/uuid.dart';
+import 'package:hive/hive.dart';
 
 enum AuthRole { shopper, vendor, corporate, admin }
 
@@ -27,9 +28,10 @@ class AuthController extends GetxController {
   final RxBool isCorporateLogin = false.obs;
 
   // --- Shopper Controllers ---
-  final TextEditingController shopperPhoneController = TextEditingController();
-  final TextEditingController shopperOtpController = TextEditingController();
-  final RxBool showShopperOtpField = false.obs;
+  final TextEditingController shopperEmailController = TextEditingController();
+  final TextEditingController shopperPasswordController = TextEditingController();
+  final TextEditingController shopperNameController = TextEditingController();
+  final RxBool isShopperLogin = true.obs;
 
   // --- Vendor Controllers ---
   final TextEditingController vendorEmailController = TextEditingController();
@@ -58,9 +60,27 @@ class AuthController extends GetxController {
     '500+ Employees',
   ];
 
+  @override
+  void onInit() {
+    super.onInit();
+    final box = Hive.box('settings');
+    final savedRole = box.get('lastSelectedRole') as String?;
+    if (savedRole != null) {
+      for (final role in AuthRole.values) {
+        if (role.name == savedRole) {
+          selectedRole.value = role;
+          break;
+        }
+      }
+    }
+  }
+
   void setRole(AuthRole role) {
     selectedRole.value = role;
     status.value = AuthStatus.initial;
+    if (role != AuthRole.admin) {
+      Hive.box('settings').put('lastSelectedRole', role.name);
+    }
   }
 
   Future<void> _createProfile(
@@ -100,40 +120,67 @@ class AuthController extends GetxController {
     }
   }
 
-  // Shopper Actions
-  Future<void> sendShopperOtp() async {
-    if (shopperPhoneController.text.length < 10) {
-      _showError('Please enter a valid mobile number.');
+  void _markOnboardingComplete() {
+    Hive.box('settings').put('hasSeenOnboarding', true);
+  }
+
+  Future<void> signInShopper() async {
+    if (shopperEmailController.text.trim().isEmpty ||
+        shopperPasswordController.text.trim().isEmpty) {
+      _showError('Please enter your email and password.');
       return;
     }
     status.value = AuthStatus.loading;
     try {
-      await _authRepository.sendOtp(shopperPhoneController.text.trim());
-      status.value = AuthStatus.initial;
-      showShopperOtpField.value = true;
+      final user = await _authRepository.signInWithPassword(
+        email: shopperEmailController.text.trim(),
+        password: shopperPasswordController.text.trim(),
+      );
+      if (user != null) {
+        _markOnboardingComplete();
+        status.value = AuthStatus.success;
+        selectedRole.value = AuthRole.shopper;
+        Get.offAllNamed('/main-navigation');
+        Get.snackbar(
+          'Success',
+          'Welcome back!',
+          backgroundColor: const Color(0xFFFAF9F6),
+        );
+      }
     } catch (e) {
       _showError(_cleanMessage(e));
     }
   }
 
-  Future<void> verifyShopperOtp() async {
-    if (shopperOtpController.text.length < 6) {
-      _showError('Please enter the 6-digit OTP.');
+  Future<void> signUpShopper() async {
+    if (shopperNameController.text.trim().isEmpty ||
+        shopperEmailController.text.trim().isEmpty ||
+        shopperPasswordController.text.trim().isEmpty) {
+      _showError('Please fill in all fields.');
       return;
     }
     status.value = AuthStatus.loading;
     try {
-      final user = await _authRepository.verifyOtp(
-        shopperPhoneController.text.trim(),
-        shopperOtpController.text.trim(),
+      final user = await _authRepository.signUp(
+        email: shopperEmailController.text.trim(),
+        password: shopperPasswordController.text.trim(),
+        fullName: shopperNameController.text.trim(),
       );
       if (user != null) {
-        await _createProfile(user.id, 'shopper', fullName: 'Shopper User');
+        _markOnboardingComplete();
+        await _createProfile(
+          user.id,
+          'shopper',
+          fullName: shopperNameController.text.trim(),
+        );
         status.value = AuthStatus.success;
         selectedRole.value = AuthRole.shopper;
         Get.offAllNamed('/main-navigation');
-      } else {
-        _showError('Invalid OTP code.');
+        Get.snackbar(
+          'Success',
+          'Account created successfully!',
+          backgroundColor: const Color(0xFFFAF9F6),
+        );
       }
     } catch (e) {
       _showError(_cleanMessage(e));
@@ -145,6 +192,7 @@ class AuthController extends GetxController {
     try {
       final user = await _authRepository.signInWithSocialProvider(provider);
       if (user != null) {
+        _markOnboardingComplete();
         await _createProfile(
           user.id,
           'shopper',
@@ -206,9 +254,13 @@ class AuthController extends GetxController {
       final user = await _authRepository.signUp(
         email: vendorEmailController.text.trim(),
         password: vendorPasswordController.text.trim(),
+        fullName: contactPersonController.text.trim().isNotEmpty
+            ? contactPersonController.text.trim()
+            : brandNameController.text.trim(),
       );
 
       if (user != null) {
+        _markOnboardingComplete();
         final vendorId = uuid.v4();
 
         await _authRepository.createVendor(
@@ -271,6 +323,7 @@ class AuthController extends GetxController {
         password: vendorPasswordController.text.trim(),
       );
       if (user != null) {
+        _markOnboardingComplete();
         status.value = AuthStatus.success;
         selectedRole.value = AuthRole.vendor;
         Get.offAllNamed('/main-navigation');
@@ -298,8 +351,10 @@ class AuthController extends GetxController {
       final user = await _authRepository.signUp(
         email: corporateEmailController.text.trim(),
         password: corporatePasswordController.text.trim(),
+        fullName: companyNameController.text.trim(),
       );
       if (user != null) {
+        _markOnboardingComplete();
         await _createProfile(
           user.id,
           'corporate',
@@ -327,6 +382,7 @@ class AuthController extends GetxController {
         password: corporatePasswordController.text.trim(),
       );
       if (user != null) {
+        _markOnboardingComplete();
         status.value = AuthStatus.success;
         selectedRole.value = AuthRole.corporate;
         Get.offAllNamed('/main-navigation');
@@ -365,8 +421,9 @@ class AuthController extends GetxController {
 
   @override
   void onClose() {
-    shopperPhoneController.dispose();
-    shopperOtpController.dispose();
+    shopperEmailController.dispose();
+    shopperPasswordController.dispose();
+    shopperNameController.dispose();
     vendorEmailController.dispose();
     vendorPasswordController.dispose();
     brandNameController.dispose();

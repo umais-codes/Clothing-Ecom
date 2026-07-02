@@ -7,6 +7,7 @@ import 'package:ecom_app/features/cart/presentation/controllers/b2c_cart_control
 import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_controller.dart';
 import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 
 class PdpController extends GetxController {
   late final Map<String, dynamic> product;
@@ -186,6 +187,11 @@ class PdpController extends GetxController {
   final RxDouble predictedSize = 0.0.obs;
   final RxInt quantity = 1.obs;
 
+  final AuthRepository _authRepository = Get.find<AuthRepository>();
+  final RxString recommendedSize = ''.obs;
+  final RxBool isPredicting = false.obs;
+  final RxString predictionDetails = ''.obs;
+
   final List<String> sizes = ['S', 'M', 'L', 'XL'];
   final List<String> colors = ['Sand', 'Charcoal', 'Ivory'];
 
@@ -205,10 +211,80 @@ class PdpController extends GetxController {
     isSizePredictorExpanded.value = !isSizePredictorExpanded.value;
   }
 
-  void runAIPrediction() {
-    Future.delayed(const Duration(seconds: 1), () {
+  Future<void> runAIPrediction() async {
+    isPredicting.value = true;
+    predictionDetails.value = '';
+    
+    try {
+      final user = _authRepository.currentUser;
+      if (user == null) {
+        await Future.delayed(const Duration(milliseconds: 600));
+        isPredicting.value = false;
+        predictionDetails.value = 'Please log in to run AI size prediction.';
+        return;
+      }
+
+      final profile = await _authRepository.getProfile(user.id);
+      if (profile == null || profile['height'] == null || profile['weight'] == null) {
+        await Future.delayed(const Duration(milliseconds: 600));
+        isPredicting.value = false;
+        predictionDetails.value = 'Please calibrate your AI Fit Profile in your Account tab first.';
+        return;
+      }
+
+      final double heightVal = (profile['height'] as num).toDouble();
+      final double weightVal = (profile['weight'] as num).toDouble();
+      final String fitPref = profile['fit_preference']?.toString() ?? 'Regular';
+      final String cat = product['category']?.toString() ?? "Men's";
+      
+      final List<String> availableSizes = List<String>.from(product['sizes'] ?? ['S', 'M', 'L', 'XL']);
+
+      final recommended = _calculateSize(heightVal, weightVal, fitPref, cat, availableSizes);
+
+      await Future.delayed(const Duration(milliseconds: 800));
+      isPredicting.value = false;
+      recommendedSize.value = recommended;
+      selectedSize.value = recommended;
       predictedSize.value = 1.0;
-    });
+      predictionDetails.value = 'Based on your AI Profile (${heightVal.round()}cm, ${weightVal.round()}kg, $fitPref fit).';
+    } catch (e) {
+      isPredicting.value = false;
+      predictionDetails.value = 'Failed to calculate size: $e';
+    }
+  }
+
+  String _calculateSize(double height, double weight, String fitPreference, String category, List<String> availableSizes) {
+    if (availableSizes.isEmpty) return 'M';
+    
+    double bmi = weight / ((height / 100) * (height / 100));
+    
+    String recommended = 'M';
+    if (bmi < 19.5) {
+      recommended = 'S';
+    } else if (bmi >= 19.5 && bmi < 24.5) {
+      recommended = 'M';
+    } else if (bmi >= 24.5 && bmi < 28.5) {
+      recommended = 'L';
+    } else {
+      recommended = 'XL';
+    }
+
+    if (fitPreference.toLowerCase() == 'slim') {
+      // stays standard
+    } else if (fitPreference.toLowerCase() == 'relaxed') {
+      if (recommended == 'S' && availableSizes.contains('M')) {
+        recommended = 'M';
+      } else if (recommended == 'M' && availableSizes.contains('L')) {
+        recommended = 'L';
+      } else if (recommended == 'L' && availableSizes.contains('XL')) {
+        recommended = 'XL';
+      }
+    }
+
+    if (availableSizes.contains(recommended)) {
+      return recommended;
+    }
+    return availableSizes.isNotEmpty ? availableSizes.first : 'M';
   }
 
   void updateQuantity(int val) {

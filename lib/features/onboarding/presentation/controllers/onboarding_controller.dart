@@ -1,13 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 
 enum UserRole { shopper, corporateBuyer, fashionBrand }
 
 class OnboardingController extends GetxController {
   // --- Page Control ---
-  final PageController pageController = PageController();
+  late final PageController pageController;
   final RxInt currentPage = 0.obs;
   final RxInt carouselPage = 0.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final box = Hive.box('settings');
+    final hasSeen = box.get('hasSeenOnboarding', defaultValue: false) as bool;
+    if (hasSeen) {
+      currentPage.value = 3;
+      pageController = PageController(initialPage: 3);
+    } else {
+      pageController = PageController(initialPage: 0);
+    }
+  }
 
   // --- Role Selection ---
   final Rx<UserRole?> selectedRole = Rx<UserRole?>(null);
@@ -124,7 +138,10 @@ class OnboardingController extends GetxController {
 
   void onPageChanged(int index) => currentPage.value = index;
 
-  void skipOnboarding() => Get.offAllNamed('/main-navigation');
+  void skipOnboarding() {
+    Hive.box('settings').put('hasSeenOnboarding', true);
+    Get.offAllNamed('/main-navigation');
+  }
 
   Future<void> sendOtp() async {
     if (phoneController.text.length < 10) {

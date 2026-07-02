@@ -235,9 +235,14 @@ class PdpView extends GetView<PdpController> {
 
                 SizedBox(height: sw * 0.03),
 
-                AISizePredictorCard(
-                  sw: sw,
-                  onPredict: () => controller.runAIPrediction(),
+                Obx(
+                  () => AISizePredictorCard(
+                    sw: sw,
+                    isPredicting: controller.isPredicting.value,
+                    recommendedSize: controller.recommendedSize.value,
+                    predictionDetails: controller.predictionDetails.value,
+                    onPredict: controller.runAIPrediction,
+                  ),
                 ),
 
                 SizedBox(height: sw * 0.01),

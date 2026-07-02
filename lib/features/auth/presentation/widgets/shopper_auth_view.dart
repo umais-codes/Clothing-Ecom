@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
-import 'package:ecom_app/features/onboarding/presentation/widgets/pin_input_field.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import '../../controllers/auth_controller.dart';
 
@@ -125,7 +124,7 @@ class ShopperAuthView extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: w * 0.025),
                       child: Text(
-                        'or use your mobile',
+                        'or use your email',
                         style: GoogleFonts.outfit(
                           color: AppColors.grey,
                           fontWeight: FontWeight.w600,
@@ -146,9 +145,9 @@ class ShopperAuthView extends StatelessWidget {
                     duration: const Duration(milliseconds: 300),
                     switchInCurve: Curves.easeOut,
                     switchOutCurve: Curves.easeIn,
-                    child: controller.showShopperOtpField.value
-                        ? _buildOtpState(context, w, h)
-                        : _buildPhoneState(context, w, h),
+                    child: controller.isShopperLogin.value
+                        ? _buildLoginView(context, w, h)
+                        : _buildSignupView(context, w, h),
                   ),
                 ),
               ],
@@ -206,100 +205,126 @@ class ShopperAuthView extends StatelessWidget {
     );
   }
 
-  Widget _buildPhoneState(BuildContext context, double w, double h) {
+  Widget _buildLoginView(BuildContext context, double w, double h) {
+    final theme = Theme.of(context);
     return Column(
-      key: const ValueKey('phone_state'),
-      crossAxisAlignment: .stretch,
+      key: const ValueKey('shopper_login'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         CustomTextField(
-          controller: controller.shopperPhoneController,
-          label: 'Mobile Number',
-          hinttext: '3XX XXXXXXX',
-          keyboardType: .phone,
-          icon: Icons.phone_outlined,
+          controller: controller.shopperEmailController,
+          label: 'Email Address',
+          hinttext: 'you@domain.com',
+          keyboardType: TextInputType.emailAddress,
+          icon: Icons.email_outlined,
+        ),
+        CustomTextField(
+          controller: controller.shopperPasswordController,
+          label: 'Password',
+          hinttext: 'Enter your password',
+          obscureText: true,
+          icon: Icons.lock_outline,
         ),
         SizedBox(height: w * 0.015),
         Obx(
           () => CustomButton(
-            icon: Icons.near_me_rounded,
-            text: 'Send Code',
+            icon: Icons.login_rounded,
+            text: 'Sign In',
             onPressed: controller.status.value == AuthStatus.loading
                 ? null
-                : controller.sendShopperOtp,
+                : controller.signInShopper,
             isLoading: controller.status.value == AuthStatus.loading,
+          ),
+        ),
+        SizedBox(height: w * 0.03),
+        Center(
+          child: GestureDetector(
+            onTap: () => controller.isShopperLogin.value = false,
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: w * 0.035,
+                  color: AppColors.charcoal,
+                ),
+                children: const [
+                  TextSpan(text: 'New shopper? '),
+                  TextSpan(
+                    text: 'Create Account',
+                    style: TextStyle(
+                      color: AppColors.camel,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildOtpState(BuildContext context, double w, double h) {
+  Widget _buildSignupView(BuildContext context, double w, double h) {
     final theme = Theme.of(context);
     return Column(
-      key: const ValueKey('otp_state'),
-      crossAxisAlignment: .stretch,
+      key: const ValueKey('shopper_signup'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: .spaceBetween,
-          children: [
-            Text(
-              'Verification Code',
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontSize: w * 0.035,
-                color: AppColors.charcoal,
-              ),
-            ),
-            GestureDetector(
-              onTap: () => controller.showShopperOtpField.value = false,
-              child: Text(
-                'Edit Number',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: AppColors.camel,
-                  fontSize: w * 0.032,
-                  decoration: TextDecoration.underline,
-                  decorationColor: AppColors.camel,
-                ),
-              ),
-            ),
-          ],
+        CustomTextField(
+          controller: controller.shopperNameController,
+          label: 'Full Name',
+          hinttext: 'Enter your full name',
+          icon: Icons.person_outline,
         ),
-        SizedBox(height: h * 0.01),
-        PinInputField(
-          controller: controller.shopperOtpController,
-          onCompleted: (v) => controller.verifyShopperOtp(),
+        CustomTextField(
+          controller: controller.shopperEmailController,
+          label: 'Email Address',
+          hinttext: 'you@domain.com',
+          keyboardType: TextInputType.emailAddress,
+          icon: Icons.email_outlined,
         ),
-        SizedBox(height: h * 0.015),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Didn't receive code? ",
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontSize: w * 0.035,
-                color: AppColors.grey,
-              ),
-            ),
-            GestureDetector(
-              onTap: controller.sendShopperOtp,
-              child: Text(
-                'Resend',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.camel,
-                  fontWeight: FontWeight.w700,
-                  fontSize: w * 0.035,
-                ),
-              ),
-            ),
-          ],
+        CustomTextField(
+          controller: controller.shopperPasswordController,
+          label: 'Password',
+          hinttext: 'Create a password',
+          obscureText: true,
+          icon: Icons.lock_outline,
         ),
-        SizedBox(height: h * 0.015),
+        SizedBox(height: w * 0.015),
         Obx(
           () => CustomButton(
-            text: 'Verify & Login',
+            icon: Icons.person_add_alt_1_rounded,
+            text: 'Create Account',
             onPressed: controller.status.value == AuthStatus.loading
                 ? null
-                : controller.verifyShopperOtp,
+                : controller.signUpShopper,
             isLoading: controller.status.value == AuthStatus.loading,
+          ),
+        ),
+        SizedBox(height: w * 0.03),
+        Center(
+          child: GestureDetector(
+            onTap: () => controller.isShopperLogin.value = true,
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: w * 0.035,
+                  color: AppColors.charcoal,
+                ),
+                children: const [
+                  TextSpan(text: 'Already have an account? '),
+                  TextSpan(
+                    text: 'Sign In',
+                    style: TextStyle(
+                      color: AppColors.camel,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ],

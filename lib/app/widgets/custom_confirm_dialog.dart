@@ -28,10 +28,10 @@ class CustomConfirmDialog extends StatelessWidget {
     final sw = context.screenWidth;
 
     return Dialog(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.white.withValues(alpha: 0.6),
       shape: RoundedRectangleBorder(borderRadius: .circular(sw * 0.04)),
       child: Padding(
-        padding: .symmetric(horizontal: sw * 0.06, vertical: sw * 0.025),
+        padding: .symmetric(horizontal: sw * 0.04, vertical: sw * 0.02),
         child: Column(
           mainAxisSize: .min,
           children: [

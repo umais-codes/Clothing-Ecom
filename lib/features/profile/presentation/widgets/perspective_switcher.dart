@@ -1,5 +1,6 @@
 import 'package:ecom_app/features/profile/presentation/widgets/profile_menu_item.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
@@ -132,7 +133,28 @@ class PerspectiveSwitcher extends StatelessWidget {
       context: context,
       icon: Icons.swap_horiz_rounded,
       title: 'Switch Perspective?',
-      description: 'Are you sure you want to switch to $name?',
+      description: Text.rich(
+        TextSpan(
+          text: 'Are you sure you want to switch to ',
+          style: GoogleFonts.outfit(
+            fontSize: context.sp(14),
+            color: AppColors.grey,
+            height: 1.5,
+            fontWeight: FontWeight.w400,
+          ),
+          children: [
+            TextSpan(
+              text: name,
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.w700,
+                color: AppColors.charcoal,
+              ),
+            ),
+            const TextSpan(text: '?'),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      ),
       grantText: 'Switch',
       denyText: 'Cancel',
       onGrant: onConfirm,

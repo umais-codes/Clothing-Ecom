@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
@@ -48,7 +49,7 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     loadUserProfile();
-    
+
     // Automatically reload profile info when login status succeeds
     ever(_authController.status, (status) {
       if (status == AuthStatus.success) {
@@ -71,6 +72,19 @@ class ProfileController extends GetxController {
           if (avatarUrl.isNotEmpty) {
             profileImagePath.value = avatarUrl;
           }
+          final phoneVal = metadata['phone']?.toString() ?? '';
+          if (phoneVal.isNotEmpty) {
+            userPhone.value = phoneVal;
+          }
+          if (metadata['height'] != null) {
+            height.value = '${metadata['height'].toString().replaceAll('.0', '')}cm';
+          }
+          if (metadata['weight'] != null) {
+            weight.value = '${metadata['weight'].toString().replaceAll('.0', '')}kg';
+          }
+          if (metadata['fit_preference'] != null) {
+            fitPreference.value = metadata['fit_preference'].toString();
+          }
         }
 
         // Fetch custom profile metrics from Supabase DB via repository
@@ -79,22 +93,23 @@ class ProfileController extends GetxController {
           if (data['full_name'] != null) {
             userName.value = data['full_name'].toString();
           }
+          try {
+            if (data['phone'] != null && data['phone'].toString().isNotEmpty) {
+              userPhone.value = data['phone'].toString();
+            }
+            if (data['avatar_url'] != null &&
+                data['avatar_url'].toString().isNotEmpty) {
+              profileImagePath.value = data['avatar_url'].toString();
+            }
+          } catch (_) {}
           if (data['height'] != null) {
-            height.value =
-                '${data['height'].toString().replaceAll('.0', '')}cm';
-          } else {
-            height.value = 'Not Set';
+            height.value = '${data['height'].toString().replaceAll('.0', '')}cm';
           }
           if (data['weight'] != null) {
-            weight.value =
-                '${data['weight'].toString().replaceAll('.0', '')}kg';
-          } else {
-            weight.value = 'Not Set';
+            weight.value = '${data['weight'].toString().replaceAll('.0', '')}kg';
           }
           if (data['fit_preference'] != null) {
             fitPreference.value = data['fit_preference'].toString();
-          } else {
-            fitPreference.value = 'Not Set';
           }
         }
       }
@@ -146,7 +161,7 @@ class ProfileController extends GetxController {
 
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(MediaQuery.of(Get.context!).size.width * 0.05),
         decoration: const BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.only(
@@ -162,10 +177,9 @@ class ProfileController extends GetxController {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Calibrate AI Fit Profile',
-                    style: TextStyle(
-                      fontFamily: 'Playfair Display',
+                    style: GoogleFonts.outfit(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppColors.charcoal,
@@ -177,15 +191,14 @@ class ProfileController extends GetxController {
                   ),
                 ],
               ),
-              const SizedBox(height: 15),
+              SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
               // Height
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Height',
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
+                    style: GoogleFonts.outfit(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.charcoal,
@@ -193,9 +206,10 @@ class ProfileController extends GetxController {
                   ),
                   Obx(
                     () => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 2,
+                      padding: EdgeInsets.symmetric(
+                        horizontal:
+                            MediaQuery.of(Get.context!).size.width * 0.02,
+                        vertical: MediaQuery.of(Get.context!).size.width * 0.01,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.camelLight,
@@ -203,8 +217,7 @@ class ProfileController extends GetxController {
                       ),
                       child: Text(
                         '${tempHeight.value.round()} cm',
-                        style: const TextStyle(
-                          fontFamily: 'Outfit',
+                        style: GoogleFonts.outfit(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.camel,
@@ -220,7 +233,7 @@ class ProfileController extends GetxController {
                     activeTrackColor: AppColors.camel,
                     inactiveTrackColor: AppColors.greyLight,
                     thumbColor: AppColors.camel,
-                    trackHeight: 3,
+                    trackHeight: 2,
                   ),
                   child: Slider(
                     value: tempHeight.value,
@@ -231,15 +244,14 @@ class ProfileController extends GetxController {
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
               // Weight
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Weight',
-                    style: TextStyle(
-                      fontFamily: 'Outfit',
+                    style: GoogleFonts.outfit(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppColors.charcoal,
@@ -247,9 +259,10 @@ class ProfileController extends GetxController {
                   ),
                   Obx(
                     () => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 2,
+                      padding: EdgeInsets.symmetric(
+                        horizontal:
+                            MediaQuery.of(Get.context!).size.width * 0.02,
+                        vertical: MediaQuery.of(Get.context!).size.width * 0.01,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.camelLight,
@@ -257,8 +270,7 @@ class ProfileController extends GetxController {
                       ),
                       child: Text(
                         '${tempWeight.value.round()} kg',
-                        style: const TextStyle(
-                          fontFamily: 'Outfit',
+                        style: GoogleFonts.outfit(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: AppColors.camel,
@@ -274,7 +286,7 @@ class ProfileController extends GetxController {
                     activeTrackColor: AppColors.camel,
                     inactiveTrackColor: AppColors.greyLight,
                     thumbColor: AppColors.camel,
-                    trackHeight: 3,
+                    trackHeight: 2,
                   ),
                   child: Slider(
                     value: tempWeight.value,
@@ -285,18 +297,17 @@ class ProfileController extends GetxController {
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
+              SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
               // Preferred Fit
-              const Text(
+              Text(
                 'Preferred Fit',
-                style: TextStyle(
-                  fontFamily: 'Outfit',
+                style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.charcoal,
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
               Obx(
                 () => Row(
                   children: fitOptions.map((fit) {
@@ -320,7 +331,7 @@ class ProfileController extends GetxController {
                   }).toList(),
                 ),
               ),
-              const SizedBox(height: 25),
+              SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.05),
               CustomButton(
                 text: 'Save Changes',
                 onPressed: () async {
@@ -364,7 +375,7 @@ class ProfileController extends GetxController {
                 },
                 width: double.infinity,
               ),
-              const SizedBox(height: 15),
+              SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
             ],
           ),
         ),
@@ -386,7 +397,7 @@ class ProfileController extends GetxController {
 
       String? uploadedAvatarUrl;
       final localPath = profileImagePath.value;
-      
+
       if (localPath.isNotEmpty && !localPath.startsWith('http')) {
         final file = File(localPath);
         try {

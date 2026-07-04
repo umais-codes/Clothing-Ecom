@@ -158,41 +158,41 @@ class EditProfileView extends GetView<ProfileController> {
 
   void _showImagePicker(BuildContext context) {
     Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Select Image Source',
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.charcoal,
+      Material(
+        color: AppColors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Select Image Source',
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.charcoal,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined, color: AppColors.camel),
-              title: const Text('Gallery'),
-              onTap: () {
-                Get.back();
-                controller.pickImage(ImageSource.gallery);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt_outlined, color: AppColors.camel),
-              title: const Text('Camera'),
-              onTap: () {
-                Get.back();
-                controller.pickImage(ImageSource.camera);
-              },
-            ),
-          ],
+              const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined, color: AppColors.camel),
+                title: const Text('Gallery'),
+                onTap: () {
+                  Get.back();
+                  controller.pickImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined, color: AppColors.camel),
+                title: const Text('Camera'),
+                onTap: () {
+                  Get.back();
+                  controller.pickImage(ImageSource.camera);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

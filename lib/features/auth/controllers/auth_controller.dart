@@ -167,6 +167,7 @@ class AuthController extends GetxController {
         email: shopperEmailController.text.trim(),
         password: shopperPasswordController.text.trim(),
         fullName: shopperNameController.text.trim(),
+        role: 'shopper',
       );
       if (user != null) {
         _markOnboardingComplete();
@@ -259,6 +260,7 @@ class AuthController extends GetxController {
         fullName: contactPersonController.text.trim().isNotEmpty
             ? contactPersonController.text.trim()
             : brandNameController.text.trim(),
+        role: 'vendor',
       );
 
       if (user != null) {
@@ -354,6 +356,7 @@ class AuthController extends GetxController {
         email: corporateEmailController.text.trim(),
         password: corporatePasswordController.text.trim(),
         fullName: companyNameController.text.trim(),
+        role: 'corporate',
       );
       if (user != null) {
         _markOnboardingComplete();

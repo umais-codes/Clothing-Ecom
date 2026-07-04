@@ -41,9 +41,19 @@ class SplashController extends GetxController {
 
         if (isSessionValid) {
           final data = await authRepo.getProfile(user.id);
+          String? roleStr;
           if (data != null) {
+            roleStr = data['role']?.toString();
+          }
+
+          // Fallback 1: Read from Auth user metadata
+          roleStr ??= user.userMetadata?['role']?.toString();
+
+          // Fallback 2: Read from Hive settings
+          roleStr ??= box.get('lastSelectedRole')?.toString();
+
+          if (roleStr != null && roleStr.isNotEmpty) {
             final authCtrl = Get.find<AuthController>();
-            final roleStr = data['role']?.toString();
             if (roleStr == 'shopper') {
               authCtrl.selectedRole.value = AuthRole.shopper;
               Get.offAllNamed('/main-navigation');

@@ -214,7 +214,7 @@ class PdpController extends GetxController {
   Future<void> runAIPrediction() async {
     isPredicting.value = true;
     predictionDetails.value = '';
-    
+
     try {
       final user = _authRepository.currentUser;
       if (user == null) {
@@ -225,39 +225,80 @@ class PdpController extends GetxController {
       }
 
       final profile = await _authRepository.getProfile(user.id);
-      if (profile == null || profile['height'] == null || profile['weight'] == null) {
+      double? heightVal;
+      double? weightVal;
+      String? fitPref;
+
+      if (profile != null) {
+        if (profile['height'] != null) {
+          heightVal = (profile['height'] as num).toDouble();
+        }
+        if (profile['weight'] != null) {
+          weightVal = (profile['weight'] as num).toDouble();
+        }
+        fitPref = profile['fit_preference']?.toString();
+      }
+
+      final metadata = user.userMetadata;
+      if (metadata != null) {
+        if (heightVal == null && metadata['height'] != null) {
+          heightVal = (metadata['height'] as num).toDouble();
+        }
+        if (weightVal == null && metadata['weight'] != null) {
+          weightVal = (metadata['weight'] as num).toDouble();
+        }
+        if (fitPref == null && metadata['fit_preference'] != null) {
+          fitPref = metadata['fit_preference'].toString();
+        }
+      }
+
+      if (heightVal == null || weightVal == null) {
         await Future.delayed(const Duration(milliseconds: 600));
         isPredicting.value = false;
-        predictionDetails.value = 'Please calibrate your AI Fit Profile in your Account tab first.';
+        predictionDetails.value =
+            'Please calibrate your AI Fit Profile in your Account tab first.';
         return;
       }
 
-      final double heightVal = (profile['height'] as num).toDouble();
-      final double weightVal = (profile['weight'] as num).toDouble();
-      final String fitPref = profile['fit_preference']?.toString() ?? 'Regular';
+      fitPref ??= 'Regular';
       final String cat = product['category']?.toString() ?? "Men's";
-      
-      final List<String> availableSizes = List<String>.from(product['sizes'] ?? ['S', 'M', 'L', 'XL']);
 
-      final recommended = _calculateSize(heightVal, weightVal, fitPref, cat, availableSizes);
+      final List<String> availableSizes = List<String>.from(
+        product['sizes'] ?? ['S', 'M', 'L', 'XL'],
+      );
+
+      final recommended = _calculateSize(
+        heightVal,
+        weightVal,
+        fitPref,
+        cat,
+        availableSizes,
+      );
 
       await Future.delayed(const Duration(milliseconds: 800));
       isPredicting.value = false;
       recommendedSize.value = recommended;
       selectedSize.value = recommended;
       predictedSize.value = 1.0;
-      predictionDetails.value = 'Based on your AI Profile (${heightVal.round()}cm, ${weightVal.round()}kg, $fitPref fit).';
+      predictionDetails.value =
+          'Based on your AI Profile (${heightVal.round()}cm, ${weightVal.round()}kg, $fitPref fit).';
     } catch (e) {
       isPredicting.value = false;
       predictionDetails.value = 'Failed to calculate size: $e';
     }
   }
 
-  String _calculateSize(double height, double weight, String fitPreference, String category, List<String> availableSizes) {
+  String _calculateSize(
+    double height,
+    double weight,
+    String fitPreference,
+    String category,
+    List<String> availableSizes,
+  ) {
     if (availableSizes.isEmpty) return 'M';
-    
+
     double bmi = weight / ((height / 100) * (height / 100));
-    
+
     String recommended = 'M';
     if (bmi < 19.5) {
       recommended = 'S';

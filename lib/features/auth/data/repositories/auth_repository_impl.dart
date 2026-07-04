@@ -16,7 +16,11 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Map<String, dynamic>?> getProfile(String userId) async {
     try {
-      final res = await _supabase.from('profiles').select().eq('id', userId).maybeSingle();
+      final res = await _supabase
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
       return res;
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));
@@ -64,12 +68,15 @@ class AuthRepositoryImpl implements AuthRepository {
             return null; // User cancelled native sign-in dialog
           }
 
-          final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication;
           final idToken = googleAuth.idToken;
           final accessToken = googleAuth.accessToken;
 
           if (idToken == null) {
-            throw Exception('Google Sign-In succeeded but did not return an ID Token.');
+            throw Exception(
+              'Google Sign-In succeeded but did not return an ID Token.',
+            );
           }
 
           final response = await _supabase.auth.signInWithIdToken(
@@ -106,12 +113,20 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User?> signUp({required String email, required String password, String? fullName}) async {
+  Future<User?> signUp({
+    required String email,
+    required String password,
+    String? fullName,
+    String? role,
+  }) async {
     try {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
-        data: fullName != null ? {'full_name': fullName} : null,
+        data: {
+          if (fullName != null) 'full_name': fullName,
+          if (role != null) 'role': role,
+        },
       );
       return response.user;
     } catch (e) {
@@ -120,7 +135,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User?> signInWithPassword({required String email, required String password}) async {
+  Future<User?> signInWithPassword({
+    required String email,
+    required String password,
+  }) async {
     try {
       final response = await _supabase.auth.signInWithPassword(
         email: email,
@@ -195,11 +213,27 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fitPreference,
   }) async {
     try {
-      await _supabase.from('profiles').update({
-        'height': height,
-        'weight': weight,
-        'fit_preference': fitPreference,
-      }).eq('id', userId);
+      // 1. Update metadata in Supabase Auth user record (this always works and acts as a fail-safe fallback)
+      await _supabase.auth.updateUser(
+        UserAttributes(
+          data: {
+            'height': height,
+            'weight': weight,
+            'fit_preference': fitPreference,
+          },
+        ),
+      );
+
+      // 2. Try to update profiles database table
+      try {
+        await _supabase.from('profiles').update({
+          'height': height,
+          'weight': weight,
+          'fit_preference': fitPreference,
+        }).eq('id', userId);
+      } catch (dbError) {
+        debugPrint('profiles table update for body metrics failed: $dbError. Saved in metadata.');
+      }
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));
     }
@@ -218,18 +252,29 @@ class AuthRepositoryImpl implements AuthRepository {
         UserAttributes(
           data: {
             'full_name': fullName,
-            'phone': ?phone,
-            'avatar_url': ?avatarUrl,
+            if (phone != null) 'phone': phone,
+            if (avatarUrl != null) 'avatar_url': avatarUrl,
           },
         ),
       );
 
       // Update profiles database table
-      await _supabase.from('profiles').update({
-        'full_name': fullName,
-        'phone': ?phone,
-        'avatar_url': ?avatarUrl,
-      }).eq('id', userId);
+      try {
+        await _supabase.from('profiles').update({
+          'full_name': fullName,
+          if (phone != null) 'phone': phone,
+          if (avatarUrl != null) 'avatar_url': avatarUrl,
+        }).eq('id', userId);
+      } catch (dbError) {
+        debugPrint('Database update failed, falling back to full_name only: $dbError');
+        try {
+          await _supabase.from('profiles').update({
+            'full_name': fullName,
+          }).eq('id', userId);
+        } catch (fbError) {
+          debugPrint('Fallback database update failed silently: $fbError. Profile changes saved in user metadata.');
+        }
+      }
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));
     }
@@ -243,12 +288,14 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_avatar.png';
       final path = '$userId/$fileName';
-      
+
       try {
         await _supabase.storage.from('avatars').upload(path, file);
         return _supabase.storage.from('avatars').getPublicUrl(path);
       } catch (storageError) {
-        debugPrint('Uploading to avatars bucket failed, using fallback rma-evidence: $storageError');
+        debugPrint(
+          'Uploading to avatars bucket failed, using fallback rma-evidence: $storageError',
+        );
         // Fallback bucket
         await _supabase.storage.from('rma-evidence').upload(path, file);
         return _supabase.storage.from('rma-evidence').getPublicUrl(path);

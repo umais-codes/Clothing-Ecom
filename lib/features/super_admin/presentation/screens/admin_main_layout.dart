@@ -6,6 +6,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
 import 'package:ecom_app/app/widgets/custom_app_bar.dart';
+import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
 import 'admin_dashboard_screen.dart';
 import 'kyc_queue_screen.dart';
 import 'catalog_moderation_screen.dart';
@@ -526,8 +527,21 @@ class _SidebarFooter extends StatelessWidget {
 }
 
 void _signOut() {
-  Get.find<AuthController>().selectedRole.value = AuthRole.shopper;
-  Get.offAllNamed('/onboarding');
+  final context = Get.context;
+  if (context == null) return;
+
+  CustomPermissionDialog.show(
+    context: context,
+    icon: Icons.logout_rounded,
+    title: 'Sign Out?',
+    description: 'Are you sure you want to sign out of the Admin Panel?',
+    grantText: 'Log Out',
+    denyText: 'Cancel',
+    onGrant: () {
+      Get.find<AuthController>().selectedRole.value = AuthRole.shopper;
+      Get.offAllNamed('/onboarding');
+    },
+  );
 }
 
 // ── Data class ────────────────────────────────────────────────────────────────

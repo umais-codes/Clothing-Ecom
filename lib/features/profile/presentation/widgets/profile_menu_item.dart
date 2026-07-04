@@ -6,12 +6,14 @@ class ProfileMenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   const ProfileMenuItem({
     super.key,
     required this.icon,
     required this.title,
     this.onTap,
+    this.trailing,
   });
 
   @override
@@ -29,7 +31,7 @@ class ProfileMenuItem extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        trailing: Icon(
+        trailing: trailing ?? Icon(
           Icons.chevron_right_rounded,
           color: AppColors.grey,
           size: w * 0.06,

@@ -8,6 +8,7 @@ import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart'
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 
 class ProfileController extends GetxController {
@@ -497,12 +498,25 @@ class ProfileController extends GetxController {
   }
 
   Future<void> logout() async {
-    try {
-      await _authRepository.signOut();
-      _resetProfileData();
-    } catch (e) {
-      debugPrint('Error signing out of Supabase: $e');
-    }
-    Get.offAllNamed('/onboarding');
+    final context = Get.context;
+    if (context == null) return;
+
+    CustomPermissionDialog.show(
+      context: context,
+      icon: Icons.logout_rounded,
+      title: 'Sign Out?',
+      description: 'Are you sure you want to sign out of your account?',
+      grantText: 'Log Out',
+      denyText: 'Cancel',
+      onGrant: () async {
+        try {
+          await _authRepository.signOut();
+          _resetProfileData();
+        } catch (e) {
+          debugPrint('Error signing out of Supabase: $e');
+        }
+        Get.offAllNamed('/onboarding');
+      },
+    );
   }
 }

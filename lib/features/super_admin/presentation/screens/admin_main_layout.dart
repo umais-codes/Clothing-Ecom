@@ -189,10 +189,9 @@ class _FullSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = context.screenWidth;
     return SafeArea(
       child: Container(
-        width: context.wp(18).clamp(200, 260),
+        width: context.isMobileView ? null : context.wp(18).clamp(200, 260),
         decoration: const BoxDecoration(
           color: AppColors.white,
           border: Border(
@@ -202,16 +201,14 @@ class _FullSidebar extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: sw * 0.04),
+            SizedBox(height: context.hp(2.5)),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: context.wp(2.5).clamp(sw * 0.03, sw * 0.05),
-              ),
+              padding: EdgeInsets.symmetric(horizontal: context.wp(4)),
               child: Row(
                 children: [
                   Container(
-                    width: sw * 0.08,
-                    height: sw * 0.08,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       color: AppColors.camel,
                       borderRadius: BorderRadius.circular(8),
@@ -219,52 +216,52 @@ class _FullSidebar extends StatelessWidget {
                     child: const Icon(
                       Icons.shield_outlined,
                       color: AppColors.white,
-                      size: 18,
+                      size: 20,
                     ),
                   ),
-                  SizedBox(width: sw * 0.02),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Velvet Maison',
-                        style: GoogleFonts.outfit(
-                          fontSize: sw * 0.04,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.charcoal,
-                          letterSpacing: -0.3,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Velvet Maison',
+                          style: GoogleFonts.outfit(
+                            fontSize: context.sp(16),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.charcoal,
+                            letterSpacing: -0.3,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Admin Panel',
-                        style: GoogleFonts.outfit(
-                          fontSize: 10,
-                          color: AppColors.grey,
-                          letterSpacing: 0.5,
-                          fontWeight: FontWeight.w500,
+                        Text(
+                          'Admin Panel',
+                          style: GoogleFonts.outfit(
+                            fontSize: context.sp(10),
+                            color: AppColors.grey,
+                            letterSpacing: 0.5,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: sw * 0.03),
+            SizedBox(height: context.hp(2.5)),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: context.wp(2.5).clamp(sw * 0.03, sw * 0.05),
-              ),
+              padding: EdgeInsets.symmetric(horizontal: context.wp(4)),
               child: Text(
-                'Navigation',
+                'NAVIGATION',
                 style: GoogleFonts.outfit(
-                  fontSize: sw * 0.02,
+                  fontSize: context.sp(11),
                   fontWeight: FontWeight.w800,
                   color: AppColors.grey,
                   letterSpacing: 1.2,
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
             // Nav items
             Expanded(
@@ -292,7 +289,7 @@ class _FullSidebar extends StatelessWidget {
             // Footer
             const Divider(color: AppColors.greyLight, height: 1),
             _SidebarFooter(),
-            SizedBox(height: sw * 0.03),
+            SizedBox(height: context.hp(2)),
           ],
         ),
       ),
@@ -400,9 +397,8 @@ class _SidebarTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = context.screenWidth;
     return Padding(
-      padding: EdgeInsets.only(bottom: sw * 0.005),
+      padding: const EdgeInsets.only(bottom: 4),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(10),
@@ -412,8 +408,8 @@ class _SidebarTile extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 220),
             padding: EdgeInsets.symmetric(
-              horizontal: sw * 0.03,
-              vertical: sw * 0.025,
+              horizontal: context.wp(4),
+              vertical: context.hp(1.4),
             ),
             decoration: BoxDecoration(
               color: isActive
@@ -425,15 +421,15 @@ class _SidebarTile extends StatelessWidget {
               children: [
                 Icon(
                   isActive ? item.activeIcon : item.icon,
-                  size: sw * 0.045,
+                  size: context.sp(20),
                   color: isActive ? AppColors.camel : AppColors.grey,
                 ),
-                SizedBox(width: sw * 0.025),
+                SizedBox(width: context.wp(3)),
                 Expanded(
                   child: Text(
                     item.label,
                     style: GoogleFonts.outfit(
-                      fontSize: context.sp(sw * 0.015),
+                      fontSize: context.sp(14.5),
                       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                       color: isActive ? AppColors.camel : AppColors.ink,
                     ),
@@ -441,8 +437,8 @@ class _SidebarTile extends StatelessWidget {
                 ),
                 if (isActive)
                   Container(
-                    width: sw * 0.01,
-                    height: sw * 0.01,
+                    width: 6,
+                    height: 6,
                     decoration: const BoxDecoration(
                       color: AppColors.camel,
                       shape: BoxShape.circle,
@@ -461,11 +457,10 @@ class _SidebarTile extends StatelessWidget {
 class _SidebarFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final double sw = context.screenWidth;
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: sw * 0.03,
-        vertical: sw * 0.015,
+        horizontal: context.wp(3),
+        vertical: context.hp(1),
       ),
       child: Material(
         color: Colors.transparent,
@@ -475,25 +470,25 @@ class _SidebarFooter extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: sw * 0.03,
-              vertical: sw * 0.015,
+              horizontal: context.wp(3),
+              vertical: context.hp(1),
             ),
             child: Row(
               children: [
                 Container(
-                  width: sw * 0.08,
-                  height: sw * 0.08,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: AppColors.camel.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.person_outline_rounded,
-                    size: sw * 0.045,
+                    size: context.sp(20),
                     color: AppColors.camel,
                   ),
                 ),
-                SizedBox(width: sw * 0.025),
+                SizedBox(width: context.wp(3)),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -501,7 +496,7 @@ class _SidebarFooter extends StatelessWidget {
                       Text(
                         'Super Admin',
                         style: GoogleFonts.outfit(
-                          fontSize: 12,
+                          fontSize: context.sp(12),
                           fontWeight: FontWeight.w600,
                           color: AppColors.charcoal,
                         ),
@@ -509,7 +504,7 @@ class _SidebarFooter extends StatelessWidget {
                       Text(
                         'admin@velvetmaison.pk',
                         style: GoogleFonts.outfit(
-                          fontSize: 10,
+                          fontSize: context.sp(10),
                           color: AppColors.grey,
                         ),
                       ),
@@ -518,7 +513,7 @@ class _SidebarFooter extends StatelessWidget {
                 ),
                 Icon(
                   Icons.logout_rounded,
-                  size: sw * 0.045,
+                  size: context.sp(20),
                   color: AppColors.grey,
                 ),
               ],
@@ -553,10 +548,9 @@ class _AdminProfileBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double sw = context.screenWidth;
     return Container(
-      width: sw * 0.08,
-      height: sw * 0.08,
+      width: 32,
+      height: 32,
       decoration: BoxDecoration(
         color: AppColors.camel.withValues(alpha: 0.1),
         shape: BoxShape.circle,
@@ -569,7 +563,7 @@ class _AdminProfileBadge extends StatelessWidget {
         child: Text(
           'SA',
           style: GoogleFonts.outfit(
-            fontSize: sw * 0.025,
+            fontSize: context.sp(12),
             fontWeight: FontWeight.w700,
             color: AppColors.camel,
           ),

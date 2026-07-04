@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:ecom_app/features/auth/presentation/screens/pending_approval_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
-import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
+import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart'
+    hide UserRole;
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:uuid/uuid.dart';
@@ -29,7 +30,8 @@ class AuthController extends GetxController {
 
   // --- Shopper Controllers ---
   final TextEditingController shopperEmailController = TextEditingController();
-  final TextEditingController shopperPasswordController = TextEditingController();
+  final TextEditingController shopperPasswordController =
+      TextEditingController();
   final TextEditingController shopperNameController = TextEditingController();
   final RxBool isShopperLogin = true.obs;
 
@@ -120,10 +122,26 @@ class AuthController extends GetxController {
     }
   }
 
-  void _markOnboardingComplete() {
+  void _markOnboardingComplete(AuthRole role) {
     final box = Hive.box('settings');
     box.put('hasSeenOnboarding', true);
     box.put('login_time', DateTime.now().millisecondsSinceEpoch);
+    if (role != AuthRole.admin) {
+      box.put('lastSelectedRole', role.name);
+    }
+    if (Get.isRegistered<OnboardingController>()) {
+      Get.find<OnboardingController>().clearOnboardingDrafts();
+    }
+  }
+
+  void _handleAuthSuccess(
+    AuthRole role, {
+    String nextRoute = '/main-navigation',
+  }) {
+    _markOnboardingComplete(role);
+    status.value = AuthStatus.success;
+    selectedRole.value = role;
+    Get.offAllNamed(nextRoute);
   }
 
   Future<void> signInShopper() async {
@@ -139,10 +157,7 @@ class AuthController extends GetxController {
         password: shopperPasswordController.text.trim(),
       );
       if (user != null) {
-        _markOnboardingComplete();
-        status.value = AuthStatus.success;
-        selectedRole.value = AuthRole.shopper;
-        Get.offAllNamed('/main-navigation');
+        _handleAuthSuccess(AuthRole.shopper);
         Get.snackbar(
           'Success',
           'Welcome back!',
@@ -170,15 +185,12 @@ class AuthController extends GetxController {
         role: 'shopper',
       );
       if (user != null) {
-        _markOnboardingComplete();
         await _createProfile(
           user.id,
           'shopper',
           fullName: shopperNameController.text.trim(),
         );
-        status.value = AuthStatus.success;
-        selectedRole.value = AuthRole.shopper;
-        Get.offAllNamed('/main-navigation');
+        _handleAuthSuccess(AuthRole.shopper);
         Get.snackbar(
           'Success',
           'Account created successfully!',
@@ -195,15 +207,27 @@ class AuthController extends GetxController {
     try {
       final user = await _authRepository.signInWithSocialProvider(provider);
       if (user != null) {
-        _markOnboardingComplete();
+        String roleStr = 'shopper';
+        AuthRole authRole = AuthRole.shopper;
+        if (Get.isRegistered<OnboardingController>()) {
+          final onboarding = Get.find<OnboardingController>();
+          if (onboarding.selectedRole.value == UserRole.fashionBrand) {
+            roleStr = 'vendor';
+            authRole = AuthRole.vendor;
+          } else if (onboarding.selectedRole.value == UserRole.corporateBuyer) {
+            roleStr = 'corporate';
+            authRole = AuthRole.corporate;
+          }
+        }
+
         await _createProfile(
           user.id,
-          'shopper',
-          fullName: user.userMetadata?['full_name'] ?? 'Shopper User',
+          roleStr,
+          fullName:
+              user.userMetadata?['full_name'] ??
+              '${roleStr.capitalizeFirst} User',
         );
-        status.value = AuthStatus.success;
-        selectedRole.value = AuthRole.shopper;
-        Get.offAllNamed('/main-navigation');
+        _handleAuthSuccess(authRole);
       } else {
         status.value = AuthStatus.initial;
       }
@@ -264,7 +288,7 @@ class AuthController extends GetxController {
       );
 
       if (user != null) {
-        _markOnboardingComplete();
+        _markOnboardingComplete(AuthRole.vendor);
         final vendorId = uuid.v4();
 
         await _authRepository.createVendor(
@@ -327,10 +351,7 @@ class AuthController extends GetxController {
         password: vendorPasswordController.text.trim(),
       );
       if (user != null) {
-        _markOnboardingComplete();
-        status.value = AuthStatus.success;
-        selectedRole.value = AuthRole.vendor;
-        Get.offAllNamed('/main-navigation');
+        _handleAuthSuccess(AuthRole.vendor);
         Get.snackbar(
           'Success',
           'Welcome back to the Brand Portal',
@@ -359,15 +380,12 @@ class AuthController extends GetxController {
         role: 'corporate',
       );
       if (user != null) {
-        _markOnboardingComplete();
         await _createProfile(
           user.id,
           'corporate',
           fullName: companyNameController.text.trim(),
         );
-        status.value = AuthStatus.success;
-        selectedRole.value = AuthRole.corporate;
-        Get.offAllNamed('/main-navigation');
+        _handleAuthSuccess(AuthRole.corporate);
       }
     } catch (e) {
       _showError(_cleanMessage(e));
@@ -387,10 +405,7 @@ class AuthController extends GetxController {
         password: corporatePasswordController.text.trim(),
       );
       if (user != null) {
-        _markOnboardingComplete();
-        status.value = AuthStatus.success;
-        selectedRole.value = AuthRole.corporate;
-        Get.offAllNamed('/main-navigation');
+        _handleAuthSuccess(AuthRole.corporate);
         Get.snackbar(
           'Success',
           'Welcome to Corporate Access',

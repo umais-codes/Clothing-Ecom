@@ -40,10 +40,16 @@ class SplashController extends GetxController {
         }
 
         if (isSessionValid) {
-          final data = await authRepo.getProfile(user.id);
           String? roleStr;
-          if (data != null) {
-            roleStr = data['role']?.toString();
+          try {
+            final data = await authRepo.getProfile(user.id);
+            if (data != null) {
+              roleStr = data['role']?.toString();
+            }
+          } catch (e) {
+            Get.printInfo(
+              info: 'Failed to fetch online profile (offline?): $e',
+            );
           }
 
           // Fallback 1: Read from Auth user metadata
@@ -54,21 +60,21 @@ class SplashController extends GetxController {
 
           if (roleStr != null && roleStr.isNotEmpty) {
             final authCtrl = Get.find<AuthController>();
-            if (roleStr == 'shopper') {
-              authCtrl.selectedRole.value = AuthRole.shopper;
-              Get.offAllNamed('/main-navigation');
-              return;
-            } else if (roleStr == 'vendor') {
-              authCtrl.selectedRole.value = AuthRole.vendor;
-              Get.offAllNamed('/main-navigation');
-              return;
-            } else if (roleStr == 'corporate') {
-              authCtrl.selectedRole.value = AuthRole.corporate;
-              Get.offAllNamed('/main-navigation');
-              return;
-            } else if (roleStr == 'admin') {
-              authCtrl.selectedRole.value = AuthRole.admin;
-              Get.offAllNamed('/admin-panel');
+            AuthRole? matchedRole;
+            for (final role in AuthRole.values) {
+              if (role.name == roleStr) {
+                matchedRole = role;
+                break;
+              }
+            }
+
+            if (matchedRole != null) {
+              authCtrl.selectedRole.value = matchedRole;
+              if (matchedRole == AuthRole.admin) {
+                Get.offAllNamed('/admin-panel');
+              } else {
+                Get.offAllNamed('/main-navigation');
+              }
               return;
             }
           }

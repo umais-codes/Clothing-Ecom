@@ -12,7 +12,6 @@ class ProfileHeader extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     final w = context.screenWidth;
-    final h = context.screenHeight;
     final theme = Theme.of(context);
 
     return Column(
@@ -69,24 +68,24 @@ class ProfileHeader extends GetView<ProfileController> {
             ),
           ],
         ),
-        SizedBox(height: h * 0.02),
+        SizedBox(height: context.hp(2)),
         Obx(
           () => Text(
             controller.userName.value,
-            style: theme.textTheme.displayMedium?.copyWith(fontSize: 28),
+            style: theme.textTheme.displayMedium?.copyWith(fontSize: context.sp(28)),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: context.hp(0.5)),
         Obx(
           () => Text(
             controller.userEmail.value,
-            style: theme.textTheme.bodyMedium,
+            style: theme.textTheme.bodyMedium?.copyWith(fontSize: context.sp(14)),
           ),
         ),
-        SizedBox(height: h * 0.015),
+        SizedBox(height: context.hp(1.5)),
         Obx(
           () => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: context.wp(3.2), vertical: context.hp(0.8)),
             decoration: BoxDecoration(
               color: AppColors.camelLight,
               borderRadius: BorderRadius.circular(20),
@@ -96,6 +95,7 @@ class ProfileHeader extends GetView<ProfileController> {
               style: theme.textTheme.labelLarge?.copyWith(
                 color: AppColors.charcoal,
                 fontWeight: FontWeight.w600,
+                fontSize: context.sp(12),
               ),
             ),
           ),

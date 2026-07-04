@@ -14,13 +14,77 @@ class OnboardingController extends GetxController {
   void onInit() {
     super.onInit();
     final box = Hive.box('settings');
+    
+    // Restore drafts if onboarding hasn't been completed yet
     final hasSeen = box.get('hasSeenOnboarding', defaultValue: false) as bool;
+    
+    if (!hasSeen) {
+      final savedRoleStr = box.get('onboarding_selectedRole') as String?;
+      if (savedRoleStr != null) {
+        for (final role in UserRole.values) {
+          if (role.name == savedRoleStr) {
+            selectedRole.value = role;
+            break;
+          }
+        }
+      }
+
+      final savedCategories = box.get('onboarding_selectedCategories') as List?;
+      if (savedCategories != null) {
+        selectedCategories.addAll(savedCategories.cast<String>());
+      }
+
+      final savedHeight = box.get('onboarding_height') as double?;
+      if (savedHeight != null) {
+        height.value = savedHeight;
+      }
+
+      final savedWeight = box.get('onboarding_weight') as double?;
+      if (savedWeight != null) {
+        weight.value = savedWeight;
+      }
+
+      final savedFit = box.get('onboarding_selectedFit') as String?;
+      if (savedFit != null) {
+        selectedFit.value = savedFit;
+      }
+
+      final savedHasPersonalized = box.get('onboarding_hasPersonalized') as bool?;
+      if (savedHasPersonalized != null) {
+        hasPersonalized.value = savedHasPersonalized;
+      }
+    }
+
+    final savedPage = box.get('onboarding_currentPage') as int?;
     if (hasSeen) {
       currentPage.value = 3;
       pageController = PageController(initialPage: 3);
+    } else if (savedPage != null) {
+      currentPage.value = savedPage;
+      pageController = PageController(initialPage: savedPage);
     } else {
       pageController = PageController(initialPage: 0);
     }
+
+    // Set up reactive listeners to persist future changes
+    ever(currentPage, (int page) => box.put('onboarding_currentPage', page));
+    ever(selectedRole, (UserRole? role) => box.put('onboarding_selectedRole', role?.name));
+    ever(selectedCategories, (Set<String> cats) => box.put('onboarding_selectedCategories', cats.toList()));
+    ever(height, (double val) => box.put('onboarding_height', val));
+    ever(weight, (double val) => box.put('onboarding_weight', val));
+    ever(selectedFit, (String fit) => box.put('onboarding_selectedFit', fit));
+    ever(hasPersonalized, (bool val) => box.put('onboarding_hasPersonalized', val));
+  }
+
+  void clearOnboardingDrafts() {
+    final box = Hive.box('settings');
+    box.delete('onboarding_currentPage');
+    box.delete('onboarding_selectedRole');
+    box.delete('onboarding_selectedCategories');
+    box.delete('onboarding_height');
+    box.delete('onboarding_weight');
+    box.delete('onboarding_selectedFit');
+    box.delete('onboarding_hasPersonalized');
   }
 
   // --- Role Selection ---

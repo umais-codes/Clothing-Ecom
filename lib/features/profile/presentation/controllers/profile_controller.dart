@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 
 class ProfileController extends GetxController {
   final AuthController _authController = Get.find<AuthController>();
@@ -19,6 +21,14 @@ class ProfileController extends GetxController {
   final RxString userPhone = '+1 234 567 890'.obs;
   final RxString profileImagePath = ''.obs;
   final RxBool isSaving = false.obs;
+
+  // Vendor specific observables
+  final RxString brandName = ''.obs;
+  final RxString kycStatus = 'pending'.obs;
+
+  // Corporate specific observables
+  final RxString companyNtn = ''.obs;
+  final RxString employeeVolume = ''.obs;
 
   // Fit Profile Metrics
   final RxString height = '175cm'.obs;
@@ -111,6 +121,28 @@ class ProfileController extends GetxController {
           if (data['fit_preference'] != null) {
             fitPreference.value = data['fit_preference'].toString();
           }
+        }
+
+        // Fetch role-specific vendor / corporate data
+        if (currentRole == AuthRole.vendor) {
+          try {
+            final supabase = Get.find<SupabaseService>().client;
+            final vendorRes = await supabase
+                .from('vendors')
+                .select()
+                .eq('owner_id', user.id)
+                .maybeSingle();
+            if (vendorRes != null) {
+              brandName.value = vendorRes['brand_name']?.toString() ?? '';
+              kycStatus.value = vendorRes['kyc_status']?.toString() ?? 'pending';
+            }
+          } catch (e) {
+            debugPrint('Failed to load vendor details: $e');
+          }
+        } else if (currentRole == AuthRole.corporate) {
+          final box = Hive.box('settings');
+          companyNtn.value = box.get('corporate_ntn', defaultValue: 'NTN-8762541-0') as String;
+          employeeVolume.value = box.get('corporate_volume', defaultValue: '51-200 Employees') as String;
         }
       }
     } catch (e) {
@@ -388,6 +420,8 @@ class ProfileController extends GetxController {
     required String name,
     required String email,
     required String phone,
+    String? brandName,
+    String? ntn,
   }) async {
     try {
       final user = _authRepository.currentUser;
@@ -423,6 +457,23 @@ class ProfileController extends GetxController {
       if (uploadedAvatarUrl != null) {
         profileImagePath.value = uploadedAvatarUrl;
       }
+
+      // Save role-specific details
+      if (currentRole == AuthRole.vendor && brandName != null && brandName.isNotEmpty) {
+        try {
+          final supabase = Get.find<SupabaseService>().client;
+          await supabase.from('vendors').update({
+            'brand_name': brandName,
+          }).eq('owner_id', user.id);
+          this.brandName.value = brandName;
+        } catch (e) {
+          debugPrint('Failed to update brand name in Supabase: $e');
+        }
+      } else if (currentRole == AuthRole.corporate && ntn != null) {
+        final box = Hive.box('settings');
+        box.put('corporate_ntn', ntn);
+        companyNtn.value = ntn;
+      }
     } catch (e) {
       debugPrint('Error saving profile changes: $e');
       rethrow;
@@ -439,6 +490,10 @@ class ProfileController extends GetxController {
     height.value = '175cm';
     weight.value = '62kg';
     fitPreference.value = 'Tailored Slim';
+    brandName.value = '';
+    kycStatus.value = 'pending';
+    companyNtn.value = '';
+    employeeVolume.value = '';
   }
 
   Future<void> logout() async {

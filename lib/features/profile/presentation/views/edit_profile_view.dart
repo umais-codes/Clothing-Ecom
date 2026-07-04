@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import '../controllers/profile_controller.dart';
 
 class EditProfileView extends GetView<ProfileController> {
@@ -24,6 +25,15 @@ class EditProfileView extends GetView<ProfileController> {
     final phoneController = TextEditingController(
       text: controller.userPhone.value,
     );
+    final brandController = TextEditingController(
+      text: controller.brandName.value,
+    );
+    final ntnController = TextEditingController(
+      text: controller.companyNtn.value,
+    );
+
+    final isVendor = controller.currentRole == AuthRole.vendor;
+    final isCorporate = controller.currentRole == AuthRole.corporate;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -42,7 +52,7 @@ class EditProfileView extends GetView<ProfileController> {
             _buildAvatarEdit(context),
             SizedBox(height: context.hp(5)),
             CustomTextField(
-              label: 'Full Name',
+              label: isCorporate ? 'Company Name' : 'Full Name',
               controller: nameController,
               icon: Icons.person_outline_rounded,
             ),
@@ -60,6 +70,22 @@ class EditProfileView extends GetView<ProfileController> {
               icon: Icons.phone_android_rounded,
               keyboardType: TextInputType.phone,
             ),
+            if (isVendor) ...[
+              SizedBox(height: context.hp(1.5)),
+              CustomTextField(
+                label: 'Brand Name',
+                controller: brandController,
+                icon: Icons.storefront_rounded,
+              ),
+            ],
+            if (isCorporate) ...[
+              SizedBox(height: context.hp(1.5)),
+              CustomTextField(
+                label: 'NTN Number',
+                controller: ntnController,
+                icon: Icons.business_outlined,
+              ),
+            ],
             SizedBox(height: context.hp(6)),
             Obx(
               () => CustomButton(
@@ -73,6 +99,8 @@ class EditProfileView extends GetView<ProfileController> {
                             name: nameController.text.trim(),
                             email: emailController.text.trim(),
                             phone: phoneController.text.trim(),
+                            brandName: isVendor ? brandController.text.trim() : null,
+                            ntn: isCorporate ? ntnController.text.trim() : null,
                           );
                           Get.back();
                           Get.snackbar(

@@ -1,3 +1,4 @@
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/features/profile/presentation/widgets/profile_menu_item.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import 'package:ecom_app/features/auth/presentation/screens/auth_gateway_screen.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 
 class PerspectiveSwitcher extends StatelessWidget {
@@ -61,10 +63,11 @@ class PerspectiveSwitcher extends StatelessWidget {
                   title: 'Vendor Portal',
                   onTap: () {
                     if (activeRole != AuthRole.vendor) {
-                      _confirmSwitch(
+                      _trySwitchRole(
                         context,
+                        authController,
+                        AuthRole.vendor,
                         'Vendor Portal',
-                        () => authController.setRole(AuthRole.vendor),
                       );
                     }
                   },
@@ -81,10 +84,11 @@ class PerspectiveSwitcher extends StatelessWidget {
                   title: 'Corporate Sourcing',
                   onTap: () {
                     if (activeRole != AuthRole.corporate) {
-                      _confirmSwitch(
+                      _trySwitchRole(
                         context,
+                        authController,
+                        AuthRole.corporate,
                         'Corporate Sourcing',
-                        () => authController.setRole(AuthRole.corporate),
                       );
                     }
                   },
@@ -101,10 +105,11 @@ class PerspectiveSwitcher extends StatelessWidget {
                   title: 'Super Admin Control',
                   onTap: () {
                     if (activeRole != AuthRole.admin) {
-                      _confirmSwitch(
+                      _trySwitchRole(
                         context,
+                        authController,
+                        AuthRole.admin,
                         'Super Admin Control',
-                        () => Get.toNamed('/admin-login'),
                       );
                     }
                   },
@@ -121,6 +126,131 @@ class PerspectiveSwitcher extends StatelessWidget {
           }),
         ),
       ],
+    );
+  }
+
+  void _trySwitchRole(
+    BuildContext context,
+    AuthController authController,
+    AuthRole targetRole,
+    String roleName,
+  ) async {
+    // 1. Consumer Mode switches immediately (anyone can act as shopper)
+    if (targetRole == AuthRole.shopper) {
+      _confirmSwitch(
+        context,
+        roleName,
+        () => authController.setRole(AuthRole.shopper),
+      );
+      return;
+    }
+
+    // 2. Admin switch goes directly to admin login flow
+    if (targetRole == AuthRole.admin) {
+      _confirmSwitch(context, roleName, () => Get.toNamed('/admin-login'));
+      return;
+    }
+
+    // Show backdrop loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.camel),
+        ),
+      ),
+    );
+
+    try {
+      final user = authController.currentUser;
+      if (user == null) {
+        Get.back(); // close loader
+        _showPermissionRequiredDialog(context, authController, targetRole);
+        return;
+      }
+
+      final supabase = Get.find<SupabaseService>().client;
+      final res = await supabase
+          .from('vendors')
+          .select('*, profiles:owner_id(role)')
+          .eq('owner_id', user.id)
+          .maybeSingle();
+
+      Get.back(); // close loader
+      if (!context.mounted) return;
+
+      if (res == null) {
+        _showPermissionRequiredDialog(context, authController, targetRole);
+      } else {
+        final profile = res['profiles'];
+        final roleStr = profile?['role']?.toString() ?? 'vendor';
+        final kycStatus =
+            res['kyc_status']?.toString().toLowerCase() ?? 'pending';
+
+        final isCorrectRole =
+            (targetRole == AuthRole.vendor && roleStr == 'vendor') ||
+            (targetRole == AuthRole.corporate && roleStr == 'corporate');
+
+        if (!isCorrectRole) {
+          _showPermissionRequiredDialog(context, authController, targetRole);
+          return;
+        }
+
+        if (kycStatus == 'approved') {
+          _confirmSwitch(
+            context,
+            roleName,
+            () => authController.setRole(targetRole),
+          );
+        } else if (kycStatus == 'rejected') {
+          CustomPermissionDialog.show(
+            context: context,
+            icon: Icons.cancel_outlined,
+            title: 'Application Rejected',
+            description:
+                'Your application has been rejected. Please contact partner support for more information.',
+            grantText: 'Close',
+            denyText: 'Not Now',
+            onGrant: () {},
+          );
+        } else {
+          CustomPermissionDialog.show(
+            context: context,
+            icon: Icons.hourglass_top_rounded,
+            title: 'Application Pending',
+            description:
+                'Your application is currently pending admin approval. You will receive portal access once approved.',
+            grantText: 'Close',
+            denyText: 'Not Now',
+            onGrant: () {},
+          );
+        }
+      }
+    } catch (e) {
+      Get.back(); // close loader
+      if (!context.mounted) return;
+      _showPermissionRequiredDialog(context, authController, targetRole);
+    }
+  }
+
+  void _showPermissionRequiredDialog(
+    BuildContext context,
+    AuthController authController,
+    AuthRole targetRole,
+  ) {
+    CustomPermissionDialog.show(
+      context: context,
+      icon: Icons.lock_outline,
+      title: 'Permission Required',
+      description:
+          'You have not registered for a ${targetRole == AuthRole.vendor ? "Vendor" : "Corporate"} partner account yet. To access this portal, please apply first.',
+      grantText: 'Register Now',
+      denyText: 'Cancel',
+      onGrant: () {
+        authController.setRole(targetRole);
+        Get.to(() => const AuthGatewayScreen());
+      },
     );
   }
 

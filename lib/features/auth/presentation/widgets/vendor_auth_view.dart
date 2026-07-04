@@ -230,9 +230,16 @@ class VendorAuthView extends StatelessWidget {
         ),
         CustomTextField(
           controller: controller.contactPersonController,
-          label: 'Contact Person',
+          label: 'Owner Name',
           hinttext: 'Enter full name',
           icon: Icons.person_outline,
+        ),
+        CustomTextField(
+          controller: controller.vendorPhoneController,
+          label: 'Phone Number',
+          hinttext: 'e.g. +92 300 1234567',
+          keyboardType: TextInputType.phone,
+          icon: Icons.phone_outlined,
         ),
         CustomTextField(
           controller: controller.vendorEmailController,

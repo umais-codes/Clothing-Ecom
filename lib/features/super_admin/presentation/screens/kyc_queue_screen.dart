@@ -200,35 +200,87 @@ class _VendorTable extends StatelessWidget {
           ),
 
           Expanded(
-            child: Obx(
-              () => controller.kycQueue.isEmpty
-                  ? const AdminEmptyState(
-                      message: 'No pending KYC applications.',
-                    )
-                  : ListView.builder(
-                      itemCount: controller.kycQueue.length,
-                      itemBuilder: (_, i) {
-                        final vendor = controller.kycQueue[i];
+            child: Obx(() {
+              if (controller.isLoadingKyc.value) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.camel),
+                  ),
+                );
+              }
 
-                        return Obx(() {
-                          final isSelected =
-                              controller.selectedVendor.value?.id == vendor.id;
-
-                          return _VendorRow(
-                            vendor: vendor,
-                            isSelected: isSelected,
-                            onTap: () {
-                              if (onSelectNarrow != null) {
-                                onSelectNarrow!(vendor);
-                              } else {
-                                controller.selectVendor(vendor);
-                              }
-                            },
-                          );
-                        });
-                      },
+              if (controller.kycError.isNotEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          color: AppColors.error,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Database Connection Error',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.charcoal,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          controller.kycError.value,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: AppColors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        CustomButton(
+                          text: 'Retry Connection',
+                          height: 38,
+                          onPressed: () => controller.loadPendingApplications(),
+                        ),
+                      ],
                     ),
-            ),
+                  ),
+                );
+              }
+
+              if (controller.kycQueue.isEmpty) {
+                return const AdminEmptyState(
+                  message: 'No pending KYC applications.',
+                );
+              }
+
+              return ListView.builder(
+                itemCount: controller.kycQueue.length,
+                itemBuilder: (_, i) {
+                  final vendor = controller.kycQueue[i];
+
+                  return Obx(() {
+                    final isSelected =
+                        controller.selectedVendor.value?.id == vendor.id;
+
+                    return _VendorRow(
+                      vendor: vendor,
+                      isSelected: isSelected,
+                      onTap: () {
+                        if (onSelectNarrow != null) {
+                          onSelectNarrow!(vendor);
+                        } else {
+                          controller.selectVendor(vendor);
+                        }
+                      },
+                    );
+                  });
+                },
+              );
+            }),
           ),
         ],
       ),
@@ -634,4 +686,3 @@ class _DocumentCard extends StatelessWidget {
     );
   }
 }
-

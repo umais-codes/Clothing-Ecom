@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 
 class PendingApprovalScreen extends StatelessWidget {
   const PendingApprovalScreen({super.key});
@@ -67,7 +67,8 @@ class PendingApprovalScreen extends StatelessWidget {
               CustomButton(
                 text: 'Return to Home',
                 onPressed: () {
-                  Get.offAllNamed('/home');
+                  Get.find<AuthController>().setRole(AuthRole.shopper);
+                  Get.offAllNamed('/main-navigation');
                 },
                 icon: Icons.house,
               ),

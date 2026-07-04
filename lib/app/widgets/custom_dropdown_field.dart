@@ -35,6 +35,7 @@ class CustomDropdownField extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = context.screenWidth;
     final height = context.screenHeight;
+    final fieldWidth = width - context.wp(10);
     final Color focusColor = AppColors.camel;
 
     return Container(
@@ -53,11 +54,7 @@ class CustomDropdownField extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
-                    Icon(
-                      icon,
-                      size: width * 0.038,
-                      color: focusColor,
-                    ),
+                    Icon(icon, size: width * 0.038, color: focusColor),
                     SizedBox(width: width * 0.016),
                   ],
                   Text(
@@ -85,27 +82,49 @@ class CustomDropdownField extends StatelessWidget {
             ),
 
           // ── Dropdown Button ──────────────────────────────────────────────
-          DropdownButtonFormField<String>(
-            initialValue: items.contains(value) ? value : null,
-            items: items.map((item) {
-              return DropdownMenuItem<String>(
+          DropdownMenu<String>(
+            initialSelection: items.contains(value) ? value : null,
+            width: fieldWidth,
+            menuHeight: height * 0.35,
+            hintText: hinttext,
+            errorText: errorText,
+            dropdownMenuEntries: items.map((item) {
+              return DropdownMenuEntry<String>(
                 value: item,
-                child: Text(
-                  item,
-                  style: GoogleFonts.outfit(
+                label: item,
+                style: MenuItemButton.styleFrom(
+                  foregroundColor: AppColors.charcoal,
+                  textStyle: GoogleFonts.outfit(
                     fontSize: width * 0.035,
-                    color: AppColors.charcoal,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               );
             }).toList(),
-            onChanged: onChanged,
-            decoration: InputDecoration(
+            onSelected: onChanged,
+            trailingIcon: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: AppColors.charcoal,
+            ),
+            selectedTrailingIcon: const Icon(
+              Icons.keyboard_arrow_up_rounded,
+              color: AppColors.charcoal,
+            ),
+            textStyle: GoogleFonts.outfit(
+              fontSize: width * 0.035,
+              color: AppColors.charcoal,
+              fontWeight: FontWeight.w500,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              constraints: BoxConstraints(
+                minWidth: fieldWidth,
+                maxWidth: fieldWidth,
+                minHeight: height * 0.055,
+                maxHeight: height * 0.055,
+              ),
+              isDense: true,
               filled: true,
               fillColor: fillColor ?? const Color(0xFFFAF9F7),
-              hintText: hinttext,
-              errorText: errorText,
               hintStyle: GoogleFonts.outfit(
                 color: AppColors.grey.withValues(alpha: 0.55),
                 fontSize: width * 0.032,
@@ -118,7 +137,7 @@ class CustomDropdownField extends StatelessWidget {
               ),
               contentPadding: EdgeInsets.symmetric(
                 horizontal: width * 0.04,
-                vertical: height * 0.012,
+                vertical: 0.0,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(
@@ -156,10 +175,16 @@ class CustomDropdownField extends StatelessWidget {
                 ),
               ),
             ),
-            dropdownColor: AppColors.white,
-            icon: const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              color: AppColors.charcoal,
+            menuStyle: MenuStyle(
+              backgroundColor: WidgetStateProperty.all(AppColors.white),
+              elevation: WidgetStateProperty.all(4.0),
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    borderRadius ?? width * 0.035,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

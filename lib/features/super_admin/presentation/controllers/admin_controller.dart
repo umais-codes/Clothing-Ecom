@@ -1,9 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/app/utils/asset_downloader_util.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 
 class AdminController extends GetxController {
+  @override
+  void onInit() {
+    super.onInit();
+    loadPendingApplications();
+  }
+
+  final RxBool isLoadingKyc = false.obs;
+  final RxString kycError = ''.obs;
+
+  Future<void> loadPendingApplications() async {
+    isLoadingKyc.value = true;
+    kycError.value = '';
+    // Load pending Applications (both Vendor and Corporate) from Supabase
+    try {
+      final supabase = Get.find<SupabaseService>().client;
+      final res = await supabase
+          .from('vendors')
+          .select('*, profiles:owner_id(full_name, role, phone, email)')
+          .eq('kyc_status', 'pending');
+
+      kycQueue.clear();
+      for (var item in (res as List)) {
+        final vendorId = item['id']?.toString() ?? '';
+        final brandName = item['brand_name']?.toString() ?? 'Brand';
+        final profile = item['profiles'];
+        final ownerName = profile?['full_name']?.toString() ?? 'Owner';
+        final role = profile?['role']?.toString() ?? 'vendor';
+
+        final isCorporate = role == 'corporate';
+        final email = profile?['email']?.toString() ?? item['email']?.toString() ?? '${brandName.toLowerCase().replaceAll(' ', '')}@${isCorporate ? 'corporate.com' : 'velvetmaison.pk'}';
+        final phone = profile?['phone']?.toString() ?? item['phone']?.toString() ?? (isCorporate ? '+92-333-7654321' : '+92-300-1234567');
+        
+        String appliedDate = 'June 2, 2026';
+        if (item['created_at'] != null) {
+          try {
+            final dt = DateTime.parse(item['created_at'].toString());
+            final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            appliedDate = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+          } catch (_) {}
+        }
+
+        final entity = KycVendorEntity(
+          id: vendorId,
+          brandName: brandName,
+          ownerName: isCorporate ? brandName : ownerName,
+          email: email,
+          phone: phone,
+          category: item['category']?.toString() ?? (isCorporate ? 'Corporate' : "Women's"),
+          appliedDate: appliedDate,
+          status: KycStatus.pending,
+          cnicDocUrl: item['cnic_doc_url']?.toString() ?? (isCorporate
+              ? 'https://picsum.photos/seed/corpc/800/600'
+              : 'https://picsum.photos/seed/newcnic/800/600'),
+          secpDocUrl: item['secp_doc_url']?.toString() ?? (isCorporate
+              ? 'https://picsum.photos/seed/corps/800/600'
+              : 'https://picsum.photos/seed/newsecp/800/600'),
+          bio: item['bio']?.toString() ?? (isCorporate
+              ? 'B2B Corporate Account Application.'
+              : 'Newly registered vendor brand.'),
+          city: item['city']?.toString() ?? (isCorporate ? 'Lahore' : 'Karachi'),
+        );
+
+        if (!kycQueue.any((v) => v.id == vendorId)) {
+          kycQueue.insert(0, entity);
+        }
+      }
+    } catch (e) {
+      kycError.value = e.toString();
+      debugPrint('Failed to load pending applications from database: $e');
+    } finally {
+      isLoadingKyc.value = false;
+    }
+  }
+
   // ── Navigation ──────────────────────────────────────────────────────────────
   final RxInt selectedSidebarIndex = 0.obs;
 
@@ -63,68 +138,7 @@ class AdminController extends GetxController {
   ].obs;
 
   // ── KYC Queue ────────────────────────────────────────────────────────────────
-  final RxList<KycVendorEntity> kycQueue = <KycVendorEntity>[
-    const KycVendorEntity(
-      id: 'kyc-001',
-      brandName: 'Threads & Co.',
-      ownerName: 'Ayesha Siddiqui',
-      email: 'ayesha@threadsco.pk',
-      phone: '+92-321-4550012',
-      category: "Women's",
-      appliedDate: 'May 6, 2026',
-      status: KycStatus.pending,
-      cnicDocUrl: 'https://picsum.photos/seed/cnic1/800/600',
-      secpDocUrl: 'https://picsum.photos/seed/secp1/800/600',
-      bio:
-          "Premium women's apparel brand specialising in luxury ready-to-wear and bespoke ensembles since 2018.",
-      city: 'Lahore',
-    ),
-    const KycVendorEntity(
-      id: 'kyc-002',
-      brandName: 'House of Linen',
-      ownerName: 'Bilal Rehman',
-      email: 'bilal@houseoflinen.com',
-      phone: '+92-300-8872341',
-      category: "Women's",
-      appliedDate: 'May 5, 2026',
-      status: KycStatus.pending,
-      cnicDocUrl: 'https://picsum.photos/seed/cnic2/800/600',
-      secpDocUrl: 'https://picsum.photos/seed/secp2/800/600',
-      bio:
-          "Sustainable linen clothing and home textile brand, ethically sourced from Punjab's finest mills.",
-      city: 'Faisalabad',
-    ),
-    const KycVendorEntity(
-      id: 'kyc-003',
-      brandName: 'Sole Republic',
-      ownerName: 'Zara Malik',
-      email: 'zara@solerepublic.pk',
-      phone: '+92-311-9900453',
-      category: 'Accessories',
-      appliedDate: 'May 4, 2026',
-      status: KycStatus.pending,
-      cnicDocUrl: 'https://picsum.photos/seed/cnic3/800/600',
-      secpDocUrl: 'https://picsum.photos/seed/secp3/800/600',
-      bio:
-          'Contemporary footwear label fusing Eastern craftsmanship with modern silhouettes.',
-      city: 'Karachi',
-    ),
-    const KycVendorEntity(
-      id: 'kyc-004',
-      brandName: 'Karimi Couture',
-      ownerName: 'Hassan Karimi',
-      email: 'hassan@karimicouture.com',
-      phone: '+92-333-2211890',
-      category: "Men's",
-      appliedDate: 'May 3, 2026',
-      status: KycStatus.pending,
-      cnicDocUrl: 'https://picsum.photos/seed/cnic4/800/600',
-      secpDocUrl: 'https://picsum.photos/seed/secp4/800/600',
-      bio:
-          'Bespoke and ready-to-wear menswear tailored with Italian fabric and local craftsmanship.',
-      city: 'Islamabad',
-    ),
-  ].obs;
+  final RxList<KycVendorEntity> kycQueue = <KycVendorEntity>[].obs;
 
   final Rx<KycVendorEntity?> selectedVendor = Rx<KycVendorEntity?>(null);
 
@@ -136,7 +150,17 @@ class AdminController extends GetxController {
     selectedVendor.value = null;
   }
 
-  void approveVendor(String vendorId) {
+  void approveVendor(String vendorId) async {
+    try {
+      final supabase = Get.find<SupabaseService>().client;
+      await supabase
+          .from('vendors')
+          .update({'kyc_status': 'approved'})
+          .eq('id', vendorId);
+    } catch (e) {
+      debugPrint('Failed to approve application in Supabase: $e');
+    }
+
     kycQueue.removeWhere((v) => v.id == vendorId);
     if (selectedVendor.value?.id == vendorId) selectedVendor.value = null;
     _addActivity(
@@ -149,8 +173,8 @@ class AdminController extends GetxController {
       ),
     );
     Get.snackbar(
-      'Vendor Approved',
-      'SaaS account has been activated successfully.',
+      'Account Approved',
+      'The partner account has been activated successfully.',
       snackPosition: SnackPosition.TOP,
       backgroundColor: const Color(0xFF4A7C59),
       colorText: const Color(0xFFFFFFFF),
@@ -160,7 +184,17 @@ class AdminController extends GetxController {
     );
   }
 
-  void rejectVendor(String vendorId) {
+  void rejectVendor(String vendorId) async {
+    try {
+      final supabase = Get.find<SupabaseService>().client;
+      await supabase
+          .from('vendors')
+          .update({'kyc_status': 'rejected'})
+          .eq('id', vendorId);
+    } catch (e) {
+      debugPrint('Failed to reject application in Supabase: $e');
+    }
+
     kycQueue.removeWhere((v) => v.id == vendorId);
     if (selectedVendor.value?.id == vendorId) selectedVendor.value = null;
     _addActivity(

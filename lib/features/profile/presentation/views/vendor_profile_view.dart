@@ -147,7 +147,7 @@ class VendorProfileView extends GetView<ProfileController> {
                 : 'Not Configured',
           ),
           Divider(height: h * 0.02, color: AppColors.greyLight),
-          _buildInfoRow(context, 'Contact Person', controller.userName.value),
+          _buildInfoRow(context, 'Owner Name', controller.userName.value),
         ],
       ),
     );
@@ -182,32 +182,42 @@ class VendorProfileView extends GetView<ProfileController> {
     final w = context.screenWidth;
     final cardWidth = (w * 0.92 - 16) / 3;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildStatCard(
-          context,
-          cardWidth,
-          '18',
-          'Active Products',
-          AppColors.camel,
-        ),
-        _buildStatCard(
-          context,
-          cardWidth,
-          '5',
-          'Pending Orders',
-          AppColors.warning,
-        ),
-        _buildStatCard(
-          context,
-          cardWidth,
-          '\$1.4k',
-          'Monthly Revenue',
-          AppColors.success,
-        ),
-      ],
-    );
+    return Obx(() {
+      final revenue = controller.vendorMonthlyRevenue.value;
+      final String revenueStr;
+      if (revenue >= 1000.0) {
+        revenueStr = '\$${(revenue / 1000.0).toStringAsFixed(1)}k';
+      } else {
+        revenueStr = '\$${revenue.toStringAsFixed(0)}';
+      }
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _buildStatCard(
+            context,
+            cardWidth,
+            controller.vendorActiveProducts.value.toString(),
+            'Active Products',
+            AppColors.camel,
+          ),
+          _buildStatCard(
+            context,
+            cardWidth,
+            controller.vendorPendingOrders.value.toString(),
+            'Pending Orders',
+            AppColors.warning,
+          ),
+          _buildStatCard(
+            context,
+            cardWidth,
+            revenueStr,
+            'Monthly Revenue',
+            AppColors.success,
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildStatCard(

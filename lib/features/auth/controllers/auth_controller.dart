@@ -9,6 +9,8 @@ import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart'
 import 'package:ecom_app/features/onboarding/presentation/controllers/onboarding_controller.dart';
 import 'package:uuid/uuid.dart';
 import 'package:hive/hive.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum AuthRole { shopper, vendor, corporate, admin }
 
@@ -19,6 +21,8 @@ class AuthController extends GetxController {
   final Uuid uuid = const Uuid();
 
   AuthController(this._authRepository);
+
+  User? get currentUser => _authRepository.currentUser;
 
   final Rx<AuthRole> selectedRole = AuthRole.shopper.obs;
 
@@ -41,6 +45,7 @@ class AuthController extends GetxController {
       TextEditingController();
   final TextEditingController brandNameController = TextEditingController();
   final TextEditingController contactPersonController = TextEditingController();
+  final TextEditingController vendorPhoneController = TextEditingController();
   final RxString selectedVendorCategory = "Men's".obs;
   final RxBool hasCnicUploaded = false.obs;
   final RxString cnicFileName = ''.obs;
@@ -53,6 +58,7 @@ class AuthController extends GetxController {
   final TextEditingController corporatePasswordController =
       TextEditingController();
   final TextEditingController companyNameController = TextEditingController();
+  final TextEditingController corporatePhoneController = TextEditingController();
   final TextEditingController ntnController = TextEditingController();
   final RxString selectedVolume = '1-50 Employees'.obs;
   final List<String> volumeOptions = [
@@ -90,6 +96,8 @@ class AuthController extends GetxController {
     String role, {
     String? fullName,
     String? vendorId,
+    String? phone,
+    String? email,
   }) async {
     double? heightVal;
     double? weightVal;
@@ -112,6 +120,8 @@ class AuthController extends GetxController {
         role: role,
         fullName: fullName,
         vendorId: vendorId,
+        phone: phone,
+        email: email,
         height: heightVal,
         weight: weightVal,
         fitPreference: fitPreferenceVal,
@@ -189,6 +199,7 @@ class AuthController extends GetxController {
           user.id,
           'shopper',
           fullName: shopperNameController.text.trim(),
+          email: shopperEmailController.text.trim(),
         );
         _handleAuthSuccess(AuthRole.shopper);
         Get.snackbar(
@@ -226,6 +237,7 @@ class AuthController extends GetxController {
           fullName:
               user.userMetadata?['full_name'] ??
               '${roleStr.capitalizeFirst} User',
+          email: user.email,
         );
         _handleAuthSuccess(authRole);
       } else {
@@ -285,24 +297,43 @@ class AuthController extends GetxController {
             ? contactPersonController.text.trim()
             : brandNameController.text.trim(),
         role: 'vendor',
+        phone: vendorPhoneController.text.trim(),
       );
 
       if (user != null) {
         _markOnboardingComplete(AuthRole.vendor);
-        final vendorId = uuid.v4();
+        final vendorId = user.id;
 
+        // 1. Create the profile row first (without vendorId to avoid FK constraints if any)
+        await _createProfile(
+          user.id,
+          'vendor',
+          fullName: contactPersonController.text.trim(),
+          phone: vendorPhoneController.text.trim(),
+          email: vendorEmailController.text.trim(),
+        );
+
+        // 2. Create the vendor row (safe since the owner profile now exists)
         await _authRepository.createVendor(
           id: vendorId,
           brandName: brandNameController.text.trim(),
           ownerId: user.id,
           kycStatus: 'pending',
+          cnicDocUrl: 'https://picsum.photos/seed/newcnic/800/600',
+          secpDocUrl: 'https://picsum.photos/seed/newsecp/800/600',
+          bio: 'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
+          city: 'Karachi',
+          category: selectedVendorCategory.value,
         );
 
+        // 3. Update the profile with the vendorId
         await _createProfile(
           user.id,
           'vendor',
           fullName: contactPersonController.text.trim(),
           vendorId: vendorId,
+          phone: vendorPhoneController.text.trim(),
+          email: vendorEmailController.text.trim(),
         );
 
         try {
@@ -314,7 +345,9 @@ class AuthController extends GetxController {
                 ? 'Unknown'
                 : contactPersonController.text,
             email: vendorEmailController.text,
-            phone: '+92-300-1234567',
+            phone: vendorPhoneController.text.trim().isEmpty
+                ? '+92-300-1234567'
+                : vendorPhoneController.text.trim(),
             category: selectedVendorCategory.value,
             appliedDate: 'June 2, 2026',
             status: KycStatus.pending,
@@ -351,6 +384,24 @@ class AuthController extends GetxController {
         password: vendorPasswordController.text.trim(),
       );
       if (user != null) {
+        // Query kyc_status from database to perform real-time access control
+        final supabase = Get.find<SupabaseService>().client;
+        final vendorRes = await supabase
+            .from('vendors')
+            .select('kyc_status')
+            .eq('owner_id', user.id)
+            .maybeSingle();
+
+        final String kyc = vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
+
+        if (kyc != 'approved') {
+          await _authRepository.signOut();
+          _showError(kyc == 'rejected'
+              ? 'Your brand application has been rejected. Please contact support.'
+              : 'Your brand application is pending admin approval.');
+          return;
+        }
+
         _handleAuthSuccess(AuthRole.vendor);
         Get.snackbar(
           'Success',
@@ -378,14 +429,75 @@ class AuthController extends GetxController {
         password: corporatePasswordController.text.trim(),
         fullName: companyNameController.text.trim(),
         role: 'corporate',
+        phone: corporatePhoneController.text.trim(),
       );
       if (user != null) {
+        final vendorId = user.id;
+
+        // 1. Create the profile row first (without vendorId to satisfy FK constraints)
         await _createProfile(
           user.id,
           'corporate',
           fullName: companyNameController.text.trim(),
+          phone: corporatePhoneController.text.trim(),
+          email: corporateEmailController.text.trim(),
         );
-        _handleAuthSuccess(AuthRole.corporate);
+
+        // 2. Create the vendor table row representing the corporate application
+        await _authRepository.createVendor(
+          id: vendorId,
+          brandName: companyNameController.text.trim(),
+          ownerId: user.id,
+          kycStatus: 'pending',
+          cnicDocUrl: 'https://picsum.photos/seed/corpc/800/600',
+          secpDocUrl: 'https://picsum.photos/seed/corps/800/600',
+          bio: 'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
+          city: 'Lahore',
+          category: 'Corporate',
+        );
+
+        // 3. Link the profile to the vendor/corporate application row
+        await _createProfile(
+          user.id,
+          'corporate',
+          fullName: companyNameController.text.trim(),
+          vendorId: vendorId,
+          phone: corporatePhoneController.text.trim(),
+          email: corporateEmailController.text.trim(),
+        );
+
+        // Save local corporate details for offline/profile reference
+        final box = Hive.box('settings');
+        box.put('corporate_ntn', ntnController.text.trim());
+        box.put('corporate_volume', selectedVolume.value);
+
+        // Pre-insert application in Admin Onboarding Screen queue
+        try {
+          final adminCtrl = Get.find<AdminController>();
+          final newCorporate = KycVendorEntity(
+            id: vendorId,
+            brandName: companyNameController.text,
+            ownerName: companyNameController.text,
+            email: corporateEmailController.text,
+            phone: corporatePhoneController.text.trim().isEmpty
+                ? '+92-333-7654321'
+                : corporatePhoneController.text.trim(),
+            category: 'Corporate', // Categorized as Corporate
+            appliedDate: 'June 2, 2026',
+            status: KycStatus.pending,
+            cnicDocUrl: 'https://picsum.photos/seed/corpc/800/600',
+            secpDocUrl: 'https://picsum.photos/seed/corps/800/600',
+            bio: 'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
+            city: 'Lahore',
+          );
+          adminCtrl.kycQueue.insert(0, newCorporate);
+        } catch (_) {}
+
+        status.value = AuthStatus.pendingApproval;
+        Get.to(
+          () => const PendingApprovalScreen(),
+          transition: Transition.fadeIn,
+        );
       }
     } catch (e) {
       _showError(_cleanMessage(e));
@@ -405,6 +517,24 @@ class AuthController extends GetxController {
         password: corporatePasswordController.text.trim(),
       );
       if (user != null) {
+        // Query kyc_status from database to perform real-time access control
+        final supabase = Get.find<SupabaseService>().client;
+        final vendorRes = await supabase
+            .from('vendors')
+            .select('kyc_status')
+            .eq('owner_id', user.id)
+            .maybeSingle();
+
+        final String kyc = vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
+
+        if (kyc != 'approved') {
+          await _authRepository.signOut();
+          _showError(kyc == 'rejected'
+              ? 'Your corporate application has been rejected. Please contact support.'
+              : 'Your corporate application is pending admin approval.');
+          return;
+        }
+
         _handleAuthSuccess(AuthRole.corporate);
         Get.snackbar(
           'Success',
@@ -448,9 +578,11 @@ class AuthController extends GetxController {
     vendorPasswordController.dispose();
     brandNameController.dispose();
     contactPersonController.dispose();
+    vendorPhoneController.dispose();
     corporateEmailController.dispose();
     corporatePasswordController.dispose();
     companyNameController.dispose();
+    corporatePhoneController.dispose();
     ntnController.dispose();
     super.onClose();
   }

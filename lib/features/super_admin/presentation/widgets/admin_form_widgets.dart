@@ -171,6 +171,10 @@ class _AdminStatusDropdownState extends State<AdminStatusDropdown> {
             ),
           ),
           dropdownColor: AppColors.white,
+          borderRadius: BorderRadius.circular(width * 0.035),
+          elevation: 4,
+          menuMaxHeight: height * 0.35,
+          alignment: AlignmentDirectional.bottomStart,
           icon: const Icon(
             Icons.keyboard_arrow_down_rounded,
             color: AppColors.charcoal,

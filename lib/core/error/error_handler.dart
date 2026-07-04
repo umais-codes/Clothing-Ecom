@@ -17,7 +17,7 @@ class ErrorHandler {
       }
       return error.message;
     } else if (error is PostgrestException) {
-      return 'Database operations failed. Please try again later.';
+      return 'Database operations failed: ${error.message}';
     } else if (error is FormatException) {
       return 'Data format is invalid.';
     }

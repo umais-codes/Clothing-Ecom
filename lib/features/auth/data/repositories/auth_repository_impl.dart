@@ -118,14 +118,16 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     String? fullName,
     String? role,
+    String? phone,
   }) async {
     try {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
         data: {
-          if (fullName != null) 'full_name': fullName,
-          if (role != null) 'role': role,
+          'full_name': ?fullName,
+          'role': ?role,
+          'phone': ?phone,
         },
       );
       return response.user;
@@ -156,6 +158,8 @@ class AuthRepositoryImpl implements AuthRepository {
     required String role,
     String? fullName,
     String? vendorId,
+    String? phone,
+    String? email,
     double? height,
     double? weight,
     String? fitPreference,
@@ -167,6 +171,8 @@ class AuthRepositoryImpl implements AuthRepository {
         'full_name': fullName ?? 'User',
         'role': role,
         'vendor_id': vendorId,
+        'phone': phone,
+        'email': email,
         'height': height,
         'weight': weight,
         'fit_preference': fitPreference,
@@ -183,6 +189,11 @@ class AuthRepositoryImpl implements AuthRepository {
     required String brandName,
     required String ownerId,
     required String kycStatus,
+    String? cnicDocUrl,
+    String? secpDocUrl,
+    String? bio,
+    String? city,
+    String? category,
   }) async {
     try {
       await _supabase.from('vendors').insert({
@@ -190,6 +201,11 @@ class AuthRepositoryImpl implements AuthRepository {
         'brand_name': brandName,
         'owner_id': ownerId,
         'kyc_status': kycStatus,
+        'cnic_doc_url': cnicDocUrl,
+        'secp_doc_url': secpDocUrl,
+        'bio': bio,
+        'city': city,
+        'category': category,
       });
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));
@@ -252,8 +268,8 @@ class AuthRepositoryImpl implements AuthRepository {
         UserAttributes(
           data: {
             'full_name': fullName,
-            if (phone != null) 'phone': phone,
-            if (avatarUrl != null) 'avatar_url': avatarUrl,
+            'phone': ?phone,
+            'avatar_url': ?avatarUrl,
           },
         ),
       );
@@ -262,8 +278,8 @@ class AuthRepositoryImpl implements AuthRepository {
       try {
         await _supabase.from('profiles').update({
           'full_name': fullName,
-          if (phone != null) 'phone': phone,
-          if (avatarUrl != null) 'avatar_url': avatarUrl,
+          'phone': ?phone,
+          'avatar_url': ?avatarUrl,
         }).eq('id', userId);
       } catch (dbError) {
         debugPrint('Database update failed, falling back to full_name only: $dbError');

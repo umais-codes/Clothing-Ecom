@@ -234,6 +234,13 @@ class CorporateAuthView extends StatelessWidget {
           icon: Icons.receipt_long_outlined,
         ),
         CustomTextField(
+          controller: controller.corporatePhoneController,
+          label: 'Phone Number',
+          hinttext: 'e.g. +92 333 1234567',
+          keyboardType: TextInputType.phone,
+          icon: Icons.phone_outlined,
+        ),
+        CustomTextField(
           controller: controller.corporateEmailController,
           label: 'Corporate Email',
           hinttext: 'procurement@company.com',

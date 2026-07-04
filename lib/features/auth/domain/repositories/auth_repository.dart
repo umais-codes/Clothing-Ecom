@@ -18,7 +18,13 @@ abstract class AuthRepository {
   Future<User?> signInWithSocialProvider(String provider);
 
   /// Sign up a user with email and password.
-  Future<User?> signUp({required String email, required String password, String? fullName, String? role});
+  Future<User?> signUp({
+    required String email,
+    required String password,
+    String? fullName,
+    String? role,
+    String? phone,
+  });
 
   /// Sign in a user with email and password.
   Future<User?> signInWithPassword({required String email, required String password});
@@ -29,6 +35,8 @@ abstract class AuthRepository {
     required String role,
     String? fullName,
     String? vendorId,
+    String? phone,
+    String? email,
     double? height,
     double? weight,
     String? fitPreference,
@@ -41,6 +49,11 @@ abstract class AuthRepository {
     required String brandName,
     required String ownerId,
     required String kycStatus,
+    String? cnicDocUrl,
+    String? secpDocUrl,
+    String? bio,
+    String? city,
+    String? category,
   });
 
   /// Sign out the current user session.

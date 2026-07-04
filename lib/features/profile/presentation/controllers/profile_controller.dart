@@ -26,6 +26,9 @@ class ProfileController extends GetxController {
   // Vendor specific observables
   final RxString brandName = ''.obs;
   final RxString kycStatus = 'pending'.obs;
+  final RxInt vendorActiveProducts = 0.obs;
+  final RxInt vendorPendingOrders = 0.obs;
+  final RxDouble vendorMonthlyRevenue = 0.0.obs;
 
   // Corporate specific observables
   final RxString companyNtn = ''.obs;
@@ -136,6 +139,66 @@ class ProfileController extends GetxController {
             if (vendorRes != null) {
               brandName.value = vendorRes['brand_name']?.toString() ?? '';
               kycStatus.value = vendorRes['kyc_status']?.toString() ?? 'pending';
+              final String vendorId = vendorRes['id'].toString();
+
+              // --- SUPABASE VENDOR STATS INTEGRATION ---
+              // 1. Fetch all product IDs belonging to this vendor
+              final productsRes = await supabase
+                  .from('products')
+                  .select('id')
+                  .eq('vendor_id', vendorId);
+              
+              final productIds = (productsRes as List)
+                  .map((p) => p['id'].toString())
+                  .toList();
+              
+              vendorActiveProducts.value = productIds.length;
+
+              if (productIds.isNotEmpty) {
+                // 2. Fetch order items for these products and their parent orders status & created_at
+                final itemsRes = await supabase
+                    .from('order_items')
+                    .select('quantity, unit_price, order_id, orders!inner(status, created_at)')
+                    .inFilter('product_id', productIds);
+
+                final Set<String> pendingOrderIds = {};
+                double monthlyRevenueSum = 0.0;
+
+                final now = DateTime.now();
+                final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+
+                for (var item in (itemsRes as List)) {
+                  final order = item['orders'];
+                  if (order != null) {
+                    final status = order['status']?.toString().toLowerCase() ?? '';
+                    final orderId = item['order_id']?.toString() ?? '';
+
+                    // Pending/Paid status indicates active pending order
+                    if (status == 'pending' || status == 'paid') {
+                      pendingOrderIds.add(orderId);
+                    }
+
+                    // Sum revenue for completed/paid orders placed within the last 30 days
+                    if (status != 'cancelled') {
+                      final createdAtStr = order['created_at']?.toString();
+                      if (createdAtStr != null) {
+                        final createdAt = DateTime.tryParse(createdAtStr);
+                        if (createdAt != null && createdAt.isAfter(thirtyDaysAgo)) {
+                          final double qty = (item['quantity'] as num?)?.toDouble() ?? 0.0;
+                          final double price = (item['unit_price'] as num?)?.toDouble() ?? 0.0;
+                          monthlyRevenueSum += (qty * price);
+                        }
+                      }
+                    }
+                  }
+                }
+
+                vendorPendingOrders.value = pendingOrderIds.length;
+                vendorMonthlyRevenue.value = monthlyRevenueSum;
+              } else {
+                vendorPendingOrders.value = 0;
+                vendorMonthlyRevenue.value = 0.0;
+              }
             }
           } catch (e) {
             debugPrint('Failed to load vendor details: $e');
@@ -495,6 +558,9 @@ class ProfileController extends GetxController {
     kycStatus.value = 'pending';
     companyNtn.value = '';
     employeeVolume.value = '';
+    vendorActiveProducts.value = 0;
+    vendorPendingOrders.value = 0;
+    vendorMonthlyRevenue.value = 0.0;
   }
 
   Future<void> logout() async {

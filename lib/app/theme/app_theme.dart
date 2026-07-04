@@ -115,6 +115,15 @@ class AppTheme {
         labelStyle: GoogleFonts.outfit(fontSize: 12, color: AppColors.ink),
       ),
 
+      // Scrollbar Theme
+      scrollbarTheme: ScrollbarThemeData(
+        thumbColor: WidgetStateProperty.all(AppColors.camel),
+        trackColor: WidgetStateProperty.all(AppColors.greyLight.withValues(alpha: 0.3)),
+        thickness: WidgetStateProperty.all(6.0),
+        radius: const Radius.circular(3),
+        interactive: true,
+      ),
+
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

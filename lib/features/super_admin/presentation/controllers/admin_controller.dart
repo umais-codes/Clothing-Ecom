@@ -129,22 +129,32 @@ class AdminController extends GetxController {
         String phone = '';
         if (existingItem != null &&
             existingItem.phone.isNotEmpty &&
-            existingItem.phone != 'Not provided') {
+            existingItem.phone != 'Not provided' &&
+            !existingItem.phone.contains('-')) {
           phone = existingItem.phone;
-        } else if (itemPhone != null &&
-            itemPhone.trim().isNotEmpty &&
-            itemPhone != 'Not provided') {
-          phone = itemPhone;
-        } else if (profilePhone != null && profilePhone.trim().isNotEmpty) {
-          phone = profilePhone;
         } else {
-          final phoneMatch = RegExp(
-            r'(\+?\d[\d\s-]{7,}\d)',
+          final phoneExplicitMatch = RegExp(
+            r'Phone:\s*([\+?\d\s-]{7,20})',
+            caseSensitive: false,
           ).firstMatch(bioContent);
-          if (phoneMatch != null) {
-            phone = phoneMatch.group(0)!;
+          if (phoneExplicitMatch != null) {
+            phone = phoneExplicitMatch.group(1)!.trim();
+          } else if (itemPhone != null &&
+              itemPhone.trim().isNotEmpty &&
+              itemPhone != 'Not provided' &&
+              !itemPhone.contains('-')) {
+            phone = itemPhone;
+          } else if (profilePhone != null && profilePhone.trim().isNotEmpty) {
+            phone = profilePhone;
           } else {
-            phone = 'Not provided';
+            final generalPhoneMatch = RegExp(
+              r'(\+?\d{10,15})',
+            ).firstMatch(bioContent);
+            if (generalPhoneMatch != null) {
+              phone = generalPhoneMatch.group(0)!;
+            } else {
+              phone = 'Not provided';
+            }
           }
         }
 
@@ -301,7 +311,14 @@ class AdminController extends GetxController {
       await supabase
           .from('vendors')
           .update({'kyc_status': 'approved'})
-          .eq('id', vendorId);
+          .or('id.eq.$vendorId,owner_id.eq.$vendorId');
+
+      try {
+        await supabase
+            .from('profiles')
+            .update({'role': 'vendor'})
+            .eq('id', vendorId);
+      } catch (_) {}
     } catch (e) {
       debugPrint('Failed to approve application in Supabase: $e');
     }
@@ -335,7 +352,7 @@ class AdminController extends GetxController {
       await supabase
           .from('vendors')
           .update({'kyc_status': 'rejected'})
-          .eq('id', vendorId);
+          .or('id.eq.$vendorId,owner_id.eq.$vendorId');
     } catch (e) {
       debugPrint('Failed to reject application in Supabase: $e');
     }

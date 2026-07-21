@@ -218,13 +218,19 @@ class CorporateAuthView extends StatelessWidget {
   Widget _buildSignupView(BuildContext context, ThemeData theme, double w) {
     return Column(
       key: const ValueKey('corporate_signup'),
-      crossAxisAlignment: .stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         CustomTextField(
           controller: controller.companyNameController,
           label: 'Company Name',
           hinttext: 'Enter registered company name',
           icon: Icons.business_outlined,
+        ),
+        CustomTextField(
+          controller: controller.corporateContactPersonController,
+          label: 'Authorized Representative / Owner',
+          hinttext: 'e.g. Umais Anjum',
+          icon: Icons.person_outline_rounded,
         ),
         CustomTextField(
           controller: controller.ntnController,
@@ -239,6 +245,12 @@ class CorporateAuthView extends StatelessWidget {
           hinttext: 'e.g. +92 333 1234567',
           keyboardType: TextInputType.phone,
           icon: Icons.phone_outlined,
+        ),
+        CustomTextField(
+          controller: controller.corporateCityController,
+          label: 'City',
+          hinttext: 'e.g. Lahore, Karachi, Islamabad',
+          icon: Icons.location_on_outlined,
         ),
         CustomTextField(
           controller: controller.corporateEmailController,
@@ -269,7 +281,136 @@ class CorporateAuthView extends StatelessWidget {
             margin: EdgeInsets.only(bottom: w * 0.04),
           ),
         ),
+
+        // Verification Documents Section
+        Text(
+          'Verification Documents (Optional)',
+          style: GoogleFonts.outfit(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppColors.charcoal,
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // CNIC / Tax Doc Tile
+        Obx(
+          () => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: controller.hasCnicUploaded.value
+                  ? AppColors.camelLight
+                  : AppColors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: controller.hasCnicUploaded.value
+                    ? AppColors.camel
+                    : AppColors.greyLight,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  controller.hasCnicUploaded.value
+                      ? Icons.check_circle
+                      : Icons.upload_file,
+                  color: controller.hasCnicUploaded.value
+                      ? AppColors.camel
+                      : AppColors.grey,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    controller.hasCnicUploaded.value
+                        ? controller.cnicFileName.value
+                        : 'Upload CNIC / NTN Certificate',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: controller.hasCnicUploaded.value
+                          ? AppColors.charcoal
+                          : AppColors.grey,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                TextButton(
+                  onPressed: controller.pickCnicDocument,
+                  child: Text(
+                    controller.hasCnicUploaded.value ? 'Change' : 'Browse',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.camel,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // SECP Tile
+        Obx(
+          () => Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: controller.hasSecpUploaded.value
+                  ? AppColors.camelLight
+                  : AppColors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: controller.hasSecpUploaded.value
+                    ? AppColors.camel
+                    : AppColors.greyLight,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  controller.hasSecpUploaded.value
+                      ? Icons.check_circle
+                      : Icons.upload_file,
+                  color: controller.hasSecpUploaded.value
+                      ? AppColors.camel
+                      : AppColors.grey,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    controller.hasSecpUploaded.value
+                        ? controller.secpFileName.value
+                        : 'Upload SECP / Company Registration',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: controller.hasSecpUploaded.value
+                          ? AppColors.charcoal
+                          : AppColors.grey,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                TextButton(
+                  onPressed: controller.pickSecpDocument,
+                  child: Text(
+                    controller.hasSecpUploaded.value ? 'Change' : 'Browse',
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.camel,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         SizedBox(height: w * 0.04),
+
         Obx(
           () => CustomButton(
             text: 'Request Access',
@@ -284,14 +425,14 @@ class CorporateAuthView extends StatelessWidget {
           child: GestureDetector(
             onTap: () => controller.isCorporateLogin.value = true,
             child: RichText(
-              textAlign: .center,
+              textAlign: TextAlign.center,
               text: TextSpan(
                 style: theme.textTheme.bodySmall?.copyWith(fontSize: w * 0.035),
                 children: const [
                   TextSpan(text: 'Existing client? '),
                   TextSpan(
                     text: 'Sign In',
-                    style: TextStyle(color: AppColors.camel, fontWeight: .w700),
+                    style: TextStyle(color: AppColors.camel, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

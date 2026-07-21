@@ -63,7 +63,11 @@ class AuthController extends GetxController {
   final TextEditingController corporatePasswordController =
       TextEditingController();
   final TextEditingController companyNameController = TextEditingController();
+  final TextEditingController corporateContactPersonController =
+      TextEditingController();
   final TextEditingController corporatePhoneController =
+      TextEditingController();
+  final TextEditingController corporateCityController =
       TextEditingController();
   final TextEditingController ntnController = TextEditingController();
   final RxString selectedVolume = '1-50 Employees'.obs;
@@ -416,7 +420,8 @@ class AuthController extends GetxController {
         }
 
         final vendorEmailStr = vendorEmailController.text.trim();
-        final bioStr = 'Newly registered vendor brand category: ${selectedVendorCategory.value}.\nContact Email: $vendorEmailStr | Phone: $phoneNum';
+        final bioStr =
+            'Newly registered vendor brand category: ${selectedVendorCategory.value}.\nContact Email: $vendorEmailStr | Phone: $phoneNum';
 
         // 2. Create vendor row in Supabase DB via isolated client
         try {
@@ -496,25 +501,26 @@ class AuthController extends GetxController {
         password: vendorPasswordController.text.trim(),
       );
       if (user != null) {
-        // Query kyc_status from database to perform real-time access control
         final supabase = Get.find<SupabaseService>().client;
-        final vendorRes = await supabase
-            .from('vendors')
-            .select('kyc_status')
-            .eq('owner_id', user.id)
-            .maybeSingle();
+        try {
+          final vendorRes = await supabase
+              .from('vendors')
+              .select('kyc_status')
+              .or('id.eq.${user.id},owner_id.eq.${user.id}')
+              .maybeSingle();
 
-        final String kyc =
-            vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
+          final String kyc =
+              vendorRes?['kyc_status']?.toString().toLowerCase() ?? '';
 
-        if (kyc != 'approved') {
-          await _authRepository.signOut();
-          _showError(
-            kyc == 'rejected'
-                ? 'Your brand application has been rejected. Please contact support.'
-                : 'Your brand application is pending admin approval.',
-          );
-          return;
+          if (kyc == 'rejected') {
+            await _authRepository.signOut();
+            _showError(
+              'Your brand application has been rejected. Please contact support.',
+            );
+            return;
+          }
+        } catch (e) {
+          debugPrint('KYC check error: $e');
         }
 
         _handleAuthSuccess(AuthRole.vendor);
@@ -540,9 +546,21 @@ class AuthController extends GetxController {
     status.value = AuthStatus.loading;
     try {
       final compName = companyNameController.text.trim();
+      final contactPerson = corporateContactPersonController.text.trim().isNotEmpty
+          ? corporateContactPersonController.text.trim()
+          : compName;
       final corpPhone = corporatePhoneController.text.trim().isNotEmpty
           ? corporatePhoneController.text.trim()
           : 'Not provided';
+      final corpCity = corporateCityController.text.trim().isNotEmpty
+          ? corporateCityController.text.trim()
+          : 'Lahore';
+      final corpEmailStr = corporateEmailController.text.trim();
+      final ntnVal = ntnController.text.trim();
+      final volumeVal = selectedVolume.value;
+
+      final bioStr =
+          'Corporate buyer NTN: $ntnVal, Volume: $volumeVal.\nContact Person: $contactPerson | Email: $corpEmailStr | Phone: $corpPhone | City: $corpCity';
 
       final isolatedClient = SupabaseClient(
         SupabaseService.supabaseUrl,
@@ -553,9 +571,9 @@ class AuthController extends GetxController {
       );
 
       final authRes = await isolatedClient.auth.signUp(
-        email: corporateEmailController.text.trim(),
+        email: corpEmailStr,
         password: corporatePasswordController.text.trim(),
-        data: {'full_name': compName, 'role': 'corporate', 'phone': corpPhone},
+        data: {'full_name': contactPerson, 'role': 'corporate', 'phone': corpPhone},
       );
 
       final user = authRes.user;
@@ -607,9 +625,9 @@ class AuthController extends GetxController {
           await isolatedClient.from('profiles').upsert({
             'id': user.id,
             'role': 'corporate',
-            'full_name': compName,
+            'full_name': contactPerson,
             'phone': corpPhone,
-            'email': corporateEmailController.text.trim(),
+            'email': corpEmailStr,
             'vendor_id': vendorId,
           });
         } catch (pe) {
@@ -618,7 +636,7 @@ class AuthController extends GetxController {
             await isolatedClient.from('profiles').upsert({
               'id': user.id,
               'role': 'corporate',
-              'full_name': compName,
+              'full_name': contactPerson,
             });
           } catch (pe2) {
             debugPrint(
@@ -635,13 +653,12 @@ class AuthController extends GetxController {
             'kyc_status': 'pending',
             'cnic_doc_url': cnicUrl,
             'secp_doc_url': secpUrl,
-            'bio':
-                'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
-            'city': 'Lahore',
+            'bio': bioStr,
+            'city': corpCity,
             'category': 'Corporate',
-            'email': corporateEmailController.text.trim(),
+            'email': corpEmailStr,
             'phone': corpPhone,
-            'owner_name': compName,
+            'owner_name': contactPerson,
           });
         } catch (colErr) {
           await isolatedClient.from('vendors').insert({
@@ -651,33 +668,31 @@ class AuthController extends GetxController {
             'kyc_status': 'pending',
             'cnic_doc_url': cnicUrl,
             'secp_doc_url': secpUrl,
-            'bio':
-                'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
-            'city': 'Lahore',
+            'bio': bioStr,
+            'city': corpCity,
             'category': 'Corporate',
           });
         }
 
         final box = Hive.box('settings');
-        box.put('corporate_ntn', ntnController.text.trim());
-        box.put('corporate_volume', selectedVolume.value);
+        box.put('corporate_ntn', ntnVal);
+        box.put('corporate_volume', volumeVal);
 
         try {
           final adminCtrl = Get.find<AdminController>();
           final newCorporate = KycVendorEntity(
             id: vendorId,
             brandName: compName,
-            ownerName: compName,
-            email: corporateEmailController.text.trim(),
+            ownerName: contactPerson,
+            email: corpEmailStr,
             phone: corpPhone,
             category: 'Corporate',
             appliedDate: currentDateStr,
             status: KycStatus.pending,
             cnicDocUrl: cnicUrl,
             secpDocUrl: secpUrl,
-            bio:
-                'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
-            city: 'Lahore',
+            bio: bioStr,
+            city: corpCity,
           );
           adminCtrl.kycQueue.insert(0, newCorporate);
         } catch (_) {}
@@ -708,25 +723,26 @@ class AuthController extends GetxController {
         password: corporatePasswordController.text.trim(),
       );
       if (user != null) {
-        // Query kyc_status from database to perform real-time access control
         final supabase = Get.find<SupabaseService>().client;
-        final vendorRes = await supabase
-            .from('vendors')
-            .select('kyc_status')
-            .eq('owner_id', user.id)
-            .maybeSingle();
+        try {
+          final vendorRes = await supabase
+              .from('vendors')
+              .select('kyc_status')
+              .or('id.eq.${user.id},owner_id.eq.${user.id}')
+              .maybeSingle();
 
-        final String kyc =
-            vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
+          final String kyc =
+              vendorRes?['kyc_status']?.toString().toLowerCase() ?? '';
 
-        if (kyc != 'approved') {
-          await _authRepository.signOut();
-          _showError(
-            kyc == 'rejected'
-                ? 'Your corporate application has been rejected. Please contact support.'
-                : 'Your corporate application is pending admin approval.',
-          );
-          return;
+          if (kyc == 'rejected') {
+            await _authRepository.signOut();
+            _showError(
+              'Your corporate application has been rejected. Please contact support.',
+            );
+            return;
+          }
+        } catch (e) {
+          debugPrint('Corporate KYC check error: $e');
         }
 
         _handleAuthSuccess(AuthRole.corporate);

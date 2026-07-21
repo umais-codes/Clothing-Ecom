@@ -519,23 +519,49 @@ class _VendorDetailPanel extends StatelessWidget {
                   const SizedBox(height: 12),
                   Builder(
                     builder: (context) {
+                      final String bioText = vendor.bio;
+                      final bool isCorp = vendor.category == 'Corporate';
+
                       final resolvedEmail =
                           (vendor.email.isNotEmpty &&
                               !vendor.email.contains('No email'))
                           ? vendor.email
                           : (RegExp(
                                   r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
-                                ).firstMatch(vendor.bio)?.group(0) ??
+                                ).firstMatch(bioText)?.group(0) ??
                                 'No email provided');
 
-                      final resolvedPhone =
-                          (vendor.phone.isNotEmpty &&
-                              vendor.phone != 'Not provided')
-                          ? vendor.phone
-                          : (RegExp(
-                                  r'(\+?\d[\d\s-]{7,}\d)',
-                                ).firstMatch(vendor.bio)?.group(0) ??
-                                'Not provided');
+                      String resolvedPhone = '';
+                      final phoneExplicitMatch = RegExp(
+                        r'Phone:\s*([\+?\d\s-]{7,20})',
+                        caseSensitive: false,
+                      ).firstMatch(bioText);
+
+                      if (phoneExplicitMatch != null) {
+                        resolvedPhone = phoneExplicitMatch.group(1)!.trim();
+                      } else if (vendor.phone.isNotEmpty &&
+                          vendor.phone != 'Not provided' &&
+                          !vendor.phone.contains('-') &&
+                          vendor.phone.length > 8) {
+                        resolvedPhone = vendor.phone;
+                      } else {
+                        final generalPhoneMatch = RegExp(
+                          r'(\+?\d{10,15})',
+                        ).firstMatch(bioText);
+                        resolvedPhone =
+                            generalPhoneMatch?.group(0) ?? 'Not provided';
+                      }
+
+                      String ntnValue = '';
+                      if (isCorp) {
+                        final ntnMatch = RegExp(
+                          r'NTN:\s*([\d-]+)',
+                          caseSensitive: false,
+                        ).firstMatch(bioText);
+                        if (ntnMatch != null) {
+                          ntnValue = ntnMatch.group(1)!.trim();
+                        }
+                      }
 
                       return AdminCard(
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -551,6 +577,12 @@ class _VendorDetailPanel extends StatelessWidget {
                               label: 'Phone Number',
                               value: resolvedPhone,
                             ),
+                            if (ntnValue.isNotEmpty)
+                              AdminInfoRow(
+                                icon: Icons.receipt_long_outlined,
+                                label: 'NTN Number',
+                                value: ntnValue,
+                              ),
                             AdminInfoRow(
                               icon: Icons.location_on_outlined,
                               label: 'City',

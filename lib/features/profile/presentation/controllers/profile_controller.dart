@@ -89,10 +89,17 @@ class ProfileController extends GetxController {
         }
         userName.value = name.isNotEmpty ? name : 'Shopper';
 
-        final avatarUrl = metadata?['avatar_url']?.toString() ?? '';
-        if (avatarUrl.isNotEmpty) {
-          profileImagePath.value = avatarUrl;
+        final rawAvatar = metadata?['avatar_url']?.toString() ?? '';
+        if (rawAvatar.isNotEmpty &&
+            !rawAvatar.contains('vendor_docs') &&
+            !rawAvatar.contains('secp') &&
+            !rawAvatar.contains('cnic') &&
+            !rawAvatar.contains('rma-evidence')) {
+          profileImagePath.value = rawAvatar;
+        } else {
+          profileImagePath.value = '';
         }
+
         final phoneVal = metadata?['phone']?.toString() ?? '';
         if (phoneVal.isNotEmpty) {
           userPhone.value = phoneVal;
@@ -119,9 +126,13 @@ class ProfileController extends GetxController {
           if (data['phone'] != null && data['phone'].toString().isNotEmpty) {
             userPhone.value = data['phone'].toString();
           }
-          if (data['avatar_url'] != null &&
-              data['avatar_url'].toString().isNotEmpty) {
-            profileImagePath.value = data['avatar_url'].toString();
+          final dbAvatar = data['avatar_url']?.toString() ?? '';
+          if (dbAvatar.isNotEmpty &&
+              !dbAvatar.contains('vendor_docs') &&
+              !dbAvatar.contains('secp') &&
+              !dbAvatar.contains('cnic') &&
+              !dbAvatar.contains('rma-evidence')) {
+            profileImagePath.value = dbAvatar;
           }
           if (data['height'] != null) {
             height.value =
@@ -136,21 +147,47 @@ class ProfileController extends GetxController {
           }
         }
 
+        // Auto-detect role from vendors table or metadata/DB role
+        final supabase = Get.find<SupabaseService>().client;
+        final String metaRole =
+            metadata?['role']?.toString().toLowerCase() ?? '';
+        final String dbRole = data?['role']?.toString().toLowerCase() ?? '';
+
+        Map<String, dynamic>? vendorRes;
+        try {
+          vendorRes = await supabase
+              .from('vendors')
+              .select()
+              .or('id.eq.${user.id},owner_id.eq.${user.id}')
+              .maybeSingle();
+        } catch (ve) {
+          debugPrint('Vendor check in profile controller error: $ve');
+        }
+
+        final String category =
+            vendorRes?['category']?.toString().toLowerCase() ?? '';
+
+        if (metaRole == 'corporate' ||
+            dbRole == 'corporate' ||
+            category == 'corporate') {
+          _authController.selectedRole.value = AuthRole.corporate;
+        } else if (category == 'vendor' ||
+            metaRole == 'vendor' ||
+            dbRole == 'vendor' ||
+            vendorRes != null) {
+          _authController.selectedRole.value = AuthRole.vendor;
+        } else if (metaRole == 'admin' || dbRole == 'admin') {
+          _authController.selectedRole.value = AuthRole.admin;
+        }
+
         // Fetch role-specific vendor / corporate data
         if (currentRole == AuthRole.vendor) {
-          try {
-            final supabase = Get.find<SupabaseService>().client;
-            final vendorRes = await supabase
-                .from('vendors')
-                .select()
-                .eq('owner_id', user.id)
-                .maybeSingle();
-            if (vendorRes != null) {
-              brandName.value = vendorRes['brand_name']?.toString() ?? '';
-              kycStatus.value =
-                  vendorRes['kyc_status']?.toString() ?? 'pending';
-              final String vendorId = vendorRes['id'].toString();
+          if (vendorRes != null) {
+            brandName.value = vendorRes['brand_name']?.toString() ?? '';
+            kycStatus.value = vendorRes['kyc_status']?.toString() ?? 'pending';
+            final String vendorId = vendorRes['id'].toString();
 
+            try {
               final productsRes = await supabase
                   .from('products')
                   .select('id')
@@ -210,9 +247,9 @@ class ProfileController extends GetxController {
                 vendorPendingOrders.value = 0;
                 vendorMonthlyRevenue.value = 0.0;
               }
+            } catch (ve) {
+              debugPrint('Failed to load vendor details: $ve');
             }
-          } catch (e) {
-            debugPrint('Failed to load vendor details: $e');
           }
         } else if (currentRole == AuthRole.corporate) {
           final box = Hive.box('settings');

@@ -1,6 +1,9 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/utils/constants.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 import '../../domain/repositories/inventory_repository.dart';
 import '../../data/models/vendor_product_model.dart';
 import '../../data/models/product_variant_model.dart';
@@ -110,6 +113,58 @@ class ProductCrudController extends GetxController {
   void removeVariant(String id) {
     variants.removeWhere((v) => v.id == id);
     saveDraft();
+  }
+
+  final RxBool isUploadingImage = false.obs;
+
+  Future<void> pickAndUploadProductImage() async {
+    try {
+      FilePickerResult? result = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+        allowMultiple: true,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        isUploadingImage.value = true;
+        final supabase = Get.find<SupabaseService>().client;
+        final user = supabase.auth.currentUser;
+        final vendorId = user?.id ?? 'guest_vendor';
+
+        for (var pickedFile in result.files) {
+          if (pickedFile.path != null && File(pickedFile.path!).existsSync()) {
+            final file = File(pickedFile.path!);
+            final ext = pickedFile.extension ?? 'jpg';
+            final fileName =
+                'product_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 6)}.$ext';
+            final storagePath = 'products/$vendorId/$fileName';
+
+            String uploadedUrl = '';
+            try {
+              await supabase.storage.from('product-images').upload(storagePath, file);
+              uploadedUrl = supabase.storage.from('product-images').getPublicUrl(storagePath);
+            } catch (e1) {
+              debugPrint('Uploading to product-images failed, trying rma-evidence: $e1');
+              try {
+                await supabase.storage.from('rma-evidence').upload(storagePath, file);
+                uploadedUrl = supabase.storage.from('rma-evidence').getPublicUrl(storagePath);
+              } catch (e2) {
+                debugPrint('Secondary storage upload failed: $e2');
+              }
+            }
+
+            if (uploadedUrl.isNotEmpty) {
+              imageUrls.add(uploadedUrl);
+            }
+          }
+        }
+        saveDraft();
+      }
+    } catch (e) {
+      Get.snackbar('Upload Error', 'Failed to pick or upload image: $e');
+    } finally {
+      isUploadingImage.value = false;
+    }
   }
 
   void addImage(String url) {

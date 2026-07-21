@@ -66,19 +66,40 @@ class InventoryRepositoryImpl implements InventoryRepository {
           return (dbProducts as List).map<VendorProduct>((map) {
             final List<String> sizes = List<String>.from(map['sizes'] ?? []);
             final List<String> colors = List<String>.from(map['colors'] ?? []);
+
+            final List<String> imagesList = List<String>.from(map['images'] ?? []);
+            if (imagesList.isEmpty && map['image_url'] != null && map['image_url'].toString().isNotEmpty) {
+              imagesList.add(map['image_url'].toString());
+            }
+
             final List<ProductVariant> variantsList = [];
-            int varIndex = 0;
-            for (var c in colors) {
-              for (var s in sizes) {
+            final rawVariants = map['variants_json'];
+            if (rawVariants != null && rawVariants is List && rawVariants.isNotEmpty) {
+              for (var v in rawVariants) {
                 variantsList.add(
                   ProductVariant(
-                    id: '${map['id']}_v_${varIndex++}',
-                    color: c,
-                    size: s,
-                    stockQuantity: (map['in_stock'] == true) ? 50 : 0,
-                    sku: '${map['name'].toString().replaceAll(' ', '').toUpperCase()}-$c-$s',
+                    id: v['id']?.toString() ?? '',
+                    color: v['color']?.toString() ?? '',
+                    size: v['size']?.toString() ?? '',
+                    stockQuantity: (v['stock'] as num?)?.toInt() ?? 0,
+                    sku: v['sku']?.toString() ?? '',
                   ),
                 );
+              }
+            } else {
+              int varIndex = 0;
+              for (var c in colors) {
+                for (var s in sizes) {
+                  variantsList.add(
+                    ProductVariant(
+                      id: '${map['id']}_v_${varIndex++}',
+                      color: c,
+                      size: s,
+                      stockQuantity: (map['in_stock'] == true) ? 50 : 0,
+                      sku: '${map['name'].toString().replaceAll(' ', '').toUpperCase()}-$c-$s',
+                    ),
+                  );
+                }
               }
             }
 
@@ -88,7 +109,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
               description: map['description']?.toString() ?? '',
               category: map['category']?.toString() ?? '',
               basePrice: (map['price'] as num?)?.toDouble() ?? 0.0,
-              imageUrls: [map['image_url']?.toString() ?? ''],
+              imageUrls: imagesList,
               variants: variantsList,
               isDraft: false,
               isB2B: map['is_b2b'] ?? false,
@@ -135,7 +156,6 @@ class InventoryRepositoryImpl implements InventoryRepository {
       }
 
       if (vendorId == null && user != null) {
-        // Upsert fallback vendor
         vendorId = user.id;
         try {
           await supabase.from('vendors').upsert({
@@ -149,6 +169,14 @@ class InventoryRepositoryImpl implements InventoryRepository {
 
       if (vendorId != null) {
         final totalStock = product.variants.fold<int>(0, (sum, v) => sum + v.stockQuantity);
+        final List<Map<String, dynamic>> variantsJsonData = product.variants.map((v) => {
+          'id': v.id,
+          'color': v.color,
+          'size': v.size,
+          'stock': v.stockQuantity,
+          'sku': v.sku,
+        }).toList();
+
         await supabase.from('products').upsert({
           'id': product.id,
           'vendor_id': vendorId,
@@ -158,6 +186,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
           'image_url': product.imageUrls.isNotEmpty 
               ? product.imageUrls.first 
               : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+          'images': product.imageUrls,
           'in_stock': totalStock > 0,
           'description': product.description,
           'is_b2b': product.isB2B,
@@ -168,6 +197,8 @@ class InventoryRepositoryImpl implements InventoryRepository {
           'sourcing_type': product.sourcingType,
           'location': 'Pakistan',
           'is_new': true,
+          'status': 'approved',
+          'variants_json': variantsJsonData,
         });
       }
     } catch (e) {

@@ -42,11 +42,32 @@ class EcomApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Premium Apparel E-commerce',
+      title: 'Valvet Maison',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
+      builder: (context, child) {
+        return PopScope(
+          canPop: true,
+          onPopInvokedWithResult: (didPop, result) {
+            final primaryFocus = FocusManager.instance.primaryFocus;
+            if (primaryFocus != null && primaryFocus.hasFocus) {
+              primaryFocus.unfocus();
+            }
+          },
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTap: () {
+              final primaryFocus = FocusManager.instance.primaryFocus;
+              if (primaryFocus != null && primaryFocus.hasFocus) {
+                primaryFocus.unfocus();
+              }
+            },
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
+      },
     );
   }
 }

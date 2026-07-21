@@ -167,11 +167,9 @@ class ProductFormView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () {
-              controller.addImage(
-                'https://picsum.photos/200/300?random=${DateTime.now().millisecondsSinceEpoch}',
-              );
-            },
+            onTap: controller.isUploadingImage.value
+                ? null
+                : controller.pickAndUploadProductImage,
             child: Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: sw * 0.06),
@@ -183,20 +181,37 @@ class ProductFormView extends StatelessWidget {
                   style: BorderStyle.solid,
                 ),
               ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.add_a_photo_outlined,
-                    color: AppColors.camel,
-                    size: sw * 0.08,
-                  ),
-                  SizedBox(height: sw * 0.02),
-                  Text(
-                    'Tap to upload image',
-                    style: GoogleFonts.outfit(color: AppColors.camel),
-                  ),
-                ],
-              ),
+              child: controller.isUploadingImage.value
+                  ? Column(
+                      children: [
+                        const CircularProgressIndicator(color: AppColors.camel),
+                        SizedBox(height: sw * 0.02),
+                        Text(
+                          'Uploading to Storage...',
+                          style: GoogleFonts.outfit(
+                            color: AppColors.camel,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        Icon(
+                          Icons.add_a_photo_outlined,
+                          color: AppColors.camel,
+                          size: sw * 0.08,
+                        ),
+                        SizedBox(height: sw * 0.02),
+                        Text(
+                          'Tap to select & upload product photos',
+                          style: GoogleFonts.outfit(
+                            color: AppColors.camel,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
           if (controller.imageUrls.isNotEmpty) ...[
@@ -228,7 +243,7 @@ class ProductFormView extends StatelessWidget {
                             controller.imageUrls[index],
                           ),
                           child: Container(
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: AppColors.white,
                               shape: BoxShape.circle,
                             ),

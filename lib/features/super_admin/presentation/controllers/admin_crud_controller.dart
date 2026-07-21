@@ -169,9 +169,5 @@ class AdminCrudController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    searchController.dispose();
-    super.onClose();
-  }
+
 }

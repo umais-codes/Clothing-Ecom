@@ -50,12 +50,7 @@ class FulfillmentController extends GetxController {
     _generateChecklist();
   }
 
-  @override
-  void onClose() {
-    weightController.dispose();
-    trackingController.dispose();
-    super.onClose();
-  }
+
 
   void _generateChecklist() {
     checklistItems.clear();

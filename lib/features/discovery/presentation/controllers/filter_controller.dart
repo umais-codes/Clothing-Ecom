@@ -70,7 +70,6 @@ class FilterController extends GetxController {
   @override
   void onClose() {
     _roleWorker?.dispose();
-    searchController.dispose();
     super.onClose();
   }
 

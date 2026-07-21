@@ -54,6 +54,9 @@ abstract class AuthRepository {
     String? bio,
     String? city,
     String? category,
+    String? email,
+    String? phone,
+    String? ownerName,
   });
 
   /// Sign out the current user session.
@@ -79,5 +82,12 @@ abstract class AuthRepository {
   Future<String> uploadAvatar({
     required String userId,
     required File file,
+  });
+
+  /// Upload vendor verification document (CNIC / SECP).
+  Future<String> uploadVendorDocument({
+    required String userId,
+    required File file,
+    required String docType,
   });
 }

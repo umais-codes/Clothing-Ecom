@@ -173,7 +173,7 @@ class PerspectiveSwitcher extends StatelessWidget {
       final supabase = Get.find<SupabaseService>().client;
       final res = await supabase
           .from('vendors')
-          .select('*, profiles:owner_id(role)')
+          .select('*')
           .eq('owner_id', user.id)
           .maybeSingle();
 
@@ -183,7 +183,19 @@ class PerspectiveSwitcher extends StatelessWidget {
       if (res == null) {
         _showPermissionRequiredDialog(context, authController, targetRole);
       } else {
-        final profile = res['profiles'];
+        Map<String, dynamic>? profile;
+        try {
+          profile = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', user.id)
+              .maybeSingle();
+        } catch (pe) {
+          debugPrint('Failed to load user profile role in switcher: $pe');
+        }
+
+        if (!context.mounted) return;
+
         final roleStr = profile?['role']?.toString() ?? 'vendor';
         final kycStatus =
             res['kyc_status']?.toString().toLowerCase() ?? 'pending';

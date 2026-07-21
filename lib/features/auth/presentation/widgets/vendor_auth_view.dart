@@ -242,6 +242,12 @@ class VendorAuthView extends StatelessWidget {
           icon: Icons.phone_outlined,
         ),
         CustomTextField(
+          controller: controller.vendorCityController,
+          label: 'City',
+          hinttext: 'e.g. Karachi, Lahore, Islamabad',
+          icon: Icons.location_city_outlined,
+        ),
+        CustomTextField(
           controller: controller.vendorEmailController,
           label: 'Business Email',
           hinttext: 'brand@domain.com',

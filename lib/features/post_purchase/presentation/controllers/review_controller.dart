@@ -20,11 +20,7 @@ class ReviewController extends GetxController {
   // Loading status
   final RxBool isLoading = false.obs;
 
-  @override
-  void onClose() {
-    reviewTextController.dispose();
-    super.onClose();
-  }
+
 
   void setRating(double val) {
     rating.value = val;

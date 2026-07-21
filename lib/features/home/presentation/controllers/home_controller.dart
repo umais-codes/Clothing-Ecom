@@ -23,11 +23,7 @@ class HomeController extends GetxController {
     loadTrendingProducts();
   }
 
-  @override
-  void onClose() {
-    searchController.dispose();
-    super.onClose();
-  }
+
 
   final List<String> categories = [
     'All',

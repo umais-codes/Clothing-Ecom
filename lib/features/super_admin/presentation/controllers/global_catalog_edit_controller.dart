@@ -5,7 +5,7 @@ import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/constants.dart';
 import '../../domain/entities/admin_entities.dart';
 import 'admin_crud_controller.dart';
-import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
 
 class GlobalCatalogEditController extends GetxController {
   final PendingProductEntity? product;
@@ -52,14 +52,7 @@ class GlobalCatalogEditController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    nameController.dispose();
-    priceController.dispose();
-    descriptionController.dispose();
-    skuController.dispose();
-    super.onClose();
-  }
+
 
   Future<void> addImage() async {
     if (isPickingImage.value) return;
@@ -69,7 +62,7 @@ class GlobalCatalogEditController extends GetxController {
         'Limit Reached',
         'You can only add up to 5 images.',
         backgroundColor: AppColors.warning,
-        colorText: Colors.white,
+        colorText: AppColors.white,
       );
       return;
     }
@@ -97,34 +90,22 @@ class GlobalCatalogEditController extends GetxController {
   }
 
   void discardChanges() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Discard Changes?'),
-        content: const Text('Are you sure you want to revert all changes?'),
-        actions: [
-          CustomButton(
-            text: 'CANCEL',
-            onPressed: () => Get.back(),
-            height: 35,
-            variant: ButtonVariant.ghost,
-            textColor: AppColors.grey,
-            width: Get.width * 0.3,
-          ),
-          const SizedBox(width: 8),
-          CustomButton(
-            text: 'DISCARD',
-            onPressed: () {
-              _initializeFields();
-              Get.back();
-            },
-            height: 35,
-            variant: ButtonVariant.primary,
-            buttonColor: AppColors.error,
-            textColor: AppColors.white,
-            width: Get.width * 0.3,
-          ),
-        ],
-      ),
+    final context = Get.context;
+    if (context == null) {
+      _initializeFields();
+      return;
+    }
+
+    CustomPermissionDialog.show(
+      context: context,
+      icon: Icons.restore_rounded,
+      title: 'Discard Changes?',
+      description: 'Are you sure you want to revert all changes?',
+      grantText: 'Discard',
+      denyText: 'Cancel',
+      onGrant: () {
+        _initializeFields();
+      },
     );
   }
 
@@ -134,7 +115,7 @@ class GlobalCatalogEditController extends GetxController {
         'Validation Error',
         'Required fields are missing.',
         backgroundColor: AppColors.error,
-        colorText: Colors.white,
+        colorText: AppColors.white,
       );
       return;
     }
@@ -161,7 +142,7 @@ class GlobalCatalogEditController extends GetxController {
       'Success',
       'Catalog audit updated successfully.',
       backgroundColor: AppColors.success,
-      colorText: Colors.white,
+      colorText: AppColors.white,
     );
   }
 }

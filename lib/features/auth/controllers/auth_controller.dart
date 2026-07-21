@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/features/auth/presentation/screens/pending_approval_screen.dart';
@@ -46,11 +48,14 @@ class AuthController extends GetxController {
   final TextEditingController brandNameController = TextEditingController();
   final TextEditingController contactPersonController = TextEditingController();
   final TextEditingController vendorPhoneController = TextEditingController();
+  final TextEditingController vendorCityController = TextEditingController();
   final RxString selectedVendorCategory = "Men's".obs;
   final RxBool hasCnicUploaded = false.obs;
   final RxString cnicFileName = ''.obs;
+  final RxString cnicFilePath = ''.obs;
   final RxBool hasSecpUploaded = false.obs;
   final RxString secpFileName = ''.obs;
+  final RxString secpFilePath = ''.obs;
 
   // --- Corporate Controllers ---
   final TextEditingController corporateEmailController =
@@ -58,7 +63,8 @@ class AuthController extends GetxController {
   final TextEditingController corporatePasswordController =
       TextEditingController();
   final TextEditingController companyNameController = TextEditingController();
-  final TextEditingController corporatePhoneController = TextEditingController();
+  final TextEditingController corporatePhoneController =
+      TextEditingController();
   final TextEditingController ntnController = TextEditingController();
   final RxString selectedVolume = '1-50 Employees'.obs;
   final List<String> volumeOptions = [
@@ -258,6 +264,7 @@ class AuthController extends GetxController {
 
       if (result != null) {
         cnicFileName.value = result.files.first.name;
+        cnicFilePath.value = result.files.first.path ?? '';
         hasCnicUploaded.value = true;
       }
     } catch (e) {
@@ -274,11 +281,21 @@ class AuthController extends GetxController {
 
       if (result != null) {
         secpFileName.value = result.files.first.name;
+        secpFilePath.value = result.files.first.path ?? '';
         hasSecpUploaded.value = true;
       }
     } catch (e) {
       _showError('Failed to pick document: $e');
     }
+  }
+
+  String _formatCurrentDate() {
+    final now = DateTime.now();
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[now.month - 1]} ${now.day}, ${now.year}';
   }
 
   Future<void> registerVendor() async {
@@ -290,49 +307,92 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
+      final ownerName = contactPersonController.text.trim().isNotEmpty
+          ? contactPersonController.text.trim()
+          : (brandNameController.text.trim().isNotEmpty
+              ? brandNameController.text.trim()
+              : 'Owner');
+      final phoneNum = vendorPhoneController.text.trim().isNotEmpty
+          ? vendorPhoneController.text.trim()
+          : 'Not provided';
+
       final user = await _authRepository.signUp(
         email: vendorEmailController.text.trim(),
         password: vendorPasswordController.text.trim(),
-        fullName: contactPersonController.text.trim().isNotEmpty
-            ? contactPersonController.text.trim()
-            : brandNameController.text.trim(),
+        fullName: ownerName,
         role: 'vendor',
-        phone: vendorPhoneController.text.trim(),
+        phone: phoneNum,
       );
 
       if (user != null) {
         _markOnboardingComplete(AuthRole.vendor);
         final vendorId = user.id;
 
-        // 1. Create the profile row first (without vendorId to avoid FK constraints if any)
+        String cnicUrl = '';
+        String secpUrl = '';
+
+        if (cnicFilePath.value.isNotEmpty && File(cnicFilePath.value).existsSync()) {
+          try {
+            cnicUrl = await _authRepository.uploadVendorDocument(
+              userId: vendorId,
+              file: File(cnicFilePath.value),
+              docType: 'cnic',
+            );
+          } catch (e) {
+            debugPrint('Error uploading CNIC doc: $e');
+          }
+        }
+
+        if (secpFilePath.value.isNotEmpty && File(secpFilePath.value).existsSync()) {
+          try {
+            secpUrl = await _authRepository.uploadVendorDocument(
+              userId: vendorId,
+              file: File(secpFilePath.value),
+              docType: 'secp',
+            );
+          } catch (e) {
+            debugPrint('Error uploading SECP doc: $e');
+          }
+        }
+
+        final currentDateStr = _formatCurrentDate();
+
+        final cityVal = vendorCityController.text.trim().isNotEmpty
+            ? vendorCityController.text.trim()
+            : 'Karachi';
+
+        // 1. Create the profile row first
         await _createProfile(
           user.id,
           'vendor',
-          fullName: contactPersonController.text.trim(),
-          phone: vendorPhoneController.text.trim(),
+          fullName: ownerName,
+          phone: phoneNum,
           email: vendorEmailController.text.trim(),
         );
 
-        // 2. Create the vendor row (safe since the owner profile now exists)
+        // 2. Create the vendor row
         await _authRepository.createVendor(
           id: vendorId,
           brandName: brandNameController.text.trim(),
           ownerId: user.id,
           kycStatus: 'pending',
-          cnicDocUrl: 'https://picsum.photos/seed/newcnic/800/600',
-          secpDocUrl: 'https://picsum.photos/seed/newsecp/800/600',
+          cnicDocUrl: cnicUrl,
+          secpDocUrl: secpUrl,
           bio: 'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
-          city: 'Karachi',
+          city: cityVal,
           category: selectedVendorCategory.value,
+          email: vendorEmailController.text.trim(),
+          phone: phoneNum,
+          ownerName: ownerName,
         );
 
         // 3. Update the profile with the vendorId
         await _createProfile(
           user.id,
           'vendor',
-          fullName: contactPersonController.text.trim(),
+          fullName: ownerName,
           vendorId: vendorId,
-          phone: vendorPhoneController.text.trim(),
+          phone: phoneNum,
           email: vendorEmailController.text.trim(),
         );
 
@@ -340,22 +400,17 @@ class AuthController extends GetxController {
           final adminCtrl = Get.find<AdminController>();
           final newVendor = KycVendorEntity(
             id: vendorId,
-            brandName: brandNameController.text,
-            ownerName: contactPersonController.text.isEmpty
-                ? 'Unknown'
-                : contactPersonController.text,
-            email: vendorEmailController.text,
-            phone: vendorPhoneController.text.trim().isEmpty
-                ? '+92-300-1234567'
-                : vendorPhoneController.text.trim(),
+            brandName: brandNameController.text.trim(),
+            ownerName: ownerName,
+            email: vendorEmailController.text.trim(),
+            phone: phoneNum,
             category: selectedVendorCategory.value,
-            appliedDate: 'June 2, 2026',
+            appliedDate: currentDateStr,
             status: KycStatus.pending,
-            cnicDocUrl: 'https://picsum.photos/seed/newcnic/800/600',
-            secpDocUrl: 'https://picsum.photos/seed/newsecp/800/600',
-            bio:
-                'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
-            city: 'Karachi',
+            cnicDocUrl: cnicUrl,
+            secpDocUrl: secpUrl,
+            bio: 'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
+            city: cityVal,
           );
           adminCtrl.kycQueue.insert(0, newVendor);
         } catch (_) {}
@@ -392,13 +447,16 @@ class AuthController extends GetxController {
             .eq('owner_id', user.id)
             .maybeSingle();
 
-        final String kyc = vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
+        final String kyc =
+            vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
 
         if (kyc != 'approved') {
           await _authRepository.signOut();
-          _showError(kyc == 'rejected'
-              ? 'Your brand application has been rejected. Please contact support.'
-              : 'Your brand application is pending admin approval.');
+          _showError(
+            kyc == 'rejected'
+                ? 'Your brand application has been rejected. Please contact support.'
+                : 'Your brand application is pending admin approval.',
+          );
           return;
         }
 
@@ -424,33 +482,67 @@ class AuthController extends GetxController {
     }
     status.value = AuthStatus.loading;
     try {
+      final compName = companyNameController.text.trim();
+      final corpPhone = corporatePhoneController.text.trim().isNotEmpty
+          ? corporatePhoneController.text.trim()
+          : 'Not provided';
+
       final user = await _authRepository.signUp(
         email: corporateEmailController.text.trim(),
         password: corporatePasswordController.text.trim(),
-        fullName: companyNameController.text.trim(),
+        fullName: compName,
         role: 'corporate',
-        phone: corporatePhoneController.text.trim(),
+        phone: corpPhone,
       );
       if (user != null) {
         final vendorId = user.id;
 
-        // 1. Create the profile row first (without vendorId to satisfy FK constraints)
+        String cnicUrl = '';
+        String secpUrl = '';
+
+        if (cnicFilePath.value.isNotEmpty && File(cnicFilePath.value).existsSync()) {
+          try {
+            cnicUrl = await _authRepository.uploadVendorDocument(
+              userId: vendorId,
+              file: File(cnicFilePath.value),
+              docType: 'cnic',
+            );
+          } catch (e) {
+            debugPrint('Error uploading corporate CNIC doc: $e');
+          }
+        }
+
+        if (secpFilePath.value.isNotEmpty && File(secpFilePath.value).existsSync()) {
+          try {
+            secpUrl = await _authRepository.uploadVendorDocument(
+              userId: vendorId,
+              file: File(secpFilePath.value),
+              docType: 'secp',
+            );
+          } catch (e) {
+            debugPrint('Error uploading corporate SECP doc: $e');
+          }
+        }
+
+        final currentDateStr = _formatCurrentDate();
+
+        // 1. Create the profile row first
         await _createProfile(
           user.id,
           'corporate',
-          fullName: companyNameController.text.trim(),
-          phone: corporatePhoneController.text.trim(),
+          fullName: compName,
+          phone: corpPhone,
           email: corporateEmailController.text.trim(),
         );
 
         // 2. Create the vendor table row representing the corporate application
         await _authRepository.createVendor(
           id: vendorId,
-          brandName: companyNameController.text.trim(),
+          brandName: compName,
           ownerId: user.id,
           kycStatus: 'pending',
-          cnicDocUrl: 'https://picsum.photos/seed/corpc/800/600',
-          secpDocUrl: 'https://picsum.photos/seed/corps/800/600',
+          cnicDocUrl: cnicUrl,
+          secpDocUrl: secpUrl,
           bio: 'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
           city: 'Lahore',
           category: 'Corporate',
@@ -460,33 +552,29 @@ class AuthController extends GetxController {
         await _createProfile(
           user.id,
           'corporate',
-          fullName: companyNameController.text.trim(),
+          fullName: compName,
           vendorId: vendorId,
-          phone: corporatePhoneController.text.trim(),
+          phone: corpPhone,
           email: corporateEmailController.text.trim(),
         );
 
-        // Save local corporate details for offline/profile reference
         final box = Hive.box('settings');
         box.put('corporate_ntn', ntnController.text.trim());
         box.put('corporate_volume', selectedVolume.value);
 
-        // Pre-insert application in Admin Onboarding Screen queue
         try {
           final adminCtrl = Get.find<AdminController>();
           final newCorporate = KycVendorEntity(
             id: vendorId,
-            brandName: companyNameController.text,
-            ownerName: companyNameController.text,
-            email: corporateEmailController.text,
-            phone: corporatePhoneController.text.trim().isEmpty
-                ? '+92-333-7654321'
-                : corporatePhoneController.text.trim(),
-            category: 'Corporate', // Categorized as Corporate
-            appliedDate: 'June 2, 2026',
+            brandName: compName,
+            ownerName: compName,
+            email: corporateEmailController.text.trim(),
+            phone: corpPhone,
+            category: 'Corporate',
+            appliedDate: currentDateStr,
             status: KycStatus.pending,
-            cnicDocUrl: 'https://picsum.photos/seed/corpc/800/600',
-            secpDocUrl: 'https://picsum.photos/seed/corps/800/600',
+            cnicDocUrl: cnicUrl,
+            secpDocUrl: secpUrl,
             bio: 'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
             city: 'Lahore',
           );
@@ -525,13 +613,16 @@ class AuthController extends GetxController {
             .eq('owner_id', user.id)
             .maybeSingle();
 
-        final String kyc = vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
+        final String kyc =
+            vendorRes?['kyc_status']?.toString().toLowerCase() ?? 'pending';
 
         if (kyc != 'approved') {
           await _authRepository.signOut();
-          _showError(kyc == 'rejected'
-              ? 'Your corporate application has been rejected. Please contact support.'
-              : 'Your corporate application is pending admin approval.');
+          _showError(
+            kyc == 'rejected'
+                ? 'Your corporate application has been rejected. Please contact support.'
+                : 'Your corporate application is pending admin approval.',
+          );
           return;
         }
 
@@ -567,23 +658,5 @@ class AuthController extends GetxController {
       return str.substring(11);
     }
     return str;
-  }
-
-  @override
-  void onClose() {
-    shopperEmailController.dispose();
-    shopperPasswordController.dispose();
-    shopperNameController.dispose();
-    vendorEmailController.dispose();
-    vendorPasswordController.dispose();
-    brandNameController.dispose();
-    contactPersonController.dispose();
-    vendorPhoneController.dispose();
-    corporateEmailController.dispose();
-    corporatePasswordController.dispose();
-    companyNameController.dispose();
-    corporatePhoneController.dispose();
-    ntnController.dispose();
-    super.onClose();
   }
 }

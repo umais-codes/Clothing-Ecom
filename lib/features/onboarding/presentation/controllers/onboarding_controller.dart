@@ -265,8 +265,6 @@ class OnboardingController extends GetxController {
   @override
   void onClose() {
     pageController.dispose();
-    phoneController.dispose();
-    otpController.dispose();
     super.onClose();
   }
 }

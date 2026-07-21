@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:ecom_app/app/widgets/app_downloader.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -386,26 +387,34 @@ class _VendorRow extends StatelessWidget {
 
             Expanded(
               flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    vendor.appliedDate.split(',')[0],
-                    style: GoogleFonts.outfit(
-                      fontSize: 11,
-                      color: AppColors.charcoal,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    '2026',
-                    style: GoogleFonts.outfit(
-                      fontSize: 9,
-                      color: AppColors.grey,
-                    ),
-                  ),
-                ],
+              child: Builder(
+                builder: (context) {
+                  final parts = vendor.appliedDate.split(',');
+                  final dayMonth = parts[0].trim();
+                  final yearStr = parts.length > 1 ? parts[1].trim() : '';
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        dayMonth,
+                        style: GoogleFonts.outfit(
+                          fontSize: 11,
+                          color: AppColors.charcoal,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (yearStr.isNotEmpty)
+                        Text(
+                          yearStr,
+                          style: GoogleFonts.outfit(
+                            fontSize: 9,
+                            color: AppColors.grey,
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -642,6 +651,59 @@ class _DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasUrl = imageUrl.trim().isNotEmpty && !imageUrl.contains('picsum.photos');
+    final bool isNetworkUrl = hasUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+    final bool isLocalFile = hasUrl && File(imageUrl).existsSync();
+
+    Widget buildPlaceholder() {
+      return Container(
+        height: 130,
+        width: double.infinity,
+        color: AppColors.greyLight.withValues(alpha: 0.25),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              hasUrl ? Icons.verified_user_outlined : Icons.description_outlined,
+              size: 36,
+              color: AppColors.camel,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              hasUrl ? 'Document Uploaded' : 'No Document Attached',
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                color: AppColors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget buildPreview() {
+      if (isNetworkUrl) {
+        return CachedNetworkImage(
+          imageUrl: imageUrl,
+          height: 130,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorWidget: (context, url, error) => buildPlaceholder(),
+        );
+      } else if (isLocalFile) {
+        return Image.file(
+          File(imageUrl),
+          height: 130,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => buildPlaceholder(),
+        );
+      } else {
+        return buildPlaceholder();
+      }
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -653,30 +715,26 @@ class _DocumentCard extends StatelessWidget {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: const .vertical(top: Radius.circular(11)),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  height: 130,
-                  width: .infinity,
-                  fit: .cover,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                child: buildPreview(),
+              ),
+              if (hasUrl)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: AppDownloader(url: imageUrl, fileName: label),
                 ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: AppDownloader(url: imageUrl, fileName: label),
-              ),
             ],
           ),
 
           Padding(
-            padding: const .symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Text(
               label,
-              textAlign: .center,
+              textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 11,
-                fontWeight: .w600,
+                fontWeight: FontWeight.w600,
                 color: AppColors.charcoal,
               ),
             ),

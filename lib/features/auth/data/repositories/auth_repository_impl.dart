@@ -124,11 +124,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
-        data: {
-          'full_name': ?fullName,
-          'role': ?role,
-          'phone': ?phone,
-        },
+        data: {'full_name': ?fullName, 'role': ?role, 'phone': ?phone},
       );
       return response.user;
     } catch (e) {
@@ -194,19 +190,40 @@ class AuthRepositoryImpl implements AuthRepository {
     String? bio,
     String? city,
     String? category,
+    String? email,
+    String? phone,
+    String? ownerName,
   }) async {
     try {
-      await _supabase.from('vendors').insert({
-        'id': id,
-        'brand_name': brandName,
-        'owner_id': ownerId,
-        'kyc_status': kycStatus,
-        'cnic_doc_url': cnicDocUrl,
-        'secp_doc_url': secpDocUrl,
-        'bio': bio,
-        'city': city,
-        'category': category,
-      });
+      try {
+        await _supabase.from('vendors').insert({
+          'id': id,
+          'brand_name': brandName,
+          'owner_id': ownerId,
+          'kyc_status': kycStatus,
+          'cnic_doc_url': cnicDocUrl,
+          'secp_doc_url': secpDocUrl,
+          'bio': bio,
+          'city': city,
+          'category': category,
+          'email': email,
+          'phone': phone,
+          'owner_name': ownerName,
+        });
+      } catch (colErr) {
+        debugPrint('Inserting extra columns into vendors table failed, falling back to base columns: $colErr');
+        await _supabase.from('vendors').insert({
+          'id': id,
+          'brand_name': brandName,
+          'owner_id': ownerId,
+          'kyc_status': kycStatus,
+          'cnic_doc_url': cnicDocUrl,
+          'secp_doc_url': secpDocUrl,
+          'bio': bio,
+          'city': city,
+          'category': category,
+        });
+      }
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));
     }
@@ -242,13 +259,18 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // 2. Try to update profiles database table
       try {
-        await _supabase.from('profiles').update({
-          'height': height,
-          'weight': weight,
-          'fit_preference': fitPreference,
-        }).eq('id', userId);
+        await _supabase
+            .from('profiles')
+            .update({
+              'height': height,
+              'weight': weight,
+              'fit_preference': fitPreference,
+            })
+            .eq('id', userId);
       } catch (dbError) {
-        debugPrint('profiles table update for body metrics failed: $dbError. Saved in metadata.');
+        debugPrint(
+          'profiles table update for body metrics failed: $dbError. Saved in metadata.',
+        );
       }
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));
@@ -276,19 +298,27 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // Update profiles database table
       try {
-        await _supabase.from('profiles').update({
-          'full_name': fullName,
-          'phone': ?phone,
-          'avatar_url': ?avatarUrl,
-        }).eq('id', userId);
+        await _supabase
+            .from('profiles')
+            .update({
+              'full_name': fullName,
+              'phone': ?phone,
+              'avatar_url': ?avatarUrl,
+            })
+            .eq('id', userId);
       } catch (dbError) {
-        debugPrint('Database update failed, falling back to full_name only: $dbError');
+        debugPrint(
+          'Database update failed, falling back to full_name only: $dbError',
+        );
         try {
-          await _supabase.from('profiles').update({
-            'full_name': fullName,
-          }).eq('id', userId);
+          await _supabase
+              .from('profiles')
+              .update({'full_name': fullName})
+              .eq('id', userId);
         } catch (fbError) {
-          debugPrint('Fallback database update failed silently: $fbError. Profile changes saved in user metadata.');
+          debugPrint(
+            'Fallback database update failed silently: $fbError. Profile changes saved in user metadata.',
+          );
         }
       }
     } catch (e) {
@@ -312,9 +342,37 @@ class AuthRepositoryImpl implements AuthRepository {
         debugPrint(
           'Uploading to avatars bucket failed, using fallback rma-evidence: $storageError',
         );
-        // Fallback bucket
         await _supabase.storage.from('rma-evidence').upload(path, file);
         return _supabase.storage.from('rma-evidence').getPublicUrl(path);
+      }
+    } catch (e) {
+      throw Exception(ErrorHandler.getErrorMessage(e));
+    }
+  }
+
+  @override
+  Future<String> uploadVendorDocument({
+    required String userId,
+    required File file,
+    required String docType,
+  }) async {
+    try {
+      final ext = file.path.split('.').last;
+      final fileName =
+          '${docType}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      final path = 'vendor_docs/$userId/$fileName';
+
+      try {
+        await _supabase.storage.from('rma-evidence').upload(path, file);
+        return _supabase.storage.from('rma-evidence').getPublicUrl(path);
+      } catch (_) {
+        try {
+          await _supabase.storage.from('avatars').upload(path, file);
+          return _supabase.storage.from('avatars').getPublicUrl(path);
+        } catch (storageError) {
+          debugPrint('Upload failed: $storageError');
+          return file.path; // Fallback to local file path
+        }
       }
     } catch (e) {
       throw Exception(ErrorHandler.getErrorMessage(e));

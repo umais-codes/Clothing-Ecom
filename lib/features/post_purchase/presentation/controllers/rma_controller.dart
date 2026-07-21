@@ -69,11 +69,7 @@ class RmaController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    commentsController.dispose();
-    super.onClose();
-  }
+
 
   void nextStep() {
     if (currentStep.value < 3) {

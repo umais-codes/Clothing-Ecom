@@ -22,28 +22,114 @@ class AdminController extends GetxController {
       final supabase = Get.find<SupabaseService>().client;
       final res = await supabase
           .from('vendors')
-          .select('*, profiles:owner_id(full_name, role, phone, email)')
+          .select('*')
           .eq('kyc_status', 'pending');
 
       kycQueue.clear();
-      for (var item in (res as List)) {
+      final items = res as List;
+
+      // Fetch corresponding profiles in a separate query to avoid joint Postgrest issues
+      final ownerIds = items
+          .map((item) => item['owner_id']?.toString())
+          .whereType<String>()
+          .toSet()
+          .toList();
+
+      final Map<String, dynamic> profilesMap = {};
+      if (ownerIds.isNotEmpty) {
+        try {
+          final profilesRes = await supabase
+              .from('profiles')
+              .select('id, full_name, role, phone, email')
+              .filter('id', 'in', ownerIds);
+
+          for (var p in (profilesRes as List)) {
+            final pMap = p as Map<String, dynamic>;
+            final id = pMap['id']?.toString();
+            if (id != null) {
+              profilesMap[id] = pMap;
+            }
+          }
+        } catch (pe) {
+          debugPrint('Failed to load profiles for pending vendors: $pe');
+        }
+      }
+
+      for (var item in items) {
         final vendorId = item['id']?.toString() ?? '';
         final brandName = item['brand_name']?.toString() ?? 'Brand';
-        final profile = item['profiles'];
-        final ownerName = profile?['full_name']?.toString() ?? 'Owner';
-        final role = profile?['role']?.toString() ?? 'vendor';
+        final ownerId = item['owner_id']?.toString();
+        final profile = ownerId != null ? profilesMap[ownerId] : null;
 
+        final itemOwnerName = item['owner_name']?.toString();
+        final profileFullName = profile?['full_name']?.toString();
+        final ownerName = (itemOwnerName != null && itemOwnerName.trim().isNotEmpty)
+            ? itemOwnerName
+            : ((profileFullName != null &&
+                    profileFullName.trim().isNotEmpty &&
+                    profileFullName != 'User' &&
+                    profileFullName != 'Unknown' &&
+                    profileFullName != 'Owner')
+                ? profileFullName
+                : brandName);
+
+        final role = profile?['role']?.toString() ?? 'vendor';
         final isCorporate = role == 'corporate';
-        final email = profile?['email']?.toString() ?? item['email']?.toString() ?? '${brandName.toLowerCase().replaceAll(' ', '')}@${isCorporate ? 'corporate.com' : 'velvetmaison.pk'}';
-        final phone = profile?['phone']?.toString() ?? item['phone']?.toString() ?? (isCorporate ? '+92-333-7654321' : '+92-300-1234567');
-        
-        String appliedDate = 'June 2, 2026';
+
+        final itemEmail = item['email']?.toString();
+        final profileEmail = profile?['email']?.toString();
+        final email = (itemEmail != null && itemEmail.trim().isNotEmpty)
+            ? itemEmail
+            : ((profileEmail != null && profileEmail.trim().isNotEmpty)
+                ? profileEmail
+                : '${brandName.toLowerCase().replaceAll(' ', '')}@${isCorporate ? 'corporate.com' : 'velvetmaison.pk'}');
+
+        final itemPhone = item['phone']?.toString();
+        final profilePhone = profile?['phone']?.toString();
+        final phone = (itemPhone != null && itemPhone.trim().isNotEmpty && itemPhone != 'Not provided')
+            ? itemPhone
+            : ((profilePhone != null && profilePhone.trim().isNotEmpty)
+                ? profilePhone
+                : 'Not provided');
+
+        String appliedDate = '';
         if (item['created_at'] != null) {
           try {
             final dt = DateTime.parse(item['created_at'].toString());
-            final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            final months = [
+              'Jan',
+              'Feb',
+              'Mar',
+              'Apr',
+              'May',
+              'Jun',
+              'Jul',
+              'Aug',
+              'Sep',
+              'Oct',
+              'Nov',
+              'Dec',
+            ];
             appliedDate = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
           } catch (_) {}
+        }
+        if (appliedDate.isEmpty) {
+          final dt = DateTime.now();
+          final months = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+          ];
+          appliedDate = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
         }
 
         final entity = KycVendorEntity(
@@ -52,19 +138,18 @@ class AdminController extends GetxController {
           ownerName: isCorporate ? brandName : ownerName,
           email: email,
           phone: phone,
-          category: item['category']?.toString() ?? (isCorporate ? 'Corporate' : "Women's"),
+          category:
+              item['category']?.toString() ??
+              (isCorporate ? 'Corporate' : "Women's"),
           appliedDate: appliedDate,
           status: KycStatus.pending,
-          cnicDocUrl: item['cnic_doc_url']?.toString() ?? (isCorporate
-              ? 'https://picsum.photos/seed/corpc/800/600'
-              : 'https://picsum.photos/seed/newcnic/800/600'),
-          secpDocUrl: item['secp_doc_url']?.toString() ?? (isCorporate
-              ? 'https://picsum.photos/seed/corps/800/600'
-              : 'https://picsum.photos/seed/newsecp/800/600'),
-          bio: item['bio']?.toString() ?? (isCorporate
-              ? 'B2B Corporate Account Application.'
-              : 'Newly registered vendor brand.'),
-          city: item['city']?.toString() ?? (isCorporate ? 'Lahore' : 'Karachi'),
+          cnicDocUrl: item['cnic_doc_url']?.toString() ?? '',
+          secpDocUrl: item['secp_doc_url']?.toString() ?? '',
+          bio: item['bio']?.toString() ??
+              (isCorporate
+                  ? 'B2B Corporate Account Application.'
+                  : 'Newly registered vendor brand.'),
+          city: item['city']?.toString() ?? 'Not provided',
         );
 
         if (!kycQueue.any((v) => v.id == vendorId)) {

@@ -108,20 +108,7 @@ class CheckoutController extends GetxController {
     validateForm();
   }
 
-  @override
-  void onClose() {
-    fullNameController.dispose();
-    addressController.dispose();
-    cityController.dispose();
-    postalCodeController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    companyNameController.dispose();
-    ntnController.dispose();
-    procurementEmailController.dispose();
-    poNumberController.dispose();
-    super.onClose();
-  }
+
 
   // Checkout pricing values based on B2B / B2C pathways
   double get subtotal => isB2B.value ? b2bCart.subtotal : b2cCart.subtotal;

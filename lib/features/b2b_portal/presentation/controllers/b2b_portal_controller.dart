@@ -90,11 +90,5 @@ class B2BPortalController extends GetxController {
     );
   }
 
-  @override
-  void onClose() {
-    companyNameController.dispose();
-    rfqQuantityController.dispose();
-    rfqNotesController.dispose();
-    super.onClose();
-  }
+
 }

@@ -20,15 +20,7 @@ class DispatchController extends GetxController {
 
   final List<String> couriers = ['Trax', 'PostEx', 'Leopards'];
 
-  @override
-  void onClose() {
-    weightController.dispose();
-    lengthController.dispose();
-    widthController.dispose();
-    heightController.dispose();
-    addressController.dispose();
-    super.onClose();
-  }
+
 
   bool get isFormValid {
     final weightVal = double.tryParse(weightController.text.trim());

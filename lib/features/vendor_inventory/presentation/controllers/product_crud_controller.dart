@@ -37,14 +37,7 @@ class ProductCrudController extends GetxController {
     _loadDraft();
   }
 
-  @override
-  void onClose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    basePriceController.dispose();
-    moqController.dispose();
-    super.onClose();
-  }
+
 
   Future<void> refreshProducts() async {
     await _loadProducts();

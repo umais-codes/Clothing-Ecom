@@ -161,13 +161,5 @@ class MonetizationController extends GetxController {
       snackPosition: SnackPosition.BOTTOM);
   }
 
-  @override
-  void onClose() {
-    planNameController.dispose();
-    priceMonthlyController.dispose();
-    priceYearlyController.dispose();
-    maxProductsController.dispose();
-    maxStaffController.dispose();
-    super.onClose();
-  }
+
 }

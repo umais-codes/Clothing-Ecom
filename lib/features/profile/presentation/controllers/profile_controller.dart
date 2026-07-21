@@ -17,9 +17,9 @@ class ProfileController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
 
   // Observables for instant UI updates
-  final RxString userName = 'Eleanor Fitzgerald'.obs;
-  final RxString userEmail = 'eleanor.fitz@example.com'.obs;
-  final RxString userPhone = '+1 234 567 890'.obs;
+  final RxString userName = 'Guest Shopper'.obs;
+  final RxString userEmail = 'guest@velvetmaison.pk'.obs;
+  final RxString userPhone = 'Not logged in'.obs;
   final RxString profileImagePath = ''.obs;
   final RxBool isSaving = false.obs;
 
@@ -35,9 +35,9 @@ class ProfileController extends GetxController {
   final RxString employeeVolume = ''.obs;
 
   // Fit Profile Metrics
-  final RxString height = '175cm'.obs;
-  final RxString weight = '62kg'.obs;
-  final RxString fitPreference = 'Tailored Slim'.obs;
+  final RxString height = '170cm'.obs;
+  final RxString weight = '65kg'.obs;
+  final RxString fitPreference = 'Regular Fit'.obs;
 
   // Settings Toggles
   final RxBool notificationsEnabled = true.obs;
@@ -80,47 +80,56 @@ class ProfileController extends GetxController {
         userPhone.value = user.phone ?? '';
 
         final metadata = user.userMetadata;
-        if (metadata != null) {
-          userName.value = metadata['full_name']?.toString() ?? userName.value;
-          final avatarUrl = metadata['avatar_url']?.toString() ?? '';
-          if (avatarUrl.isNotEmpty) {
-            profileImagePath.value = avatarUrl;
+        String name = metadata?['full_name']?.toString() ?? '';
+        if (name.isEmpty && user.email != null) {
+          name = user.email!.split('@')[0];
+          if (name.isNotEmpty) {
+            name = name[0].toUpperCase() + name.substring(1);
           }
-          final phoneVal = metadata['phone']?.toString() ?? '';
-          if (phoneVal.isNotEmpty) {
-            userPhone.value = phoneVal;
-          }
-          if (metadata['height'] != null) {
-            height.value = '${metadata['height'].toString().replaceAll('.0', '')}cm';
-          }
-          if (metadata['weight'] != null) {
-            weight.value = '${metadata['weight'].toString().replaceAll('.0', '')}kg';
-          }
-          if (metadata['fit_preference'] != null) {
-            fitPreference.value = metadata['fit_preference'].toString();
-          }
+        }
+        userName.value = name.isNotEmpty ? name : 'Shopper';
+
+        final avatarUrl = metadata?['avatar_url']?.toString() ?? '';
+        if (avatarUrl.isNotEmpty) {
+          profileImagePath.value = avatarUrl;
+        }
+        final phoneVal = metadata?['phone']?.toString() ?? '';
+        if (phoneVal.isNotEmpty) {
+          userPhone.value = phoneVal;
+        }
+        if (metadata?['height'] != null) {
+          height.value =
+              '${metadata!['height'].toString().replaceAll('.0', '')}cm';
+        }
+        if (metadata?['weight'] != null) {
+          weight.value =
+              '${metadata!['weight'].toString().replaceAll('.0', '')}kg';
+        }
+        if (metadata?['fit_preference'] != null) {
+          fitPreference.value = metadata!['fit_preference'].toString();
         }
 
         // Fetch custom profile metrics from Supabase DB via repository
         final data = await _authRepository.getProfile(user.id);
         if (data != null) {
-          if (data['full_name'] != null) {
+          if (data['full_name'] != null &&
+              data['full_name'].toString().trim().isNotEmpty) {
             userName.value = data['full_name'].toString();
           }
-          try {
-            if (data['phone'] != null && data['phone'].toString().isNotEmpty) {
-              userPhone.value = data['phone'].toString();
-            }
-            if (data['avatar_url'] != null &&
-                data['avatar_url'].toString().isNotEmpty) {
-              profileImagePath.value = data['avatar_url'].toString();
-            }
-          } catch (_) {}
+          if (data['phone'] != null && data['phone'].toString().isNotEmpty) {
+            userPhone.value = data['phone'].toString();
+          }
+          if (data['avatar_url'] != null &&
+              data['avatar_url'].toString().isNotEmpty) {
+            profileImagePath.value = data['avatar_url'].toString();
+          }
           if (data['height'] != null) {
-            height.value = '${data['height'].toString().replaceAll('.0', '')}cm';
+            height.value =
+                '${data['height'].toString().replaceAll('.0', '')}cm';
           }
           if (data['weight'] != null) {
-            weight.value = '${data['weight'].toString().replaceAll('.0', '')}kg';
+            weight.value =
+                '${data['weight'].toString().replaceAll('.0', '')}kg';
           }
           if (data['fit_preference'] != null) {
             fitPreference.value = data['fit_preference'].toString();
@@ -138,28 +147,28 @@ class ProfileController extends GetxController {
                 .maybeSingle();
             if (vendorRes != null) {
               brandName.value = vendorRes['brand_name']?.toString() ?? '';
-              kycStatus.value = vendorRes['kyc_status']?.toString() ?? 'pending';
+              kycStatus.value =
+                  vendorRes['kyc_status']?.toString() ?? 'pending';
               final String vendorId = vendorRes['id'].toString();
 
-              // --- SUPABASE VENDOR STATS INTEGRATION ---
-              // 1. Fetch all product IDs belonging to this vendor
               final productsRes = await supabase
                   .from('products')
                   .select('id')
                   .eq('vendor_id', vendorId);
-              
+
               final productIds = (productsRes as List)
                   .map((p) => p['id'].toString())
                   .toList();
-              
+
               vendorActiveProducts.value = productIds.length;
 
               if (productIds.isNotEmpty) {
-                // 2. Fetch order items for these products and their parent orders status & created_at
                 final itemsRes = await supabase
                     .from('order_items')
-                    .select('quantity, unit_price, order_id, orders!inner(status, created_at)')
-                    .inFilter('product_id', productIds);
+                    .select(
+                      'quantity, unit_price, order_id, orders!inner(status, created_at)',
+                    )
+                    .filter('product_id', 'in', productIds);
 
                 final Set<String> pendingOrderIds = {};
                 double monthlyRevenueSum = 0.0;
@@ -170,22 +179,24 @@ class ProfileController extends GetxController {
                 for (var item in (itemsRes as List)) {
                   final order = item['orders'];
                   if (order != null) {
-                    final status = order['status']?.toString().toLowerCase() ?? '';
+                    final status =
+                        order['status']?.toString().toLowerCase() ?? '';
                     final orderId = item['order_id']?.toString() ?? '';
 
-                    // Pending/Paid status indicates active pending order
                     if (status == 'pending' || status == 'paid') {
                       pendingOrderIds.add(orderId);
                     }
 
-                    // Sum revenue for completed/paid orders placed within the last 30 days
                     if (status != 'cancelled') {
                       final createdAtStr = order['created_at']?.toString();
                       if (createdAtStr != null) {
                         final createdAt = DateTime.tryParse(createdAtStr);
-                        if (createdAt != null && createdAt.isAfter(thirtyDaysAgo)) {
-                          final double qty = (item['quantity'] as num?)?.toDouble() ?? 0.0;
-                          final double price = (item['unit_price'] as num?)?.toDouble() ?? 0.0;
+                        if (createdAt != null &&
+                            createdAt.isAfter(thirtyDaysAgo)) {
+                          final double qty =
+                              (item['quantity'] as num?)?.toDouble() ?? 0.0;
+                          final double price =
+                              (item['unit_price'] as num?)?.toDouble() ?? 0.0;
                           monthlyRevenueSum += (qty * price);
                         }
                       }
@@ -205,9 +216,20 @@ class ProfileController extends GetxController {
           }
         } else if (currentRole == AuthRole.corporate) {
           final box = Hive.box('settings');
-          companyNtn.value = box.get('corporate_ntn', defaultValue: 'NTN-8762541-0') as String;
-          employeeVolume.value = box.get('corporate_volume', defaultValue: '51-200 Employees') as String;
+          companyNtn.value =
+              box.get('corporate_ntn', defaultValue: 'NTN-8762541-0') as String;
+          employeeVolume.value =
+              box.get('corporate_volume', defaultValue: '51-200 Employees')
+                  as String;
         }
+      } else {
+        userName.value = 'Guest Shopper';
+        userEmail.value = 'guest@velvetmaison.pk';
+        userPhone.value = 'Not logged in';
+        profileImagePath.value = '';
+        height.value = '170cm';
+        weight.value = '65kg';
+        fitPreference.value = 'Regular Fit';
       }
     } catch (e) {
       debugPrint('Error loading user profile: $e');
@@ -240,7 +262,6 @@ class ProfileController extends GetxController {
       return;
     }
 
-    // Parse current values or use defaults
     double currentHeight =
         double.tryParse(height.value.replaceAll('cm', '')) ?? 170.0;
     double currentWeight =
@@ -288,7 +309,6 @@ class ProfileController extends GetxController {
                 ],
               ),
               SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
-              // Height
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -341,7 +361,6 @@ class ProfileController extends GetxController {
                 ),
               ),
               SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
-              // Weight
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -394,7 +413,6 @@ class ProfileController extends GetxController {
                 ),
               ),
               SizedBox(height: MediaQuery.of(Get.context!).size.width * 0.02),
-              // Preferred Fit
               Text(
                 'Preferred Fit',
                 style: GoogleFonts.outfit(
@@ -432,7 +450,7 @@ class ProfileController extends GetxController {
                 text: 'Save Changes',
                 onPressed: () async {
                   try {
-                    Get.back(); // Close bottom sheet
+                    Get.back();
                     Get.showOverlay(
                       asyncFunction: () async {
                         await _authRepository.updateBodyMetrics(
@@ -442,7 +460,6 @@ class ProfileController extends GetxController {
                           fitPreference: tempFit.value,
                         );
 
-                        // Update locally
                         height.value = '${tempHeight.value.round()}cm';
                         weight.value = '${tempWeight.value.round()}kg';
                         fitPreference.value = tempFit.value;
@@ -522,13 +539,15 @@ class ProfileController extends GetxController {
         profileImagePath.value = uploadedAvatarUrl;
       }
 
-      // Save role-specific details
-      if (currentRole == AuthRole.vendor && brandName != null && brandName.isNotEmpty) {
+      if (currentRole == AuthRole.vendor &&
+          brandName != null &&
+          brandName.isNotEmpty) {
         try {
           final supabase = Get.find<SupabaseService>().client;
-          await supabase.from('vendors').update({
-            'brand_name': brandName,
-          }).eq('owner_id', user.id);
+          await supabase
+              .from('vendors')
+              .update({'brand_name': brandName})
+              .eq('owner_id', user.id);
           this.brandName.value = brandName;
         } catch (e) {
           debugPrint('Failed to update brand name in Supabase: $e');
@@ -547,13 +566,13 @@ class ProfileController extends GetxController {
   }
 
   void _resetProfileData() {
-    userName.value = 'Eleanor Fitzgerald';
-    userEmail.value = 'eleanor.fitz@example.com';
-    userPhone.value = '+1 234 567 890';
+    userName.value = 'Guest Shopper';
+    userEmail.value = 'guest@velvetmaison.pk';
+    userPhone.value = 'Not logged in';
     profileImagePath.value = '';
-    height.value = '175cm';
-    weight.value = '62kg';
-    fitPreference.value = 'Tailored Slim';
+    height.value = '170cm';
+    weight.value = '65kg';
+    fitPreference.value = 'Regular Fit';
     brandName.value = '';
     kycStatus.value = 'pending';
     companyNtn.value = '';

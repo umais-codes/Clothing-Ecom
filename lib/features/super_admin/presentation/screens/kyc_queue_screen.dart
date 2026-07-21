@@ -517,27 +517,49 @@ class _VendorDetailPanel extends StatelessWidget {
                   const SizedBox(height: 20),
                   const AdminSectionHeader(title: 'CONTACT DETAILS'),
                   const SizedBox(height: 12),
-                  AdminCard(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
-                      children: [
-                        AdminInfoRow(
-                          icon: Icons.email_outlined,
-                          label: 'Email Address',
-                          value: vendor.email,
+                  Builder(
+                    builder: (context) {
+                      final resolvedEmail =
+                          (vendor.email.isNotEmpty &&
+                              !vendor.email.contains('No email'))
+                          ? vendor.email
+                          : (RegExp(
+                                  r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
+                                ).firstMatch(vendor.bio)?.group(0) ??
+                                'No email provided');
+
+                      final resolvedPhone =
+                          (vendor.phone.isNotEmpty &&
+                              vendor.phone != 'Not provided')
+                          ? vendor.phone
+                          : (RegExp(
+                                  r'(\+?\d[\d\s-]{7,}\d)',
+                                ).firstMatch(vendor.bio)?.group(0) ??
+                                'Not provided');
+
+                      return AdminCard(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Column(
+                          children: [
+                            AdminInfoRow(
+                              icon: Icons.email_outlined,
+                              label: 'Email Address',
+                              value: resolvedEmail,
+                            ),
+                            AdminInfoRow(
+                              icon: Icons.phone_outlined,
+                              label: 'Phone Number',
+                              value: resolvedPhone,
+                            ),
+                            AdminInfoRow(
+                              icon: Icons.location_on_outlined,
+                              label: 'City',
+                              value: vendor.city,
+                            ),
+                          ],
                         ),
-                        AdminInfoRow(
-                          icon: Icons.phone_outlined,
-                          label: 'Phone Number',
-                          value: vendor.phone,
-                        ),
-                        AdminInfoRow(
-                          icon: Icons.location_on_outlined,
-                          label: 'City',
-                          value: vendor.city,
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 20),
@@ -651,8 +673,11 @@ class _DocumentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasUrl = imageUrl.trim().isNotEmpty && !imageUrl.contains('picsum.photos');
-    final bool isNetworkUrl = hasUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
+    final bool hasUrl =
+        imageUrl.trim().isNotEmpty && !imageUrl.contains('picsum.photos');
+    final bool isNetworkUrl =
+        hasUrl &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
     final bool isLocalFile = hasUrl && File(imageUrl).existsSync();
 
     Widget buildPlaceholder() {
@@ -664,7 +689,9 @@ class _DocumentCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              hasUrl ? Icons.verified_user_outlined : Icons.description_outlined,
+              hasUrl
+                  ? Icons.verified_user_outlined
+                  : Icons.description_outlined,
               size: 36,
               color: AppColors.camel,
             ),
@@ -715,7 +742,9 @@ class _DocumentCard extends StatelessWidget {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(11),
+                ),
                 child: buildPreview(),
               ),
               if (hasUrl)

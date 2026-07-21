@@ -392,15 +392,18 @@ class CheckoutView extends GetView<CheckoutController> {
                     ],
                   ),
                 ),
-                Radio<String>(
-                  value: value,
-                  groupValue: activeOpt,
+                RadioGroup<String>(
+                  groupValue: controller.selectedPaymentOption.value,
                   onChanged: (val) {
                     if (val != null) {
                       controller.selectedPaymentOption.value = val;
                     }
                   },
-                  activeColor: AppColors.camel,
+                  child: Column(
+                    children: [
+                      Radio<String>(value: value, activeColor: AppColors.camel),
+                    ],
+                  ),
                 ),
               ],
             ),

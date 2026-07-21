@@ -25,7 +25,11 @@ class AdminController extends GetxController {
           .select('*')
           .eq('kyc_status', 'pending');
 
+      final Map<String, KycVendorEntity> existingQueue = {
+        for (var v in kycQueue) v.id: v,
+      };
       kycQueue.clear();
+
       final items = res as List;
 
       // Fetch corresponding profiles in a separate query to avoid joint Postgrest issues
@@ -40,7 +44,7 @@ class AdminController extends GetxController {
         try {
           final profilesRes = await supabase
               .from('profiles')
-              .select('id, full_name, role, phone, email')
+              .select('id, full_name, role, email')
               .filter('id', 'in', ownerIds);
 
           for (var p in (profilesRes as List)) {
@@ -51,46 +55,98 @@ class AdminController extends GetxController {
             }
           }
         } catch (pe) {
-          debugPrint('Failed to load profiles for pending vendors: $pe');
+          debugPrint('Select with email from profiles failed: $pe');
+          try {
+            final baseRes = await supabase
+                .from('profiles')
+                .select('id, full_name, role')
+                .filter('id', 'in', ownerIds);
+
+            for (var p in (baseRes as List)) {
+              final pMap = p as Map<String, dynamic>;
+              final id = pMap['id']?.toString();
+              if (id != null) {
+                profilesMap[id] = pMap;
+              }
+            }
+          } catch (_) {}
         }
       }
 
       for (var item in items) {
         final vendorId = item['id']?.toString() ?? '';
+        final existingItem = existingQueue[vendorId];
         final brandName = item['brand_name']?.toString() ?? 'Brand';
         final ownerId = item['owner_id']?.toString();
         final profile = ownerId != null ? profilesMap[ownerId] : null;
 
         final itemOwnerName = item['owner_name']?.toString();
         final profileFullName = profile?['full_name']?.toString();
-        final ownerName = (itemOwnerName != null && itemOwnerName.trim().isNotEmpty)
+        final ownerName =
+            (itemOwnerName != null && itemOwnerName.trim().isNotEmpty)
             ? itemOwnerName
             : ((profileFullName != null &&
-                    profileFullName.trim().isNotEmpty &&
-                    profileFullName != 'User' &&
-                    profileFullName != 'Unknown' &&
-                    profileFullName != 'Owner')
-                ? profileFullName
-                : brandName);
+                      profileFullName.trim().isNotEmpty &&
+                      profileFullName != 'User' &&
+                      profileFullName != 'Unknown' &&
+                      profileFullName != 'Owner')
+                  ? profileFullName
+                  : brandName);
 
-        final role = profile?['role']?.toString() ?? 'vendor';
-        final isCorporate = role == 'corporate';
-
+        final bioContent = item['bio']?.toString() ?? '';
         final itemEmail = item['email']?.toString();
         final profileEmail = profile?['email']?.toString();
-        final email = (itemEmail != null && itemEmail.trim().isNotEmpty)
-            ? itemEmail
-            : ((profileEmail != null && profileEmail.trim().isNotEmpty)
-                ? profileEmail
-                : '${brandName.toLowerCase().replaceAll(' ', '')}@${isCorporate ? 'corporate.com' : 'velvetmaison.pk'}');
+
+        String email = '';
+        if (existingItem != null &&
+            existingItem.email.isNotEmpty &&
+            !existingItem.email.contains('No email')) {
+          email = existingItem.email;
+        } else if (itemEmail != null &&
+            itemEmail.trim().isNotEmpty &&
+            !itemEmail.contains('@velvetmaison.pk')) {
+          email = itemEmail;
+        } else if (profileEmail != null && profileEmail.trim().isNotEmpty) {
+          email = profileEmail;
+        } else {
+          final emailMatch = RegExp(
+            r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
+          ).firstMatch(bioContent);
+          if (emailMatch != null) {
+            email = emailMatch.group(0)!;
+          } else {
+            email = (itemEmail != null && itemEmail.trim().isNotEmpty)
+                ? itemEmail
+                : ((profileEmail != null && profileEmail.trim().isNotEmpty)
+                      ? profileEmail
+                      : 'No email provided');
+          }
+        }
 
         final itemPhone = item['phone']?.toString();
         final profilePhone = profile?['phone']?.toString();
-        final phone = (itemPhone != null && itemPhone.trim().isNotEmpty && itemPhone != 'Not provided')
-            ? itemPhone
-            : ((profilePhone != null && profilePhone.trim().isNotEmpty)
-                ? profilePhone
-                : 'Not provided');
+
+        String phone = '';
+        if (existingItem != null &&
+            existingItem.phone.isNotEmpty &&
+            existingItem.phone != 'Not provided') {
+          phone = existingItem.phone;
+        } else if (itemPhone != null &&
+            itemPhone.trim().isNotEmpty &&
+            itemPhone != 'Not provided') {
+          phone = itemPhone;
+        } else if (profilePhone != null && profilePhone.trim().isNotEmpty) {
+          phone = profilePhone;
+        } else {
+          final phoneMatch = RegExp(
+            r'(\+?\d[\d\s-]{7,}\d)',
+          ).firstMatch(bioContent);
+          if (phoneMatch != null) {
+            phone = phoneMatch.group(0)!;
+          } else {
+            phone = 'Not provided';
+          }
+        }
 
         String appliedDate = '';
         if (item['created_at'] != null) {
@@ -132,6 +188,9 @@ class AdminController extends GetxController {
           appliedDate = '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
         }
 
+        final role = profile?['role']?.toString() ?? 'vendor';
+        final isCorporate = role == 'corporate';
+
         final entity = KycVendorEntity(
           id: vendorId,
           brandName: brandName,
@@ -145,7 +204,8 @@ class AdminController extends GetxController {
           status: KycStatus.pending,
           cnicDocUrl: item['cnic_doc_url']?.toString() ?? '',
           secpDocUrl: item['secp_doc_url']?.toString() ?? '',
-          bio: item['bio']?.toString() ??
+          bio:
+              item['bio']?.toString() ??
               (isCorporate
                   ? 'B2B Corporate Account Application.'
                   : 'Newly registered vendor brand.'),

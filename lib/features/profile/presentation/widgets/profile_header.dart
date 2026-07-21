@@ -20,30 +20,59 @@ class ProfileHeader extends GetView<ProfileController> {
           children: [
             Obx(() {
               final imagePath = controller.profileImagePath.value;
+              final name = controller.userName.value.trim();
+              final initial = name.isNotEmpty ? name[0].toUpperCase() : 'S';
+
+              if (imagePath.isNotEmpty) {
+                return Container(
+                  width: w * 0.22,
+                  height: w * 0.22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.offWhite,
+                    border: Border.all(
+                      color: AppColors.camel.withValues(alpha: 0.5),
+                      width: 2,
+                    ),
+                    image: imagePath.startsWith('http')
+                        ? DecorationImage(
+                            image: NetworkImage(imagePath),
+                            fit: BoxFit.cover,
+                          )
+                        : DecorationImage(
+                            image: FileImage(File(imagePath)),
+                            fit: BoxFit.cover,
+                          ),
+                  ),
+                );
+              }
+
               return Container(
                 width: w * 0.22,
                 height: w * 0.22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.offWhite,
+                  color: AppColors.camel,
                   border: Border.all(
                     color: AppColors.camel.withValues(alpha: 0.5),
                     width: 2,
                   ),
-                  image: imagePath.isNotEmpty
-                      ? (imagePath.startsWith('http')
-                          ? DecorationImage(
-                              image: NetworkImage(imagePath),
-                              fit: BoxFit.cover,
-                            )
-                          : DecorationImage(
-                              image: FileImage(File(imagePath)),
-                              fit: BoxFit.cover,
-                            ))
-                      : const DecorationImage(
-                          image: NetworkImage('https://i.pravatar.cc/150?img=47'),
-                          fit: BoxFit.cover,
-                        ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.camel.withValues(alpha: 0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initial,
+                  style: TextStyle(
+                    fontSize: w * 0.09,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.white,
+                  ),
                 ),
               );
             }),
@@ -72,20 +101,27 @@ class ProfileHeader extends GetView<ProfileController> {
         Obx(
           () => Text(
             controller.userName.value,
-            style: theme.textTheme.displayMedium?.copyWith(fontSize: context.sp(28)),
+            style: theme.textTheme.displayMedium?.copyWith(
+              fontSize: context.sp(28),
+            ),
           ),
         ),
         SizedBox(height: context.hp(0.5)),
         Obx(
           () => Text(
             controller.userEmail.value,
-            style: theme.textTheme.bodyMedium?.copyWith(fontSize: context.sp(14)),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontSize: context.sp(14),
+            ),
           ),
         ),
         SizedBox(height: context.hp(1.5)),
         Obx(
           () => Container(
-            padding: EdgeInsets.symmetric(horizontal: context.wp(3.2), vertical: context.hp(0.8)),
+            padding: EdgeInsets.symmetric(
+              horizontal: context.wp(3.2),
+              vertical: context.hp(0.8),
+            ),
             decoration: BoxDecoration(
               color: AppColors.camelLight,
               borderRadius: BorderRadius.circular(20),

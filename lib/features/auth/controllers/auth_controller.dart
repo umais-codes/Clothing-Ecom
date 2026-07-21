@@ -292,8 +292,18 @@ class AuthController extends GetxController {
   String _formatCurrentDate() {
     final now = DateTime.now();
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[now.month - 1]} ${now.day}, ${now.year}';
   }
@@ -310,46 +320,65 @@ class AuthController extends GetxController {
       final ownerName = contactPersonController.text.trim().isNotEmpty
           ? contactPersonController.text.trim()
           : (brandNameController.text.trim().isNotEmpty
-              ? brandNameController.text.trim()
-              : 'Owner');
+                ? brandNameController.text.trim()
+                : 'Owner');
       final phoneNum = vendorPhoneController.text.trim().isNotEmpty
           ? vendorPhoneController.text.trim()
           : 'Not provided';
 
-      final user = await _authRepository.signUp(
-        email: vendorEmailController.text.trim(),
-        password: vendorPasswordController.text.trim(),
-        fullName: ownerName,
-        role: 'vendor',
-        phone: phoneNum,
+      final isolatedClient = SupabaseClient(
+        SupabaseService.supabaseUrl,
+        SupabaseService.supabaseAnonKey,
+        authOptions: const AuthClientOptions(
+          authFlowType: AuthFlowType.implicit,
+        ),
       );
 
+      final authRes = await isolatedClient.auth.signUp(
+        email: vendorEmailController.text.trim(),
+        password: vendorPasswordController.text.trim(),
+        data: {'full_name': ownerName, 'role': 'vendor', 'phone': phoneNum},
+      );
+
+      final user = authRes.user;
+
       if (user != null) {
-        _markOnboardingComplete(AuthRole.vendor);
         final vendorId = user.id;
 
         String cnicUrl = '';
         String secpUrl = '';
 
-        if (cnicFilePath.value.isNotEmpty && File(cnicFilePath.value).existsSync()) {
+        if (cnicFilePath.value.isNotEmpty &&
+            File(cnicFilePath.value).existsSync()) {
           try {
-            cnicUrl = await _authRepository.uploadVendorDocument(
-              userId: vendorId,
-              file: File(cnicFilePath.value),
-              docType: 'cnic',
-            );
+            final file = File(cnicFilePath.value);
+            final ext = file.path.split('.').last;
+            final path =
+                'vendor_docs/$vendorId/cnic_${DateTime.now().millisecondsSinceEpoch}.$ext';
+            await isolatedClient.storage
+                .from('rma-evidence')
+                .upload(path, file);
+            cnicUrl = isolatedClient.storage
+                .from('rma-evidence')
+                .getPublicUrl(path);
           } catch (e) {
             debugPrint('Error uploading CNIC doc: $e');
           }
         }
 
-        if (secpFilePath.value.isNotEmpty && File(secpFilePath.value).existsSync()) {
+        if (secpFilePath.value.isNotEmpty &&
+            File(secpFilePath.value).existsSync()) {
           try {
-            secpUrl = await _authRepository.uploadVendorDocument(
-              userId: vendorId,
-              file: File(secpFilePath.value),
-              docType: 'secp',
-            );
+            final file = File(secpFilePath.value);
+            final ext = file.path.split('.').last;
+            final path =
+                'vendor_docs/$vendorId/secp_${DateTime.now().millisecondsSinceEpoch}.$ext';
+            await isolatedClient.storage
+                .from('rma-evidence')
+                .upload(path, file);
+            secpUrl = isolatedClient.storage
+                .from('rma-evidence')
+                .getPublicUrl(path);
           } catch (e) {
             debugPrint('Error uploading SECP doc: $e');
           }
@@ -361,41 +390,66 @@ class AuthController extends GetxController {
             ? vendorCityController.text.trim()
             : 'Karachi';
 
-        // 1. Create the profile row first
-        await _createProfile(
-          user.id,
-          'vendor',
-          fullName: ownerName,
-          phone: phoneNum,
-          email: vendorEmailController.text.trim(),
-        );
+        // 1. Create profile row in Supabase DB via isolated client
+        try {
+          await isolatedClient.from('profiles').upsert({
+            'id': user.id,
+            'role': 'vendor',
+            'full_name': ownerName,
+            'phone': phoneNum,
+            'email': vendorEmailController.text.trim(),
+            'vendor_id': vendorId,
+          });
+        } catch (pe) {
+          debugPrint('Profile upsert with extra columns failed: $pe');
+          try {
+            await isolatedClient.from('profiles').upsert({
+              'id': user.id,
+              'role': 'vendor',
+              'full_name': ownerName,
+            });
+          } catch (pe2) {
+            debugPrint(
+              'Base profile upsert ignored (trigger created profile): $pe2',
+            );
+          }
+        }
 
-        // 2. Create the vendor row
-        await _authRepository.createVendor(
-          id: vendorId,
-          brandName: brandNameController.text.trim(),
-          ownerId: user.id,
-          kycStatus: 'pending',
-          cnicDocUrl: cnicUrl,
-          secpDocUrl: secpUrl,
-          bio: 'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
-          city: cityVal,
-          category: selectedVendorCategory.value,
-          email: vendorEmailController.text.trim(),
-          phone: phoneNum,
-          ownerName: ownerName,
-        );
+        final vendorEmailStr = vendorEmailController.text.trim();
+        final bioStr = 'Newly registered vendor brand category: ${selectedVendorCategory.value}.\nContact Email: $vendorEmailStr | Phone: $phoneNum';
 
-        // 3. Update the profile with the vendorId
-        await _createProfile(
-          user.id,
-          'vendor',
-          fullName: ownerName,
-          vendorId: vendorId,
-          phone: phoneNum,
-          email: vendorEmailController.text.trim(),
-        );
+        // 2. Create vendor row in Supabase DB via isolated client
+        try {
+          await isolatedClient.from('vendors').insert({
+            'id': vendorId,
+            'brand_name': brandNameController.text.trim(),
+            'owner_id': user.id,
+            'kyc_status': 'pending',
+            'cnic_doc_url': cnicUrl,
+            'secp_doc_url': secpUrl,
+            'bio': bioStr,
+            'city': cityVal,
+            'category': selectedVendorCategory.value,
+            'email': vendorEmailStr,
+            'phone': phoneNum,
+            'owner_name': ownerName,
+          });
+        } catch (colErr) {
+          debugPrint('Isolated vendor insert fallback: $colErr');
+          await isolatedClient.from('vendors').insert({
+            'id': vendorId,
+            'brand_name': brandNameController.text.trim(),
+            'owner_id': user.id,
+            'kyc_status': 'pending',
+            'cnic_doc_url': cnicUrl,
+            'secp_doc_url': secpUrl,
+            'bio': bioStr,
+            'city': cityVal,
+            'category': selectedVendorCategory.value,
+          });
+        }
 
+        // 3. Add to Super Admin queue if active
         try {
           final adminCtrl = Get.find<AdminController>();
           final newVendor = KycVendorEntity(
@@ -409,11 +463,14 @@ class AuthController extends GetxController {
             status: KycStatus.pending,
             cnicDocUrl: cnicUrl,
             secpDocUrl: secpUrl,
-            bio: 'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
+            bio:
+                'Newly registered vendor brand category: ${selectedVendorCategory.value}.',
             city: cityVal,
           );
           adminCtrl.kycQueue.insert(0, newVendor);
         } catch (_) {}
+
+        isolatedClient.dispose();
 
         status.value = AuthStatus.pendingApproval;
         Get.to(
@@ -487,38 +544,58 @@ class AuthController extends GetxController {
           ? corporatePhoneController.text.trim()
           : 'Not provided';
 
-      final user = await _authRepository.signUp(
+      final isolatedClient = SupabaseClient(
+        SupabaseService.supabaseUrl,
+        SupabaseService.supabaseAnonKey,
+        authOptions: const AuthClientOptions(
+          authFlowType: AuthFlowType.implicit,
+        ),
+      );
+
+      final authRes = await isolatedClient.auth.signUp(
         email: corporateEmailController.text.trim(),
         password: corporatePasswordController.text.trim(),
-        fullName: compName,
-        role: 'corporate',
-        phone: corpPhone,
+        data: {'full_name': compName, 'role': 'corporate', 'phone': corpPhone},
       );
+
+      final user = authRes.user;
       if (user != null) {
         final vendorId = user.id;
 
         String cnicUrl = '';
         String secpUrl = '';
 
-        if (cnicFilePath.value.isNotEmpty && File(cnicFilePath.value).existsSync()) {
+        if (cnicFilePath.value.isNotEmpty &&
+            File(cnicFilePath.value).existsSync()) {
           try {
-            cnicUrl = await _authRepository.uploadVendorDocument(
-              userId: vendorId,
-              file: File(cnicFilePath.value),
-              docType: 'cnic',
-            );
+            final file = File(cnicFilePath.value);
+            final ext = file.path.split('.').last;
+            final path =
+                'vendor_docs/$vendorId/cnic_${DateTime.now().millisecondsSinceEpoch}.$ext';
+            await isolatedClient.storage
+                .from('rma-evidence')
+                .upload(path, file);
+            cnicUrl = isolatedClient.storage
+                .from('rma-evidence')
+                .getPublicUrl(path);
           } catch (e) {
             debugPrint('Error uploading corporate CNIC doc: $e');
           }
         }
 
-        if (secpFilePath.value.isNotEmpty && File(secpFilePath.value).existsSync()) {
+        if (secpFilePath.value.isNotEmpty &&
+            File(secpFilePath.value).existsSync()) {
           try {
-            secpUrl = await _authRepository.uploadVendorDocument(
-              userId: vendorId,
-              file: File(secpFilePath.value),
-              docType: 'secp',
-            );
+            final file = File(secpFilePath.value);
+            final ext = file.path.split('.').last;
+            final path =
+                'vendor_docs/$vendorId/secp_${DateTime.now().millisecondsSinceEpoch}.$ext';
+            await isolatedClient.storage
+                .from('rma-evidence')
+                .upload(path, file);
+            secpUrl = isolatedClient.storage
+                .from('rma-evidence')
+                .getPublicUrl(path);
           } catch (e) {
             debugPrint('Error uploading corporate SECP doc: $e');
           }
@@ -526,37 +603,60 @@ class AuthController extends GetxController {
 
         final currentDateStr = _formatCurrentDate();
 
-        // 1. Create the profile row first
-        await _createProfile(
-          user.id,
-          'corporate',
-          fullName: compName,
-          phone: corpPhone,
-          email: corporateEmailController.text.trim(),
-        );
+        try {
+          await isolatedClient.from('profiles').upsert({
+            'id': user.id,
+            'role': 'corporate',
+            'full_name': compName,
+            'phone': corpPhone,
+            'email': corporateEmailController.text.trim(),
+            'vendor_id': vendorId,
+          });
+        } catch (pe) {
+          debugPrint('Corporate profile upsert failed: $pe');
+          try {
+            await isolatedClient.from('profiles').upsert({
+              'id': user.id,
+              'role': 'corporate',
+              'full_name': compName,
+            });
+          } catch (pe2) {
+            debugPrint(
+              'Base corporate profile upsert ignored (trigger created profile): $pe2',
+            );
+          }
+        }
 
-        // 2. Create the vendor table row representing the corporate application
-        await _authRepository.createVendor(
-          id: vendorId,
-          brandName: compName,
-          ownerId: user.id,
-          kycStatus: 'pending',
-          cnicDocUrl: cnicUrl,
-          secpDocUrl: secpUrl,
-          bio: 'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
-          city: 'Lahore',
-          category: 'Corporate',
-        );
-
-        // 3. Link the profile to the vendor/corporate application row
-        await _createProfile(
-          user.id,
-          'corporate',
-          fullName: compName,
-          vendorId: vendorId,
-          phone: corpPhone,
-          email: corporateEmailController.text.trim(),
-        );
+        try {
+          await isolatedClient.from('vendors').insert({
+            'id': vendorId,
+            'brand_name': compName,
+            'owner_id': user.id,
+            'kyc_status': 'pending',
+            'cnic_doc_url': cnicUrl,
+            'secp_doc_url': secpUrl,
+            'bio':
+                'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
+            'city': 'Lahore',
+            'category': 'Corporate',
+            'email': corporateEmailController.text.trim(),
+            'phone': corpPhone,
+            'owner_name': compName,
+          });
+        } catch (colErr) {
+          await isolatedClient.from('vendors').insert({
+            'id': vendorId,
+            'brand_name': compName,
+            'owner_id': user.id,
+            'kyc_status': 'pending',
+            'cnic_doc_url': cnicUrl,
+            'secp_doc_url': secpUrl,
+            'bio':
+                'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
+            'city': 'Lahore',
+            'category': 'Corporate',
+          });
+        }
 
         final box = Hive.box('settings');
         box.put('corporate_ntn', ntnController.text.trim());
@@ -575,11 +675,14 @@ class AuthController extends GetxController {
             status: KycStatus.pending,
             cnicDocUrl: cnicUrl,
             secpDocUrl: secpUrl,
-            bio: 'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
+            bio:
+                'Corporate buyer NTN: ${ntnController.text.trim()}, Volume: ${selectedVolume.value}.',
             city: 'Lahore',
           );
           adminCtrl.kycQueue.insert(0, newCorporate);
         } catch (_) {}
+
+        isolatedClient.dispose();
 
         status.value = AuthStatus.pendingApproval;
         Get.to(
@@ -653,7 +756,26 @@ class AuthController extends GetxController {
   }
 
   String _cleanMessage(dynamic e) {
+    if (e is AuthException) {
+      final msg = e.message.toLowerCase();
+      if (msg.contains('already registered') ||
+          msg.contains('user_already_exists') ||
+          e.code == 'user_already_exists') {
+        return 'An account with this email address already exists. Please log in or use a different email address.';
+      }
+      if (msg.contains('invalid login credentials')) {
+        return 'Invalid email or password. Please double check your credentials.';
+      }
+      if (msg.contains('password should be at least')) {
+        return 'Password must be at least 6 characters long.';
+      }
+      return e.message;
+    }
     final str = e.toString();
+    if (str.contains('user_already_exists') ||
+        str.contains('User already registered')) {
+      return 'An account with this email address already exists. Please log in or use a different email address.';
+    }
     if (str.startsWith('Exception: ')) {
       return str.substring(11);
     }

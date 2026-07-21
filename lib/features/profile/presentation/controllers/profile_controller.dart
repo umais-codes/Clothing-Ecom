@@ -147,11 +147,16 @@ class ProfileController extends GetxController {
           }
         }
 
-        // Auto-detect role from vendors table or metadata/DB role
+        // Auto-detect role cleanly without role-flicker
         final supabase = Get.find<SupabaseService>().client;
         final String metaRole =
             metadata?['role']?.toString().toLowerCase() ?? '';
         final String dbRole = data?['role']?.toString().toLowerCase() ?? '';
+        final String hiveRole =
+            (Hive.box('settings').get('lastSelectedRole') as String?)
+                    ?.toLowerCase() ??
+                '';
+        final AuthRole activeRole = _authController.selectedRole.value;
 
         Map<String, dynamic>? vendorRes;
         try {
@@ -167,17 +172,31 @@ class ProfileController extends GetxController {
         final String category =
             vendorRes?['category']?.toString().toLowerCase() ?? '';
 
-        if (metaRole == 'corporate' ||
+        if (activeRole == AuthRole.corporate ||
+            metaRole == 'corporate' ||
             dbRole == 'corporate' ||
+            hiveRole == 'corporate' ||
             category == 'corporate') {
-          _authController.selectedRole.value = AuthRole.corporate;
-        } else if (category == 'vendor' ||
+          if (_authController.selectedRole.value != AuthRole.corporate) {
+            _authController.selectedRole.value = AuthRole.corporate;
+          }
+          Hive.box('settings').put('lastSelectedRole', 'corporate');
+        } else if (activeRole == AuthRole.vendor ||
+            category == 'vendor' ||
             metaRole == 'vendor' ||
             dbRole == 'vendor' ||
+            hiveRole == 'vendor' ||
             vendorRes != null) {
-          _authController.selectedRole.value = AuthRole.vendor;
-        } else if (metaRole == 'admin' || dbRole == 'admin') {
-          _authController.selectedRole.value = AuthRole.admin;
+          if (_authController.selectedRole.value != AuthRole.vendor) {
+            _authController.selectedRole.value = AuthRole.vendor;
+          }
+          Hive.box('settings').put('lastSelectedRole', 'vendor');
+        } else if (activeRole == AuthRole.admin ||
+            metaRole == 'admin' ||
+            dbRole == 'admin') {
+          if (_authController.selectedRole.value != AuthRole.admin) {
+            _authController.selectedRole.value = AuthRole.admin;
+          }
         }
 
         // Fetch role-specific vendor / corporate data

@@ -53,7 +53,7 @@ class PdpView extends GetView<PdpController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PdpCarousel(sw: sw, imageUrl: controller.product['image']),
+          PdpCarousel(sw: sw, images: controller.productImages),
           Padding(
             padding: EdgeInsets.fromLTRB(sw * 0.04, sw * 0.015, sw * 0.04, 0),
             child: Column(

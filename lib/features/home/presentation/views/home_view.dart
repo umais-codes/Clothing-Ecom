@@ -9,32 +9,45 @@ import '../widgets/home_search_bar.dart';
 import '../widgets/category_pills.dart';
 import '../widgets/product_card.dart';
 
-class HomeView extends GetView<HomeController> {
+class HomeView extends StatelessWidget {
   const HomeView({super.key});
+
+  void _ensureDependenciesRegistered() {
+    if (!Get.isRegistered<HomeController>()) {
+      Get.put(HomeController(), permanent: true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    _ensureDependenciesRegistered();
+    final controller = Get.find<HomeController>();
     final double sw = context.screenWidth;
 
     return Scaffold(
       backgroundColor: AppColors.white,
       appBar: HomeAppBar(sw: sw),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            HomeSearchBar(sw: sw),
-            CategoryPills(sw: sw, controller: controller),
-            SizedBox(height: sw * 0.02),
-            _buildMasonryGrid(sw),
-            SizedBox(height: sw * 0.06),
-          ],
+      body: RefreshIndicator(
+        onRefresh: controller.loadTrendingProducts,
+        color: AppColors.camel,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              HomeSearchBar(sw: sw),
+              CategoryPills(sw: sw, controller: controller),
+              SizedBox(height: sw * 0.02),
+              _buildMasonryGrid(controller, sw),
+              SizedBox(height: sw * 0.06),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildMasonryGrid(double sw) {
+  Widget _buildMasonryGrid(HomeController controller, double sw) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: sw * 0.04),
       child: Obx(() {

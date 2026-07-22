@@ -1,5 +1,7 @@
 import '../../domain/repositories/discovery_repository.dart';
 import '../../../wishlist/domain/models/product_model.dart';
+import '../../../vendor_inventory/data/models/vendor_product_model.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
@@ -10,27 +12,73 @@ class DiscoveryRepositoryImpl implements DiscoveryRepository {
 
   @override
   Future<List<Product>> getProducts({required bool isB2B}) async {
+    final List<Product> publishedProducts = [];
+
+    // 1. Fetch live products from Supabase
     try {
-      final response = await _supabase
-          .from('products')
-          .select()
-          .eq('is_b2b', isB2B);
+      final response = await _supabase.from('products').select();
 
-      final List<Product> list = (response as List).map((map) {
-        return Product.fromMap(map);
-      }).toList();
-
-      // Fallback to static mock products if database table is empty (brand new setup)
-      if (list.isEmpty) {
-        return isB2B ? _mockB2BProducts : _mockB2CProducts;
+      if (response.isNotEmpty) {
+        for (var map in response) {
+          final bool pIsB2B = map['is_b2b'] == true ||
+              map['is_b2b'] == 1 ||
+              map['is_b2b'] == 'true' ||
+              map['isB2B'] == true;
+          if (pIsB2B == isB2B) {
+            publishedProducts.add(Product.fromMap(map));
+          }
+        }
       }
-      return list;
     } catch (e) {
       debugPrint('Error fetching products from Supabase: $e');
     }
 
-    // Fallback to static mock products on error (offline mode)
-    return isB2B ? _mockB2BProducts : _mockB2CProducts;
+    // 2. Fetch local vendor products from Hive box as fallback/merge
+    try {
+      if (!Hive.isBoxOpen('vendorProductsBox')) {
+        await Hive.openBox<VendorProduct>('vendorProductsBox');
+      }
+      final box = Hive.box<VendorProduct>('vendorProductsBox');
+      for (var vp in box.values) {
+        if (vp.isB2B == isB2B && !vp.isDraft) {
+          final alreadyAdded = publishedProducts.any((p) => p.id == vp.id);
+          if (!alreadyAdded) {
+            publishedProducts.add(
+              Product(
+                id: vp.id,
+                name: vp.title,
+                vendorName: 'Boutique Apparel',
+                price: vp.basePrice,
+                imageUrl: vp.imageUrls.isNotEmpty
+                    ? vp.imageUrls.first
+                    : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+                inStock: vp.variants.isEmpty
+                    ? true
+                    : vp.variants.any((v) => v.stockQuantity > 0),
+                description: vp.description,
+                isB2B: vp.isB2B,
+                category: vp.category,
+                sizes: vp.variants.map((v) => v.size).toSet().toList(),
+                colors: vp.variants.map((v) => v.color).toSet().toList(),
+                moq: vp.moq,
+                sourcingType: vp.sourcingType,
+                location: 'Pakistan',
+                isNew: true,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading local vendor products: $e');
+    }
+
+    // 3. Combine published vendor products (at the top) with mock catalog items
+    final mockList = isB2B ? _mockB2BProducts : _mockB2CProducts;
+    final Set<String> existingIds = publishedProducts.map((p) => p.id).toSet();
+    final remainingMocks = mockList.where((p) => !existingIds.contains(p.id)).toList();
+
+    return [...publishedProducts, ...remainingMocks];
   }
 
   // --- Mock B2C Shopper Products ---

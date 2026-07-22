@@ -24,22 +24,25 @@ class ProductCard extends StatelessWidget {
         crossAxisAlignment: .start,
         children: [
           ClipRRect(
-            borderRadius: .circular(sw * 0.04),
+            borderRadius: BorderRadius.circular(sw * 0.04),
             child: Stack(
               children: [
                 AspectRatio(
                   aspectRatio: index % 2 == 0 ? 0.75 : 1.1,
                   child: CustomNetworkImage(
-                    imageUrl: product['image'],
-                    fit: .cover,
+                    imageUrl: (product['image'] != null &&
+                            product['image'].toString().isNotEmpty)
+                        ? product['image'].toString()
+                        : (product['imageUrl'] ?? product['image_url'] ?? ''),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                if (product['isNew'])
+                if (product['isNew'] == true)
                   Positioned(
                     top: sw * 0.015,
                     left: sw * 0.015,
                     child: Container(
-                      padding: .symmetric(
+                      padding: EdgeInsets.symmetric(
                         horizontal: sw * 0.015,
                         vertical: sw * 0.005,
                       ),
@@ -69,7 +72,7 @@ class ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name'],
+                  product['name'] ?? product['title'] ?? 'Apparel Item',
                   style: Get.textTheme.bodyMedium?.copyWith(
                     fontSize: sw * 0.032,
                     fontWeight: FontWeight.w500,

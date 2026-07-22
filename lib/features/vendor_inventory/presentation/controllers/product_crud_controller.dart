@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/utils/constants.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/features/discovery/presentation/controllers/filter_controller.dart';
+import 'package:ecom_app/features/home/presentation/controllers/home_controller.dart';
 import '../../domain/repositories/inventory_repository.dart';
 import '../../data/models/vendor_product_model.dart';
 import '../../data/models/product_variant_model.dart';
@@ -17,6 +19,22 @@ class ProductCrudController extends GetxController {
   final RxList<VendorProduct> products = <VendorProduct>[].obs;
   final RxBool isLoading = false.obs;
 
+  // Edit Mode & Search/Filter State
+  final RxnString editingProductId = RxnString();
+  final RxString searchQuery = ''.obs;
+  final RxString selectedCategoryFilter = 'All'.obs;
+
+  List<VendorProduct> get filteredProducts {
+    return products.where((product) {
+      final matchesSearch = searchQuery.value.isEmpty ||
+          product.title.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          product.description.toLowerCase().contains(searchQuery.value.toLowerCase());
+      final matchesCategory = selectedCategoryFilter.value == 'All' ||
+          product.category.toLowerCase() == selectedCategoryFilter.value.toLowerCase();
+      return matchesSearch && matchesCategory;
+    }).toList();
+  }
+
   // Form State
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
@@ -27,6 +45,70 @@ class ProductCrudController extends GetxController {
 
   final RxList<ProductVariant> variants = <ProductVariant>[].obs;
   final RxList<String> imageUrls = <String>[].obs;
+
+  // Form Size & Color Chips State
+  final RxList<String> formSelectedColors = <String>[].obs;
+  final RxList<String> formSelectedSizes = <String>[].obs;
+
+  void toggleFormColor(String color) {
+    if (formSelectedColors.contains(color)) {
+      formSelectedColors.remove(color);
+    } else {
+      formSelectedColors.add(color);
+    }
+    generateVariantsFromSelection();
+  }
+
+  void addCustomColor(String color) {
+    final trimmed = color.trim();
+    if (trimmed.isNotEmpty && !formSelectedColors.contains(trimmed)) {
+      formSelectedColors.add(trimmed);
+      generateVariantsFromSelection();
+    }
+  }
+
+  void toggleFormSize(String size) {
+    if (formSelectedSizes.contains(size)) {
+      formSelectedSizes.remove(size);
+    } else {
+      formSelectedSizes.add(size);
+    }
+    generateVariantsFromSelection();
+  }
+
+  void addCustomSize(String size) {
+    final trimmed = size.trim().toUpperCase();
+    if (trimmed.isNotEmpty && !formSelectedSizes.contains(trimmed)) {
+      formSelectedSizes.add(trimmed);
+      generateVariantsFromSelection();
+    }
+  }
+
+  void generateVariantsFromSelection({int defaultStock = 50}) {
+    if (formSelectedColors.isEmpty || formSelectedSizes.isEmpty) return;
+
+    final titlePrefix = titleController.text.replaceAll(' ', '').toUpperCase();
+    final prefix = titlePrefix.isNotEmpty ? titlePrefix : 'PROD';
+
+    for (var c in formSelectedColors) {
+      for (var s in formSelectedSizes) {
+        final exists = variants.any(
+            (v) => v.color.toLowerCase() == c.toLowerCase() && v.size.toLowerCase() == s.toLowerCase());
+        if (!exists) {
+          variants.add(
+            ProductVariant(
+              id: const Uuid().v4(),
+              color: c,
+              size: s,
+              stockQuantity: defaultStock,
+              sku: '$prefix-$c-$s',
+            ),
+          );
+        }
+      }
+    }
+    saveDraft();
+  }
 
   @override
   void onInit() {
@@ -39,8 +121,6 @@ class ProductCrudController extends GetxController {
     _loadProducts();
     _loadDraft();
   }
-
-
 
   Future<void> refreshProducts() async {
     await _loadProducts();
@@ -58,7 +138,7 @@ class ProductCrudController extends GetxController {
 
   Future<void> _loadDraft() async {
     final draft = await _repository.getDraft();
-    if (draft != null) {
+    if (draft != null && editingProductId.value == null) {
       if (titleController.text.isEmpty) titleController.text = draft.title;
       if (descriptionController.text.isEmpty) {
         descriptionController.text = draft.description;
@@ -76,10 +156,35 @@ class ProductCrudController extends GetxController {
       moqController.text = draft.moq.toString();
       variants.assignAll(draft.variants);
       imageUrls.assignAll(draft.imageUrls);
+      
+      final colors = draft.variants.map((v) => v.color).where((c) => c.isNotEmpty).toSet().toList();
+      final sizes = draft.variants.map((v) => v.size).where((s) => s.isNotEmpty).toSet().toList();
+      if (colors.isNotEmpty) formSelectedColors.assignAll(colors);
+      if (sizes.isNotEmpty) formSelectedSizes.assignAll(sizes);
     }
   }
 
+  void editProduct(VendorProduct product) {
+    editingProductId.value = product.id;
+    titleController.text = product.title;
+    descriptionController.text = product.description;
+    selectedCategory.value = AppConstants.categories.contains(product.category)
+        ? product.category
+        : AppConstants.categories.first;
+    basePriceController.text = product.basePrice.toString();
+    isB2B.value = product.isB2B;
+    moqController.text = product.moq.toString();
+    variants.assignAll(product.variants);
+    imageUrls.assignAll(product.imageUrls);
+
+    final colors = product.variants.map((v) => v.color).where((c) => c.isNotEmpty).toSet().toList();
+    final sizes = product.variants.map((v) => v.size).where((s) => s.isNotEmpty).toSet().toList();
+    formSelectedColors.assignAll(colors);
+    formSelectedSizes.assignAll(sizes);
+  }
+
   void saveDraft() {
+    if (editingProductId.value != null) return;
     final draft = VendorProduct(
       id: 'draft',
       title: titleController.text,
@@ -178,7 +283,7 @@ class ProductCrudController extends GetxController {
   }
 
   Future<bool> saveProduct() async {
-    if (titleController.text.isEmpty || basePriceController.text.isEmpty) {
+    if (titleController.text.trim().isEmpty || basePriceController.text.trim().isEmpty) {
       Get.snackbar('Error', 'Title and Base Price are required');
       return false;
     }
@@ -191,10 +296,13 @@ class ProductCrudController extends GetxController {
 
     isLoading.value = true;
     try {
+      final isEditing = editingProductId.value != null;
+      final productId = editingProductId.value ?? const Uuid().v4();
+
       final product = VendorProduct(
-        id: const Uuid().v4(),
-        title: titleController.text,
-        description: descriptionController.text,
+        id: productId,
+        title: titleController.text.trim(),
+        description: descriptionController.text.trim(),
         category: selectedCategory.value,
         basePrice: price,
         variants: variants.toList(),
@@ -206,25 +314,58 @@ class ProductCrudController extends GetxController {
       );
 
       await _repository.saveProduct(product);
-      products.add(product);
 
-      // Clear form and draft
+      if (isEditing) {
+        final index = products.indexWhere((p) => p.id == productId);
+        if (index != -1) {
+          products[index] = product;
+        } else {
+          products.add(product);
+        }
+      } else {
+        products.add(product);
+      }
+
       await clearForm();
+      _notifyShopperViews();
 
       Get.back();
-      Get.snackbar('Success', 'Product saved successfully');
+      Get.snackbar('Success', isEditing ? 'Product updated successfully' : 'Product published successfully');
       return true;
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to save product: $e');
+      return false;
     } finally {
       isLoading.value = false;
     }
   }
 
   Future<void> deleteProduct(String id) async {
-    await _repository.deleteProduct(id);
-    products.removeWhere((p) => p.id == id);
+    try {
+      await _repository.deleteProduct(id);
+      products.removeWhere((p) => p.id == id);
+      _notifyShopperViews();
+      Get.snackbar('Success', 'Product deleted successfully');
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to delete product: $e');
+    }
+  }
+
+  void _notifyShopperViews() {
+    try {
+      if (Get.isRegistered<FilterController>()) {
+        Get.find<FilterController>().loadProducts();
+      }
+    } catch (_) {}
+    try {
+      if (Get.isRegistered<HomeController>()) {
+        Get.find<HomeController>().loadTrendingProducts();
+      }
+    } catch (_) {}
   }
 
   Future<void> clearForm() async {
+    editingProductId.value = null;
     titleController.clear();
     descriptionController.clear();
     selectedCategory.value = AppConstants.categories.first;
@@ -236,3 +377,4 @@ class ProductCrudController extends GetxController {
     await _repository.clearDraft();
   }
 }
+

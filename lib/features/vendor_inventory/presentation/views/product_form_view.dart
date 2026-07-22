@@ -19,73 +19,75 @@ class ProductFormView extends StatelessWidget {
     final controller = Get.find<ProductCrudController>();
     final double sw = context.screenWidth;
 
-    return Scaffold(
-      backgroundColor: AppColors.offWhite,
-      appBar: CustomAppBar(
-        title: 'Product Details',
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        actions: [
-          CustomButton(
-            text: 'Save',
-            onPressed: () {
-              controller.saveDraft();
-              Get.back();
-              Get.snackbar('Draft Saved', 'Your progress has been saved.');
-            },
-            variant: ButtonVariant.ghost,
-            textColor: AppColors.camel,
-            height: 35,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ],
-      ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.camel),
-          );
-        }
-        return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: sw * 0.04,
-            vertical: sw * 0.01,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle('Basic Information', sw),
-              _buildBasicInfoCard(controller, sw),
-              SizedBox(height: sw * 0.012),
+    return Obx(() {
+      final isEditing = controller.editingProductId.value != null;
 
-              _buildSectionTitle('Media Upload', sw),
-              _buildMediaCard(controller, sw),
-              SizedBox(height: sw * 0.012),
-
-              _buildSectionTitle('Apparel Matrix Variants', sw),
-              VariantMatrixCard(sw: sw),
-              SizedBox(height: sw * 0.012),
-
-              _buildSectionTitle('Pricing', sw),
-              _buildPricingCard(controller, sw),
-              SizedBox(height: sw * 0.012),
-
-              _buildSectionTitle('Wholesale Options (B2B)', sw),
-              _buildB2BConfigCard(controller, sw),
-              SizedBox(height: sw * 0.012),
-
+      return Scaffold(
+        backgroundColor: AppColors.offWhite,
+        appBar: CustomAppBar(
+          title: isEditing ? 'Edit Product' : 'Add New Product',
+          backgroundColor: AppColors.white,
+          elevation: 0,
+          actions: [
+            if (!isEditing)
               CustomButton(
-                text: 'Publish Product',
-                onPressed: controller.saveProduct,
-                height: sw * 0.12,
+                text: 'Save',
+                onPressed: () {
+                  controller.saveDraft();
+                  Get.back();
+                  Get.snackbar('Draft Saved', 'Your progress has been saved.');
+                },
+                variant: ButtonVariant.ghost,
+                textColor: AppColors.camel,
+                height: 35,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
-              SizedBox(height: sw * 0.1),
-            ],
-          ),
-        );
-      }),
-    );
+          ],
+        ),
+        body: controller.isLoading.value
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.camel),
+              )
+            : SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: sw * 0.04,
+                  vertical: sw * 0.01,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle('Basic Information', sw),
+                    _buildBasicInfoCard(controller, sw),
+                    SizedBox(height: sw * 0.012),
+
+                    _buildSectionTitle('Media Upload', sw),
+                    _buildMediaCard(controller, sw),
+                    SizedBox(height: sw * 0.012),
+
+                    _buildSectionTitle('Apparel Matrix Variants', sw),
+                    VariantMatrixCard(sw: sw),
+                    SizedBox(height: sw * 0.012),
+
+                    _buildSectionTitle('Pricing', sw),
+                    _buildPricingCard(controller, sw),
+                    SizedBox(height: sw * 0.012),
+
+                    _buildSectionTitle('Wholesale Options (B2B)', sw),
+                    _buildB2BConfigCard(controller, sw),
+                    SizedBox(height: sw * 0.012),
+
+                    CustomButton(
+                      text: isEditing ? 'Update Product' : 'Publish Product',
+                      onPressed: controller.saveProduct,
+                      height: sw * 0.12,
+                    ),
+                    SizedBox(height: sw * 0.1),
+                  ],
+                ),
+              ),
+      );
+    });
   }
 
   Widget _buildSectionTitle(String title, double sw) {

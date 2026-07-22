@@ -28,6 +28,10 @@ class PdpController extends GetxController {
     } else {
       product = {};
     }
+
+    if (sizes.isNotEmpty) selectedSize.value = sizes.first;
+    if (colors.isNotEmpty) selectedColor.value = colors.first;
+
     fetchReviews();
   }
 
@@ -46,8 +50,9 @@ class PdpController extends GetxController {
     } catch (e) {
       debugPrint('Error fetching reviews from Supabase: $e');
     } finally {
-      // Fallback/enrich with mock reviews to ensure a beautiful storefront showcase
-      if (reviews.isEmpty) {
+      // Fallback/enrich with mock reviews ONLY for sample catalog items (b2c_1..b2c_10)
+      if (reviews.isEmpty &&
+          (product['id']?.toString().startsWith('b2c_') ?? false)) {
         reviews.assignAll(_getMockReviewsForProduct(product['id'] ?? ''));
       }
       isLoadingReviews.value = false;
@@ -55,7 +60,7 @@ class PdpController extends GetxController {
   }
 
   double get averageRating {
-    if (reviews.isEmpty) return 4.8; // Default fallback rating
+    if (reviews.isEmpty) return 0.0;
     double sum = 0;
     for (var r in reviews) {
       final val = r['rating'];
@@ -67,7 +72,7 @@ class PdpController extends GetxController {
   }
 
   String get fitSummary {
-    if (reviews.isEmpty) return 'True to Size';
+    if (reviews.isEmpty) return 'No Fit Data';
     int trueToSize = 0;
     int runsSmall = 0;
     int runsLarge = 0;
@@ -85,7 +90,7 @@ class PdpController extends GetxController {
       }
     }
     final total = reviews.length;
-    if (total == 0) return 'True to Size';
+    if (total == 0) return 'No Fit Data';
 
     final pctTrue = ((trueToSize / total) * 100).round();
     final pctSmall = ((runsSmall / total) * 100).round();
@@ -101,8 +106,8 @@ class PdpController extends GetxController {
   }
 
   List<Map<String, dynamic>> _getMockReviewsForProduct(String id) {
-    if (product['isB2B'] == true) {
-      return []; // No reviews for wholesale B2B items
+    if (product['isB2B'] == true || !id.startsWith('b2c_')) {
+      return []; // No fake reviews for vendor products or B2B items
     }
 
     final List<Map<String, dynamic>> baseReviews = [
@@ -191,9 +196,69 @@ class PdpController extends GetxController {
   final RxString recommendedSize = ''.obs;
   final RxBool isPredicting = false.obs;
   final RxString predictionDetails = ''.obs;
+  List<String> get productImages {
+    final List<String> imgs = [];
+    if (product['images'] is List && (product['images'] as List).isNotEmpty) {
+      for (var img in (product['images'] as List)) {
+        if (img != null && img.toString().isNotEmpty) {
+          imgs.add(img.toString());
+        }
+      }
+    }
+    if (imgs.isEmpty &&
+        product['image_url'] != null &&
+        product['image_url'].toString().isNotEmpty) {
+      imgs.add(product['image_url'].toString());
+    }
+    if (imgs.isEmpty &&
+        product['image'] != null &&
+        product['image'].toString().isNotEmpty) {
+      imgs.add(product['image'].toString());
+    }
+    if (imgs.isEmpty &&
+        product['imageUrl'] != null &&
+        product['imageUrl'].toString().isNotEmpty) {
+      imgs.add(product['imageUrl'].toString());
+    }
+    if (imgs.isEmpty) {
+      imgs.add(
+        'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+      );
+    }
+    return imgs;
+  }
 
-  final List<String> sizes = ['S', 'M', 'L', 'XL'];
-  final List<String> colors = ['Sand', 'Charcoal', 'Ivory'];
+  List<String> get sizes {
+    final List<String> sList = List<String>.from(product['sizes'] ?? []);
+    if (sList.isNotEmpty) return sList;
+
+    final rawVariants = product['variants_json'];
+    if (rawVariants is List && rawVariants.isNotEmpty) {
+      final set = rawVariants
+          .map((v) => v['size']?.toString() ?? '')
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
+      if (set.isNotEmpty) return set;
+    }
+    return ['S', 'M', 'L', 'XL'];
+  }
+
+  List<String> get colors {
+    final List<String> cList = List<String>.from(product['colors'] ?? []);
+    if (cList.isNotEmpty) return cList;
+
+    final rawVariants = product['variants_json'];
+    if (rawVariants is List && rawVariants.isNotEmpty) {
+      final set = rawVariants
+          .map((v) => v['color']?.toString() ?? '')
+          .where((c) => c.isNotEmpty)
+          .toSet()
+          .toList();
+      if (set.isNotEmpty) return set;
+    }
+    return ['Camel', 'Beige', 'White', 'Black'];
+  }
 
   String get description =>
       product['description'] ??

@@ -41,23 +41,25 @@ class SplashController extends GetxController {
         }
 
         if (isSessionValid) {
-          String? roleStr;
-          try {
-            final data = await authRepo.getProfile(user.id);
-            if (data != null) {
-              roleStr = data['role']?.toString();
+          // 1. Respect user's explicit perspective choice saved in Hive settings
+          String? roleStr = box.get('lastSelectedRole')?.toString();
+
+          // 2. Fallback to online profile role from database
+          if (roleStr == null || roleStr.isEmpty) {
+            try {
+              final data = await authRepo.getProfile(user.id);
+              if (data != null) {
+                roleStr = data['role']?.toString();
+              }
+            } catch (e) {
+              Get.printInfo(
+                info: 'Failed to fetch online profile (offline?): $e',
+              );
             }
-          } catch (e) {
-            Get.printInfo(
-              info: 'Failed to fetch online profile (offline?): $e',
-            );
           }
 
-          // Fallback 1: Read from Auth user metadata
+          // 3. Fallback to Auth user metadata
           roleStr ??= user.userMetadata?['role']?.toString();
-
-          // Fallback 2: Read from Hive settings
-          roleStr ??= box.get('lastSelectedRole')?.toString();
 
           if (roleStr != null && roleStr.isNotEmpty) {
             final authCtrl = Get.find<AuthController>();

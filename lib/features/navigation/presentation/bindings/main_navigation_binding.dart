@@ -15,20 +15,21 @@ import '../../../../features/discovery/presentation/controllers/discovery_contro
 class MainNavigationBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<MainNavigationController>(() => MainNavigationController());
-    Get.lazyPut<HomeController>(() => HomeController());
-    Get.lazyPut<VendorDashboardController>(() => VendorDashboardController());
-    Get.lazyPut<B2BPortalController>(() => B2BPortalController());
-    Get.lazyPut<ProfileController>(() => ProfileController());
-    Get.lazyPut<VendorOrderController>(() => VendorOrderController());
+    Get.lazyPut<MainNavigationController>(() => MainNavigationController(), fenix: true);
+    Get.lazyPut<HomeController>(() => HomeController(), fenix: true);
+    Get.lazyPut<VendorDashboardController>(() => VendorDashboardController(), fenix: true);
+    Get.lazyPut<B2BPortalController>(() => B2BPortalController(), fenix: true);
+    Get.lazyPut<ProfileController>(() => ProfileController(), fenix: true);
+    Get.lazyPut<VendorOrderController>(() => VendorOrderController(), fenix: true);
 
-    Get.lazyPut<InventoryRepository>(() => InventoryRepositoryImpl()..init());
-    Get.lazyPut<ProductCrudController>(() => ProductCrudController(Get.find()));
+    Get.lazyPut<InventoryRepository>(() => InventoryRepositoryImpl()..init(), fenix: true);
+    Get.lazyPut<ProductCrudController>(() => ProductCrudController(Get.find()), fenix: true);
 
     // Discovery Dependencies
     Get.lazyPut<FilterController>(
       () => FilterController(Get.find<DiscoveryRepository>()),
+      fenix: true,
     );
-    Get.lazyPut<DiscoveryController>(() => DiscoveryController());
+    Get.lazyPut<DiscoveryController>(() => DiscoveryController(), fenix: true);
   }
 }

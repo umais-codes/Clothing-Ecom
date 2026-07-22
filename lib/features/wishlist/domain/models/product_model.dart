@@ -58,18 +58,55 @@ class Product {
         isB2B = isB2B ?? false;
 
   factory Product.fromMap(Map<String, dynamic> map) {
+    String imgUrl = '';
+    if (map['image_url'] != null && map['image_url'].toString().isNotEmpty) {
+      imgUrl = map['image_url'].toString();
+    } else if (map['images'] is List && (map['images'] as List).isNotEmpty) {
+      imgUrl = (map['images'] as List).first.toString();
+    } else if (map['image'] != null && map['image'].toString().isNotEmpty) {
+      imgUrl = map['image'].toString();
+    } else if (map['imageUrl'] != null && map['imageUrl'].toString().isNotEmpty) {
+      imgUrl = map['imageUrl'].toString();
+    } else {
+      imgUrl = 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop';
+    }
+
+    final bool isB2bFlag = map['is_b2b'] == true ||
+        map['is_b2b'] == 1 ||
+        map['is_b2b'] == 'true' ||
+        map['isB2B'] == true;
+
+    List<String> sizeList = List<String>.from(map['sizes'] ?? []);
+    List<String> colorList = List<String>.from(map['colors'] ?? []);
+
+    if (sizeList.isEmpty && map['variants_json'] is List) {
+      sizeList = List<Map<String, dynamic>>.from(map['variants_json'])
+          .map((v) => v['size']?.toString() ?? '')
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
+    }
+
+    if (colorList.isEmpty && map['variants_json'] is List) {
+      colorList = List<Map<String, dynamic>>.from(map['variants_json'])
+          .map((v) => v['color']?.toString() ?? '')
+          .where((c) => c.isNotEmpty)
+          .toSet()
+          .toList();
+    }
+
     return Product(
       id: map['id']?.toString() ?? '',
-      name: map['name'] ?? '',
+      name: map['name'] ?? map['title'] ?? 'Apparel Product',
       vendorName: map['vendor_name'] ?? map['vendor'] ?? map['vendorName'] ?? 'Boutique Apparel',
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
-      imageUrl: map['image_url'] ?? map['image'] ?? map['imageUrl'] ?? '',
+      imageUrl: imgUrl,
       inStock: map['in_stock'] ?? map['inStock'] ?? true,
       description: map['description'] ?? '',
-      isB2B: map['is_b2b'] ?? map['isB2B'] ?? false,
-      category: map['category'] ?? '',
-      sizes: List<String>.from(map['sizes'] ?? []),
-      colors: List<String>.from(map['colors'] ?? []),
+      isB2B: isB2bFlag,
+      category: map['category'] ?? "Men's",
+      sizes: sizeList,
+      colors: colorList,
       moq: (map['moq'] as num?)?.toInt() ?? 1,
       sourcingType: map['sourcing_type'] ?? map['sourcingType'] ?? 'Ready to Ship',
       location: map['location'] ?? 'Pakistan',

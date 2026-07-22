@@ -1,3 +1,4 @@
+import 'package:ecom_app/app/utils/constants.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/features/vendor_inventory/presentation/views/product_form_view.dart';
 import 'package:flutter/material.dart';
@@ -38,11 +39,11 @@ class InventoryView extends StatelessWidget {
                     child: CircularProgressIndicator(color: AppColors.camel),
                   );
                 }
-                if (controller.products.isEmpty) {
+                if (controller.filteredProducts.isEmpty) {
                   return SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: SizedBox(
-                      height: context.screenHeight * 0.6,
+                      height: context.screenHeight * 0.5,
                       child: _buildEmptyState(sw, controller),
                     ),
                   );
@@ -62,7 +63,7 @@ class InventoryView extends StatelessWidget {
     ProductCrudController controller,
   ) {
     return Container(
-      padding: .symmetric(horizontal: sw * 0.04, vertical: sw * 0.01),
+      padding: EdgeInsets.symmetric(horizontal: sw * 0.04, vertical: sw * 0.02),
       color: AppColors.white,
       child: Column(
         children: [
@@ -72,7 +73,7 @@ class InventoryView extends StatelessWidget {
                 child: CustomButton(
                   text: 'Bulk Upload',
                   icon: Icons.upload_file,
-                  variant: .outlined,
+                  variant: ButtonVariant.outlined,
                   height: sw * 0.11,
                   onPressed: () {
                     Get.bottomSheet(
@@ -96,6 +97,50 @@ class InventoryView extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          SizedBox(height: sw * 0.025),
+          TextField(
+            onChanged: (val) => controller.searchQuery.value = val,
+            decoration: InputDecoration(
+              hintText: 'Search products...',
+              prefixIcon: const Icon(Icons.search, color: AppColors.grey),
+              filled: true,
+              fillColor: AppColors.offWhite,
+              contentPadding: EdgeInsets.symmetric(horizontal: sw * 0.03, vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(sw * 0.02),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          SizedBox(height: sw * 0.02),
+          SizedBox(
+            height: sw * 0.08,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: ['All', ...AppConstants.categories].map((cat) {
+                return Obx(() {
+                  final isSelected = controller.selectedCategoryFilter.value == cat;
+                  return Padding(
+                    padding: EdgeInsets.only(right: sw * 0.02),
+                    child: ChoiceChip(
+                      label: Text(cat),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) controller.selectedCategoryFilter.value = cat;
+                      },
+                      selectedColor: AppColors.camel,
+                      backgroundColor: AppColors.offWhite,
+                      labelStyle: GoogleFonts.outfit(
+                        color: isSelected ? AppColors.white : AppColors.charcoal,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        fontSize: sw * 0.03,
+                      ),
+                    ),
+                  );
+                });
+              }).toList(),
+            ),
           ),
         ],
       ),
@@ -129,15 +174,15 @@ class InventoryView extends StatelessWidget {
   Widget _buildProductList(ProductCrudController controller, double sw) {
     return ListView.separated(
       padding: EdgeInsets.symmetric(
-        horizontal: sw * 0.015,
-        vertical: sw * 0.0075,
+        horizontal: sw * 0.03,
+        vertical: sw * 0.02,
       ),
-      itemCount: controller.products.length,
-      separatorBuilder: (context, index) => SizedBox(height: sw * 0.01),
+      itemCount: controller.filteredProducts.length,
+      separatorBuilder: (context, index) => SizedBox(height: sw * 0.02),
       itemBuilder: (context, index) {
-        final product = controller.products[index];
+        final product = controller.filteredProducts[index];
         return Container(
-          padding: EdgeInsets.all(sw * 0.015),
+          padding: EdgeInsets.all(sw * 0.025),
           decoration: BoxDecoration(
             color: AppColors.white,
             borderRadius: BorderRadius.circular(sw * 0.03),
@@ -152,8 +197,8 @@ class InventoryView extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: sw * 0.12,
-                height: sw * 0.12,
+                width: sw * 0.14,
+                height: sw * 0.14,
                 decoration: BoxDecoration(
                   color: AppColors.offWhite,
                   borderRadius: BorderRadius.circular(sw * 0.02),
@@ -168,7 +213,7 @@ class InventoryView extends StatelessWidget {
                     ? Icon(Icons.image_not_supported, color: AppColors.grey)
                     : null,
               ),
-              SizedBox(width: sw * 0.025),
+              SizedBox(width: sw * 0.03),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,16 +222,16 @@ class InventoryView extends StatelessWidget {
                       product.title,
                       style: GoogleFonts.outfit(
                         fontWeight: FontWeight.w600,
-                        fontSize: sw * 0.035,
+                        fontSize: sw * 0.038,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: sw * 0.005),
                     Text(
-                      '\$${product.basePrice.toStringAsFixed(2)}',
+                      '\$${product.basePrice.toStringAsFixed(2)} • ${product.category}',
                       style: GoogleFonts.outfit(
-                        color: AppColors.charcoal,
+                        color: AppColors.grey,
                         fontWeight: FontWeight.w500,
                         fontSize: sw * 0.032,
                       ),
@@ -195,15 +240,9 @@ class InventoryView extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.edit, color: AppColors.camel, size: sw * 0.05),
+                icon: Icon(Icons.edit, color: AppColors.camel, size: sw * 0.055),
                 onPressed: () {
-                  controller.titleController.text = product.title;
-                  controller.descriptionController.text = product.description;
-                  controller.selectedCategory.value = product.category;
-                  controller.basePriceController.text = product.basePrice
-                      .toString();
-                  controller.variants.assignAll(product.variants);
-                  controller.imageUrls.assignAll(product.imageUrls);
+                  controller.editProduct(product);
                   Get.to(() => const ProductFormView());
                 },
               ),
@@ -211,7 +250,7 @@ class InventoryView extends StatelessWidget {
                 icon: Icon(
                   Icons.delete_forever_rounded,
                   color: AppColors.error,
-                  size: sw * 0.05,
+                  size: sw * 0.055,
                 ),
                 onPressed: () {
                   Get.dialog(

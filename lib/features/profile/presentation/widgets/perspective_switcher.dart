@@ -196,13 +196,21 @@ class PerspectiveSwitcher extends StatelessWidget {
 
         if (!context.mounted) return;
 
-        final roleStr = profile?['role']?.toString() ?? 'vendor';
-        final kycStatus =
+        final String roleStr =
+            profile?['role']?.toString().toLowerCase() ?? '';
+        final String vendorCategory =
+            res['category']?.toString().toLowerCase() ?? '';
+        final String kycStatus =
             res['kyc_status']?.toString().toLowerCase() ?? 'pending';
 
-        final isCorrectRole =
-            (targetRole == AuthRole.vendor && roleStr == 'vendor') ||
-            (targetRole == AuthRole.corporate && roleStr == 'corporate');
+        final bool isVendorMatch = targetRole == AuthRole.vendor &&
+            (roleStr == 'vendor' ||
+                (vendorCategory.isNotEmpty && vendorCategory != 'corporate') ||
+                vendorCategory.isEmpty);
+        final bool isCorporateMatch = targetRole == AuthRole.corporate &&
+            (roleStr == 'corporate' || vendorCategory == 'corporate');
+
+        final isCorrectRole = isVendorMatch || isCorporateMatch;
 
         if (!isCorrectRole) {
           _showPermissionRequiredDialog(context, authController, targetRole);

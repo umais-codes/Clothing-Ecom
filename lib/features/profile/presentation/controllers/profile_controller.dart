@@ -172,31 +172,32 @@ class ProfileController extends GetxController {
         final String category =
             vendorRes?['category']?.toString().toLowerCase() ?? '';
 
-        if (activeRole == AuthRole.corporate ||
-            metaRole == 'corporate' ||
-            dbRole == 'corporate' ||
-            hiveRole == 'corporate' ||
-            category == 'corporate') {
-          if (_authController.selectedRole.value != AuthRole.corporate) {
-            _authController.selectedRole.value = AuthRole.corporate;
+        // Honor active perspective if explicitly set, otherwise detect based on account
+        AuthRole resolvedRole = activeRole;
+        if (activeRole == AuthRole.vendor) {
+          resolvedRole = AuthRole.vendor;
+        } else if (activeRole == AuthRole.corporate) {
+          resolvedRole = AuthRole.corporate;
+        } else if (activeRole == AuthRole.admin) {
+          resolvedRole = AuthRole.admin;
+        } else {
+          // If shopper or initial, detect partner account if available
+          if (category == 'corporate' || dbRole == 'corporate' || metaRole == 'corporate' || hiveRole == 'corporate') {
+            resolvedRole = AuthRole.corporate;
+          } else if (category == 'vendor' || dbRole == 'vendor' || metaRole == 'vendor' || hiveRole == 'vendor' || (vendorRes != null && category != 'corporate')) {
+            resolvedRole = AuthRole.vendor;
+          } else if (dbRole == 'admin' || metaRole == 'admin') {
+            resolvedRole = AuthRole.admin;
+          } else {
+            resolvedRole = AuthRole.shopper;
           }
-          Hive.box('settings').put('lastSelectedRole', 'corporate');
-        } else if (activeRole == AuthRole.vendor ||
-            category == 'vendor' ||
-            metaRole == 'vendor' ||
-            dbRole == 'vendor' ||
-            hiveRole == 'vendor' ||
-            vendorRes != null) {
-          if (_authController.selectedRole.value != AuthRole.vendor) {
-            _authController.selectedRole.value = AuthRole.vendor;
-          }
-          Hive.box('settings').put('lastSelectedRole', 'vendor');
-        } else if (activeRole == AuthRole.admin ||
-            metaRole == 'admin' ||
-            dbRole == 'admin') {
-          if (_authController.selectedRole.value != AuthRole.admin) {
-            _authController.selectedRole.value = AuthRole.admin;
-          }
+        }
+
+        if (_authController.selectedRole.value != resolvedRole) {
+          _authController.selectedRole.value = resolvedRole;
+        }
+        if (resolvedRole != AuthRole.admin) {
+          Hive.box('settings').put('lastSelectedRole', resolvedRole.name);
         }
 
         // Fetch role-specific vendor / corporate data

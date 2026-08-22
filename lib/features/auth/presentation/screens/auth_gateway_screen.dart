@@ -21,9 +21,11 @@ class AuthGatewayScreen extends StatelessWidget {
 
     bool isRoleLocked = false;
     if (Get.isRegistered<OnboardingController>()) {
-      final onboardingRole =
-          Get.find<OnboardingController>().selectedRole.value;
-      if (onboardingRole != null) {
+      final onboardingCtrl = Get.find<OnboardingController>();
+      final onboardingRole = onboardingCtrl.selectedRole.value;
+      final bool isNavigatingFromOnboarding = onboardingCtrl.currentPage.value > 0;
+
+      if (onboardingRole != null && isNavigatingFromOnboarding) {
         isRoleLocked = true;
         if (onboardingRole == UserRole.shopper) {
           controller.setRole(AuthRole.shopper);
@@ -35,9 +37,11 @@ class AuthGatewayScreen extends StatelessWidget {
       }
     }
 
+    final initialIndex = controller.selectedRole.value.index.clamp(0, 2);
+
     return DefaultTabController(
       length: 3,
-      initialIndex: controller.selectedRole.value.index,
+      initialIndex: initialIndex,
       child: Scaffold(
         backgroundColor: AppColors.offWhite,
         body: SafeArea(

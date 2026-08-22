@@ -27,7 +27,92 @@ class VendorOrderController extends GetxController {
   void onInit() {
     super.onInit();
     _loadMockOrders();
+    fetchOrdersFromSupabase();
     subscribeToOrders();
+  }
+
+  Future<void> fetchOrdersFromSupabase() async {
+    if (SupabaseService.supabaseUrl.contains('placeholder')) return;
+    try {
+      final response = await _supabase
+          .from('orders')
+          .select('*, order_items(*)')
+          .order('created_at', ascending: false);
+
+      if (response.isNotEmpty) {
+        final List<VendorOrder> dbOrders = [];
+        for (var row in response) {
+          final itemsList = (row['order_items'] as List<dynamic>? ?? []).map((item) {
+            return VendorOrderItem(
+              id: item['id']?.toString() ?? '',
+              name: item['product_name']?.toString() ?? 'Product',
+              quantity: (item['quantity'] as num?)?.toInt() ?? 1,
+              unitPrice: (item['unit_price'] as num?)?.toDouble() ?? 0.0,
+              size: item['size']?.toString(),
+              color: item['color']?.toString(),
+              imageUrl: item['image_url']?.toString() ??
+                  'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
+            );
+          }).toList();
+
+          final timelineList = (row['timeline'] as List<dynamic>? ?? []).map((t) {
+            return OrderTimelineStep(
+              title: t['title']?.toString() ?? 'Update',
+              description: t['description']?.toString() ?? '',
+              timestamp: t['timestamp'] != null ? DateTime.tryParse(t['timestamp']) : null,
+              isCompleted: t['isCompleted'] == true,
+            );
+          }).toList();
+
+          dbOrders.add(
+            VendorOrder(
+              id: row['id']?.toString() ?? '',
+              customerName: row['customer_name']?.toString() ?? 'Valued Customer',
+              amount: (row['amount'] as num?)?.toDouble() ?? 0.0,
+              status: row['status']?.toString() ?? 'Pending',
+              orderDate: row['created_at'] != null
+                  ? (DateTime.tryParse(row['created_at']) ?? DateTime.now())
+                  : DateTime.now(),
+              isB2B: row['is_b2b'] == true,
+              shippingAddress: row['shipping_address']?.toString(),
+              customerPhone: row['customer_phone']?.toString(),
+              trackingNumber: row['tracking_number']?.toString(),
+              courierPartner: row['courier_partner']?.toString(),
+              packageWeight: (row['package_weight'] as num?)?.toDouble(),
+              items: itemsList.isNotEmpty
+                  ? itemsList
+                  : [
+                      const VendorOrderItem(
+                        id: 'item_1',
+                        name: 'Luxury Apparel Item',
+                        quantity: 1,
+                        unitPrice: 150.00,
+                        imageUrl:
+                            'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
+                      ),
+                    ],
+              timeline: timelineList.isNotEmpty
+                  ? timelineList
+                  : [
+                      OrderTimelineStep(
+                        title: 'Order Placed',
+                        description: 'Order placed via ${row['payment_method'] ?? 'Checkout'}.',
+                        timestamp: row['created_at'] != null
+                            ? DateTime.tryParse(row['created_at'])
+                            : DateTime.now(),
+                        isCompleted: true,
+                      ),
+                    ],
+            ),
+          );
+        }
+        if (dbOrders.isNotEmpty) {
+          orders.assignAll(dbOrders);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching orders from Supabase: $e');
+    }
   }
 
   @override

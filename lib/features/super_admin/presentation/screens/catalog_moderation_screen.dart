@@ -77,7 +77,7 @@ class CatalogModerationScreen extends GetView<AdminController> {
                         crossAxisCount: crossAxisCount,
                         crossAxisSpacing: gridSpacing,
                         mainAxisSpacing: gridSpacing,
-                        childAspectRatio: context.isMobileView ? 0.95 : 1.05,
+                        childAspectRatio: context.isMobileView ? 0.92 : 1.02,
                       ),
                       itemCount: controller.pendingProducts.length,
                       itemBuilder: (_, i) {
@@ -161,12 +161,14 @@ class _ProductModerationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SizedBox(
-            height: context.hp(12).clamp(80, 110),
+            height: context.hp(11).clamp(75, 100),
             child: Stack(
               fit: StackFit.expand,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(15),
+                  ),
                   child: CachedNetworkImage(
                     imageUrl: product.imageUrl,
                     fit: BoxFit.cover,
@@ -175,10 +177,13 @@ class _ProductModerationCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  top: 8,
-                  right: 8,
+                  top: 6,
+                  right: 6,
                   child: Container(
-                    padding: const .symmetric(horizontal: 4, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.charcoal.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(6),
@@ -198,7 +203,7 @@ class _ProductModerationCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -230,7 +235,7 @@ class _ProductModerationCard extends StatelessWidget {
                     color: AppColors.camel,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Expanded(
@@ -238,9 +243,9 @@ class _ProductModerationCard extends StatelessWidget {
                         onPressed: onReject,
                         text: 'Reject',
                         variant: ButtonVariant.outlined,
-                        height: 30,
+                        height: 28,
                         fontSize: 9,
-                        borderRadius: 8,
+                        borderRadius: 6,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -251,9 +256,9 @@ class _ProductModerationCard extends StatelessWidget {
                         text: 'Approve',
                         variant: ButtonVariant.primary,
                         buttonColor: AppColors.success,
-                        height: 30,
+                        height: 28,
                         fontSize: 9,
-                        borderRadius: 8,
+                        borderRadius: 6,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -267,4 +272,3 @@ class _ProductModerationCard extends StatelessWidget {
     );
   }
 }
-

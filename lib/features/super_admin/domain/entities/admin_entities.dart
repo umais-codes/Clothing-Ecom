@@ -58,6 +58,34 @@ class PendingProductEntity {
     this.description = '',
     required this.status,
   });
+
+  PendingProductEntity copyWith({
+    String? id,
+    String? name,
+    String? vendorName,
+    String? vendorId,
+    double? price,
+    String? category,
+    List<String>? sizes,
+    String? imageUrl,
+    List<String>? additionalImages,
+    String? description,
+    ProductStatus? status,
+  }) {
+    return PendingProductEntity(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      vendorName: vendorName ?? this.vendorName,
+      vendorId: vendorId ?? this.vendorId,
+      price: price ?? this.price,
+      category: category ?? this.category,
+      sizes: sizes ?? this.sizes,
+      imageUrl: imageUrl ?? this.imageUrl,
+      additionalImages: additionalImages ?? this.additionalImages,
+      description: description ?? this.description,
+      status: status ?? this.status,
+    );
+  }
 }
 
 class TransactionEntity {

@@ -297,7 +297,10 @@ class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
           AdminStatusDropdown(
             label: 'Approval Status',
             labelIcon: Icons.verified_outlined,
-            initialStatus: controller.product?.status ?? ProductStatus.pending,
+            initialStatus: controller.selectedStatus.value,
+            onChanged: (newStatus) {
+              controller.selectedStatus.value = newStatus;
+            },
           ),
         ],
       ),

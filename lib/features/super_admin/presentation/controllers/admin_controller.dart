@@ -4,6 +4,7 @@ import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/app/utils/asset_downloader_util.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'admin_crud_controller.dart';
 
 class AdminController extends GetxController {
   @override
@@ -475,8 +476,29 @@ class AdminController extends GetxController {
     ),
   ].obs;
 
-  void approveProduct(String productId) {
+  void approveProduct(String productId) async {
     pendingProducts.removeWhere((p) => p.id == productId);
+
+    if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+      try {
+        final supabase = Get.find<SupabaseService>().client;
+        await supabase
+            .from('products')
+            .update({'status': 'approved'}).eq('id', productId);
+      } catch (e) {
+        debugPrint('Supabase approve product error: $e');
+      }
+    }
+
+    if (Get.isRegistered<AdminCrudController>()) {
+      final crud = Get.find<AdminCrudController>();
+      final idx = crud.allProducts.indexWhere((p) => p.id == productId);
+      if (idx != -1) {
+        crud.allProducts[idx] = crud.allProducts[idx].copyWith(status: ProductStatus.approved);
+        crud.allProducts.refresh();
+      }
+    }
+
     Get.snackbar(
       'Product Approved',
       'The item is now live on the catalogue.',
@@ -489,8 +511,29 @@ class AdminController extends GetxController {
     );
   }
 
-  void rejectProduct(String productId) {
+  void rejectProduct(String productId) async {
     pendingProducts.removeWhere((p) => p.id == productId);
+
+    if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+      try {
+        final supabase = Get.find<SupabaseService>().client;
+        await supabase
+            .from('products')
+            .update({'status': 'rejected'}).eq('id', productId);
+      } catch (e) {
+        debugPrint('Supabase reject product error: $e');
+      }
+    }
+
+    if (Get.isRegistered<AdminCrudController>()) {
+      final crud = Get.find<AdminCrudController>();
+      final idx = crud.allProducts.indexWhere((p) => p.id == productId);
+      if (idx != -1) {
+        crud.allProducts[idx] = crud.allProducts[idx].copyWith(status: ProductStatus.rejected);
+        crud.allProducts.refresh();
+      }
+    }
+
     Get.snackbar(
       'Product Rejected',
       'Vendor notified to fix and resubmit.',
@@ -503,8 +546,32 @@ class AdminController extends GetxController {
     );
   }
 
-  void approveAllProducts() {
+  void approveAllProducts() async {
+    final idsToApprove = pendingProducts.map((p) => p.id).toList();
     pendingProducts.clear();
+
+    if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+      try {
+        final supabase = Get.find<SupabaseService>().client;
+        await supabase
+            .from('products')
+            .update({'status': 'approved'})
+            .filter('id', 'in', idsToApprove);
+      } catch (e) {
+        debugPrint('Supabase bulk approve error: $e');
+      }
+    }
+
+    if (Get.isRegistered<AdminCrudController>()) {
+      final crud = Get.find<AdminCrudController>();
+      for (int i = 0; i < crud.allProducts.length; i++) {
+        if (idsToApprove.contains(crud.allProducts[i].id)) {
+          crud.allProducts[i] = crud.allProducts[i].copyWith(status: ProductStatus.approved);
+        }
+      }
+      crud.allProducts.refresh();
+    }
+
     Get.snackbar(
       'All Products Approved',
       'Catalogue cleared — all items are now live.',

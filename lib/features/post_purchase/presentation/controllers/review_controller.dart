@@ -120,9 +120,12 @@ class ReviewController extends GetxController {
 
       // 2. Write review record to PostgreSQL Supabase database
       try {
+        final currentUser = _supabase.auth.currentUser;
         await _supabase.from('reviews').insert({
           'order_id': orderId,
           'product_id': productId,
+          'customer_id': currentUser?.id,
+          'customer_name': currentUser?.userMetadata?['full_name'] ?? 'Verified Buyer',
           'rating': rating.value,
           'fit_rating': fitRating.value,
           'review_text': reviewTextController.text.trim(),

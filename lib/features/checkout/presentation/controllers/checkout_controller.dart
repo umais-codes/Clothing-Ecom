@@ -253,6 +253,7 @@ class CheckoutController extends GetxController {
       // Assemble final Supabase payload
       final orderPayload = {
         'id': orderIdStr,
+        'customer_id': _supabase.auth.currentUser?.id,
         'customer_name': isB2B.value
             ? companyNameController.text.trim()
             : fullNameController.text.trim(),

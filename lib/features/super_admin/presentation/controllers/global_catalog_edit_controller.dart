@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/constants.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 import '../../domain/entities/admin_entities.dart';
 import 'admin_crud_controller.dart';
+import 'admin_controller.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
 
 class GlobalCatalogEditController extends GetxController {
@@ -16,6 +18,7 @@ class GlobalCatalogEditController extends GetxController {
   late TextEditingController nameController;
   late TextEditingController priceController;
   final RxString selectedCategory = "Men's".obs;
+  final Rx<ProductStatus> selectedStatus = ProductStatus.pending.obs;
   late TextEditingController descriptionController;
   late TextEditingController skuController;
 
@@ -38,6 +41,7 @@ class GlobalCatalogEditController extends GetxController {
     selectedCategory.value = AppConstants.categories.contains(initialCat)
         ? initialCat
         : AppConstants.categories.first;
+    selectedStatus.value = product?.status ?? ProductStatus.pending;
     descriptionController = TextEditingController(
       text: product?.description ?? '',
     );
@@ -51,8 +55,6 @@ class GlobalCatalogEditController extends GetxController {
       galleryImages.addAll(product!.additionalImages);
     }
   }
-
-
 
   Future<void> addImage() async {
     if (isPickingImage.value) return;
@@ -109,7 +111,7 @@ class GlobalCatalogEditController extends GetxController {
     );
   }
 
-  void saveProduct() {
+  Future<void> saveProduct() async {
     if (nameController.text.isEmpty || priceController.text.isEmpty) {
       Get.snackbar(
         'Validation Error',
@@ -120,27 +122,61 @@ class GlobalCatalogEditController extends GetxController {
       return;
     }
 
+    isLoading.value = true;
+
     final updatedProduct = PendingProductEntity(
-      id: skuController.text.isEmpty ? 'AUTO-GEN' : skuController.text,
-      name: nameController.text,
+      id: skuController.text.isEmpty
+          ? (product?.id ?? 'AUTO-GEN')
+          : skuController.text,
+      name: nameController.text.trim(),
       price: double.tryParse(priceController.text) ?? 0.0,
       category: selectedCategory.value,
-      description: descriptionController.text,
+      description: descriptionController.text.trim(),
       imageUrl: galleryImages.isNotEmpty ? galleryImages.first : '',
       additionalImages: galleryImages.length > 1
           ? galleryImages.sublist(1)
           : [],
-      status: product?.status ?? ProductStatus.pending,
+      status: selectedStatus.value,
       vendorId: product?.vendorId ?? 'ADMIN',
       vendorName: product?.vendorName ?? 'Internal',
       sizes: product?.sizes ?? [],
     );
 
+    if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+      try {
+        final supabase = Get.find<SupabaseService>().client;
+        await supabase
+            .from('products')
+            .update({
+              'name': updatedProduct.name,
+              'price': updatedProduct.price,
+              'category': updatedProduct.category,
+              'description': updatedProduct.description,
+              'status': selectedStatus.value.name,
+              if (updatedProduct.imageUrl.isNotEmpty)
+                'image_url': updatedProduct.imageUrl,
+            })
+            .eq('id', updatedProduct.id);
+      } catch (e) {
+        debugPrint('Supabase catalog update error: $e');
+      }
+    }
+
     crudController.updateProduct(updatedProduct);
+
+    // If marked as approved or rejected, remove from pending moderation queue if active
+    if (Get.isRegistered<AdminController>()) {
+      final adminCtrl = Get.find<AdminController>();
+      if (selectedStatus.value != ProductStatus.pending) {
+        adminCtrl.pendingProducts.removeWhere((p) => p.id == updatedProduct.id);
+      }
+    }
+
+    isLoading.value = false;
     Get.back();
     Get.snackbar(
-      'Success',
-      'Catalog audit updated successfully.',
+      'Catalog Updated',
+      '${updatedProduct.name} status updated to ${selectedStatus.value.name.toUpperCase()}.',
       backgroundColor: AppColors.success,
       colorText: AppColors.white,
     );

@@ -17,7 +17,7 @@ class WishlistScreen extends StatelessWidget {
     final double sw = context.screenWidth;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6),
+      backgroundColor: AppColors.offWhite,
       appBar: const CustomAppBar(
         title: 'My Wishlist',
       ),

@@ -72,8 +72,8 @@ class AdminProfileView extends GetView<ProfileController> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildStatCard(context, cardWidth, '148', 'Total Users', Colors.deepPurple.shade700),
-        _buildStatCard(context, cardWidth, '3', 'Active KYC Queues', Colors.amber.shade800),
+        _buildStatCard(context, cardWidth, '148', 'Total Users', AppColors.navy),
+        _buildStatCard(context, cardWidth, '3', 'Active KYC Queues', AppColors.warning),
         _buildStatCard(context, cardWidth, '99.9%', 'System Uptime', AppColors.success),
       ],
     );

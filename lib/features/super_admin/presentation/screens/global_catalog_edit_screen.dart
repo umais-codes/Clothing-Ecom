@@ -23,7 +23,7 @@ class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F2EE),
+      backgroundColor: AppColors.offWhite,
       appBar: _buildAppBar(context),
       body: SafeArea(
         child: SingleChildScrollView(

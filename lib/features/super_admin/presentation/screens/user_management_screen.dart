@@ -121,7 +121,7 @@ class UserManagementScreen extends GetView<AdminCrudController> {
                                 icon: const Icon(
                                   Icons.login_rounded,
                                   size: 18,
-                                  color: Colors.blueAccent,
+                                  color: AppColors.trustBadge,
                                 ),
                                 visualDensity: VisualDensity.compact,
                                 padding: EdgeInsets.zero,
@@ -185,7 +185,7 @@ class UserManagementScreen extends GetView<AdminCrudController> {
           height: 6,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? Colors.green : AppColors.error,
+            color: isActive ? AppColors.success : AppColors.error,
           ),
         ),
         const SizedBox(width: 8),

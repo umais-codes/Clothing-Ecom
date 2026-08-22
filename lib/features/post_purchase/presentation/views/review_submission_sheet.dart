@@ -150,7 +150,7 @@ class ReviewSubmissionSheet extends GetView<ReviewController> {
                                         ? Icons.star_rounded
                                         : Icons.star_outline_rounded,
                                     color: isSelected
-                                        ? AppColors.camel
+                                        ? AppColors.starRating
                                         : AppColors.greyLight,
                                   ),
                                   onPressed: () =>
@@ -166,7 +166,7 @@ class ReviewSubmissionSheet extends GetView<ReviewController> {
                               style: GoogleFonts.outfit(
                                 fontSize: context.sp(12),
                                 color: controller.rating.value > 0
-                                    ? AppColors.camel
+                                    ? AppColors.starRating
                                     : AppColors.grey,
                                 fontWeight: FontWeight.w700,
                               ),

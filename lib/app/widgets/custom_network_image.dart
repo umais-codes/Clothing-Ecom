@@ -60,13 +60,13 @@ class CustomNetworkImage extends StatelessWidget {
 
   Widget _buildShimmer({required double width, required double height}) {
     return Shimmer.fromColors(
-      baseColor: AppColors.greySubtle,
-      highlightColor: AppColors.white.withValues(alpha: 0.5),
+      baseColor: AppColors.shimmerBase,
+      highlightColor: AppColors.shimmerHighlight,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.greySubtle,
+          color: AppColors.shimmerBase,
           borderRadius: .circular(borderRadius),
         ),
       ),

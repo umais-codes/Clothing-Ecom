@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/app/theme/app_colors.dart';
 
 class DispatchController extends GetxController {
   // Input Controllers
@@ -44,8 +45,8 @@ class DispatchController extends GetxController {
         'Validation Failure',
         'Please enter correct packaging specifications and address.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFC0392B).withValues(alpha: 0.15),
-        colorText: const Color(0xFFC0392B),
+        backgroundColor: AppColors.errorBg,
+        colorText: AppColors.error,
       );
       return;
     }
@@ -75,8 +76,8 @@ class DispatchController extends GetxController {
           'Shipment Booked',
           'Air Waybill generated: ${generatedAwb.value}',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF4A7C59).withValues(alpha: 0.15),
-          colorText: const Color(0xFF4A7C59),
+          backgroundColor: AppColors.successBg,
+          colorText: AppColors.success,
         );
       } else {
         // Fallback mock AWB if edge function runs in demo/local mode without keys
@@ -89,8 +90,8 @@ class DispatchController extends GetxController {
           'Shipment Booked (Demo)',
           'Generated offline AWB label: $mockAwb',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFF4A7C59).withValues(alpha: 0.15),
-          colorText: const Color(0xFF4A7C59),
+          backgroundColor: AppColors.successBg,
+          colorText: AppColors.success,
         );
       }
     } catch (e) {
@@ -104,8 +105,8 @@ class DispatchController extends GetxController {
         'Offline Gateway Mode',
         'Booked in sandbox database. AWB generated: $mockAwb',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFE2B755).withValues(alpha: 0.15),
-        colorText: const Color(0xFFC19A6B),
+        backgroundColor: AppColors.warningBg,
+        colorText: AppColors.warning,
       );
     }
   }

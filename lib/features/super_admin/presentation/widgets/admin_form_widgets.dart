@@ -95,19 +95,19 @@ const Map<ProductStatus, _StatusConfig> _kStatusConfig = {
     label: 'Approved',
     color: AppColors.success,
     icon: Icons.check_circle_outline_rounded,
-    bg: Color(0xFFEDF7F1),
+    bg: AppColors.successBg,
   ),
   ProductStatus.pending: (
     label: 'Pending Review',
     color: AppColors.warning,
     icon: Icons.hourglass_empty_rounded,
-    bg: Color(0xFFFDF3EA),
+    bg: AppColors.warningBg,
   ),
   ProductStatus.rejected: (
     label: 'Rejected',
     color: AppColors.error,
     icon: Icons.cancel_outlined,
-    bg: Color(0xFFFDEDEC),
+    bg: AppColors.errorBg,
   ),
 };
 
@@ -153,7 +153,7 @@ class _AdminStatusDropdownState extends State<AdminStatusDropdown> {
           initialValue: _selected,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFFAF9F7),
+            fillColor: AppColors.offWhite,
             contentPadding: EdgeInsets.symmetric(
               horizontal: width * 0.04,
               vertical: height * 0.012,

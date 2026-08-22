@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/app/theme/app_colors.dart';
 import '../../domain/entities/vendor_order.dart';
 
 class VendorOrderController extends GetxController {
@@ -274,8 +275,8 @@ class VendorOrderController extends GetxController {
         'Order Accepted',
         'Order $orderId has been moved to Processing.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFC19A6B).withValues(alpha: 0.1),
-        colorText: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.camelLight,
+        colorText: AppColors.charcoal,
       );
 
       // Close the bottom sheet modal if it is currently open
@@ -325,8 +326,8 @@ class VendorOrderController extends GetxController {
         'Order Shipped',
         'Order $orderId marked as Shipped. Tracking ID added.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF4A7C59).withValues(alpha: 0.1),
-        colorText: const Color(0xFF4A7C59),
+        backgroundColor: AppColors.successBg,
+        colorText: AppColors.success,
       );
     }
   }
@@ -349,8 +350,8 @@ class VendorOrderController extends GetxController {
         'Refund Completed',
         'RMA for order $orderId completed successfully. Refund initiated.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFC0392B).withValues(alpha: 0.1),
-        colorText: const Color(0xFFC0392B),
+        backgroundColor: AppColors.errorBg,
+        colorText: AppColors.error,
       );
     }
   }
@@ -395,8 +396,8 @@ class VendorOrderController extends GetxController {
         'Database Sync (Real-time)',
         'Order $orderId status updated to: $status',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF4A7C59).withValues(alpha: 0.15),
-        colorText: const Color(0xFF4A7C59),
+        backgroundColor: AppColors.successBg,
+        colorText: AppColors.success,
       );
     }
   }

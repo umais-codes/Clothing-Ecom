@@ -227,6 +227,8 @@ class PerspectiveSwitcher extends StatelessWidget {
           CustomPermissionDialog.show(
             context: context,
             icon: Icons.cancel_outlined,
+            iconColor: AppColors.error,
+            iconBgColor: AppColors.errorBg,
             title: 'Application Rejected',
             description:
                 'Your application has been rejected. Please contact partner support for more information.',
@@ -238,6 +240,8 @@ class PerspectiveSwitcher extends StatelessWidget {
           CustomPermissionDialog.show(
             context: context,
             icon: Icons.hourglass_top_rounded,
+            iconColor: AppColors.warning,
+            iconBgColor: AppColors.warningBg,
             title: 'Application Pending',
             description:
                 'Your application is currently pending admin approval. You will receive portal access once approved.',

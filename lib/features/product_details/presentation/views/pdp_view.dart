@@ -97,7 +97,7 @@ class PdpView extends GetView<PdpController> {
                                       : (starVal - 0.5 <= avg
                                             ? Icons.star_half_rounded
                                             : Icons.star_outline_rounded),
-                                  color: AppColors.camel,
+                                  color: AppColors.starRating,
                                   size: sw * 0.045,
                                 );
                               }),
@@ -357,7 +357,7 @@ class PdpView extends GetView<PdpController> {
                                 : (starVal - 0.5 <= avg
                                       ? Icons.star_half_rounded
                                       : Icons.star_outline_rounded),
-                            color: AppColors.camel,
+                            color: AppColors.starRating,
                             size: sw * 0.035,
                           );
                         }),
@@ -547,7 +547,7 @@ class PdpView extends GetView<PdpController> {
                     idx < ratingVal.round()
                         ? Icons.star_rounded
                         : Icons.star_outline_rounded,
-                    color: AppColors.camel,
+                    color: AppColors.starRating,
                     size: sw * 0.035,
                   );
                 }),

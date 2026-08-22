@@ -43,18 +43,18 @@ class ProductCard extends StatelessWidget {
                     left: sw * 0.015,
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: sw * 0.015,
-                        vertical: sw * 0.005,
+                        horizontal: sw * 0.02,
+                        vertical: sw * 0.006,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.camel,
+                        color: AppColors.badgeNew,
                         borderRadius: BorderRadius.circular(sw * 0.02),
                       ),
                       child: Text(
                         'NEW',
                         style: TextStyle(
                           color: AppColors.white,
-                          fontSize: sw * 0.025,
+                          fontSize: sw * 0.024,
                           fontWeight: FontWeight.w700,
                           fontFamily: 'Outfit',
                           letterSpacing: 0.5,
@@ -99,7 +99,7 @@ class ProductCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.star_rounded,
-                            color: AppColors.camel,
+                            color: AppColors.starRating,
                             size: sw * 0.035,
                           ),
                           const SizedBox(width: 1),

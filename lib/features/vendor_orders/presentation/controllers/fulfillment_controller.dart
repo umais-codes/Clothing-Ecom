@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/theme/app_colors.dart';
 import '../../domain/entities/vendor_order.dart';
 import 'vendor_order_controller.dart';
 
@@ -136,8 +137,8 @@ class FulfillmentController extends GetxController {
         'Validation Error',
         'Please enter a valid weight (kg) and tracking number.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFC0392B).withValues(alpha: 0.1),
-        colorText: const Color(0xFFC0392B),
+        backgroundColor: AppColors.errorBg,
+        colorText: AppColors.error,
       );
       return;
     }
@@ -173,8 +174,8 @@ class FulfillmentController extends GetxController {
         'Shipment Confirmed',
         'Order ${order.id} has been shipped successfully.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF4A7C59).withValues(alpha: 0.1),
-        colorText: const Color(0xFF4A7C59),
+        backgroundColor: AppColors.successBg,
+        colorText: AppColors.success,
       );
     }
     

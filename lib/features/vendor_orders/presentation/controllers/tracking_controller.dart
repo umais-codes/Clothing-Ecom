@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/app/theme/app_colors.dart';
 
 class TrackingController extends GetxController {
   final RxInt activeStepIndex = 0.obs;
@@ -46,8 +47,8 @@ class TrackingController extends GetxController {
         'Logistics Webhook Triggered',
         'Status updated: "${steps[activeStepIndex.value]['title']}"',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFC19A6B).withValues(alpha: 0.15),
-        colorText: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.camelLight,
+        colorText: AppColors.charcoal,
       );
     } else {
       // Reset back to Placed for infinite testing simulation
@@ -56,8 +57,8 @@ class TrackingController extends GetxController {
         'Webhook Reset',
         'Fulfillment lifecycle reset to Order Placed.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFF1A1A1A).withValues(alpha: 0.1),
-        colorText: const Color(0xFF1A1A1A),
+        backgroundColor: AppColors.surfaceSubtle,
+        colorText: AppColors.charcoal,
       );
     }
   }
@@ -68,8 +69,8 @@ class TrackingController extends GetxController {
       'AWB Copied',
       'Tracking ID $trackingId copied to clipboard.',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF4A7C59).withValues(alpha: 0.15),
-      colorText: const Color(0xFF4A7C59),
+      backgroundColor: AppColors.successBg,
+      colorText: AppColors.success,
       duration: const Duration(seconds: 2),
     );
   }
@@ -128,8 +129,8 @@ class TrackingController extends GetxController {
       'Fulfillment Status Update',
       'Your order progress updated to: $status',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFFC19A6B).withValues(alpha: 0.15),
-      colorText: const Color(0xFF1A1A1A),
+      backgroundColor: AppColors.camelLight,
+      colorText: AppColors.charcoal,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/app/utils/asset_downloader_util.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
+import 'package:ecom_app/app/theme/app_colors.dart';
 
 class AdminController extends GetxController {
   @override
@@ -338,8 +339,8 @@ class AdminController extends GetxController {
       'Account Approved',
       'The partner account has been activated successfully.',
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFF4A7C59),
-      colorText: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.success,
+      colorText: AppColors.white,
       borderRadius: 12,
       margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 3),
@@ -372,8 +373,8 @@ class AdminController extends GetxController {
       'Application Rejected',
       'Vendor has been notified to resubmit documents.',
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFFC0392B),
-      colorText: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.error,
+      colorText: AppColors.white,
       borderRadius: 12,
       margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 3),
@@ -480,8 +481,8 @@ class AdminController extends GetxController {
       'Product Approved',
       'The item is now live on the catalogue.',
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFF4A7C59),
-      colorText: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.success,
+      colorText: AppColors.white,
       borderRadius: 12,
       margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 2),
@@ -494,8 +495,8 @@ class AdminController extends GetxController {
       'Product Rejected',
       'Vendor notified to fix and resubmit.',
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFFC0392B),
-      colorText: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.error,
+      colorText: AppColors.white,
       borderRadius: 12,
       margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 2),
@@ -508,8 +509,8 @@ class AdminController extends GetxController {
       'All Products Approved',
       'Catalogue cleared — all items are now live.',
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFF4A7C59),
-      colorText: const Color(0xFFFFFFFF),
+      backgroundColor: AppColors.success,
+      colorText: AppColors.white,
       borderRadius: 12,
       margin: const EdgeInsets.all(16),
     );

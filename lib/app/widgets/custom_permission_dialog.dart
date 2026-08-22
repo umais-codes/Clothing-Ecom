@@ -14,6 +14,8 @@ class CustomPermissionDialog extends StatelessWidget {
   final VoidCallback? onDeny;
   final String grantText;
   final String denyText;
+  final Color? iconColor;
+  final Color? iconBgColor;
 
   const CustomPermissionDialog({
     super.key,
@@ -24,6 +26,8 @@ class CustomPermissionDialog extends StatelessWidget {
     this.onDeny,
     this.grantText = 'Allow Access',
     this.denyText = 'Not Now',
+    this.iconColor,
+    this.iconBgColor,
   });
 
   /// Displays the premium backdrop-blurred permissions dialog.
@@ -36,12 +40,14 @@ class CustomPermissionDialog extends StatelessWidget {
     VoidCallback? onDeny,
     String grantText = 'Allow Access',
     String denyText = 'Not Now',
+    Color? iconColor,
+    Color? iconBgColor,
   }) {
     return showGeneralDialog(
       context: context,
       barrierDismissible: false,
       barrierLabel: 'Permission Dialog',
-      barrierColor: AppColors.charcoal.withValues(alpha: 0.4),
+      barrierColor: AppColors.scrimDark,
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) {
         return CustomPermissionDialog(
@@ -52,6 +58,8 @@ class CustomPermissionDialog extends StatelessWidget {
           onDeny: onDeny,
           grantText: grantText,
           denyText: denyText,
+          iconColor: iconColor,
+          iconBgColor: iconBgColor,
         );
       },
       transitionBuilder: (context, anim1, anim2, child) {
@@ -68,6 +76,12 @@ class CustomPermissionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveIconColor = iconColor ?? AppColors.camel;
+    final effectiveIconBgColor = iconBgColor ??
+        (iconColor != null
+            ? iconColor!.withValues(alpha: 0.12)
+            : AppColors.camelLight);
+
     return BackdropFilter(
       filter: ui.ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
       child: Dialog(
@@ -80,12 +94,13 @@ class CustomPermissionDialog extends StatelessWidget {
             vertical: context.hp(2),
           ),
           decoration: BoxDecoration(
-            color: AppColors.white.withValues(alpha: 0.9),
+            color: AppColors.white.withValues(alpha: 0.95),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: AppColors.greyLight.withValues(alpha: 0.5),
+              color: AppColors.greyLight.withValues(alpha: 0.8),
               width: 1.5,
             ),
+            boxShadow: AppColors.cardShadow,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -95,10 +110,10 @@ class CustomPermissionDialog extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: AppColors.camel.withValues(alpha: 0.12),
+                  color: effectiveIconBgColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: AppColors.camel, size: 32),
+                child: Icon(icon, color: effectiveIconColor, size: 32),
               ),
               SizedBox(height: context.hp(1)),
 

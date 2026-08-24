@@ -13,15 +13,44 @@ import 'package:ecom_app/app/utils/constants.dart';
 import '../widgets/admin_card.dart';
 import '../widgets/admin_form_widgets.dart';
 
-class GlobalCatalogEditScreen extends GetView<GlobalCatalogEditController> {
-  const GlobalCatalogEditScreen({super.key});
+class GlobalCatalogEditScreen extends StatefulWidget {
+  final PendingProductEntity? product;
+  const GlobalCatalogEditScreen({super.key, this.product});
+
+  @override
+  State<GlobalCatalogEditScreen> createState() =>
+      _GlobalCatalogEditScreenState();
+}
+
+class _GlobalCatalogEditScreenState extends State<GlobalCatalogEditScreen> {
+  late final GlobalCatalogEditController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    final effectiveProduct =
+        widget.product ??
+        (Get.arguments is PendingProductEntity
+            ? Get.arguments as PendingProductEntity
+            : null);
+    if (Get.isRegistered<GlobalCatalogEditController>()) {
+      Get.delete<GlobalCatalogEditController>();
+    }
+    controller = Get.put(
+      GlobalCatalogEditController(product: effectiveProduct),
+    );
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<GlobalCatalogEditController>()) {
+      Get.delete<GlobalCatalogEditController>();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<GlobalCatalogEditController>()) {
-      Get.put(GlobalCatalogEditController(product: Get.arguments));
-    }
-
     return Scaffold(
       backgroundColor: AppColors.offWhite,
       appBar: _buildAppBar(context),

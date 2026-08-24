@@ -8,6 +8,7 @@ import '../../domain/entities/admin_entities.dart';
 import 'admin_crud_controller.dart';
 import 'admin_controller.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import '../../../home/presentation/controllers/home_controller.dart';
 
 class GlobalCatalogEditController extends GetxController {
   final PendingProductEntity? product;
@@ -18,7 +19,7 @@ class GlobalCatalogEditController extends GetxController {
   late TextEditingController nameController;
   late TextEditingController priceController;
   final RxString selectedCategory = "Men's".obs;
-  final Rx<ProductStatus> selectedStatus = ProductStatus.pending.obs;
+  final Rx<ProductStatus> selectedStatus = ProductStatus.approved.obs;
   late TextEditingController descriptionController;
   late TextEditingController skuController;
 
@@ -41,7 +42,7 @@ class GlobalCatalogEditController extends GetxController {
     selectedCategory.value = AppConstants.categories.contains(initialCat)
         ? initialCat
         : AppConstants.categories.first;
-    selectedStatus.value = product?.status ?? ProductStatus.pending;
+    selectedStatus.value = product?.status ?? ProductStatus.approved;
     descriptionController = TextEditingController(
       text: product?.description ?? '',
     );
@@ -124,10 +125,15 @@ class GlobalCatalogEditController extends GetxController {
 
     isLoading.value = true;
 
+    final isEditing = product != null;
+    final String uniqueId = skuController.text.trim().isNotEmpty
+        ? skuController.text.trim()
+        : (isEditing
+              ? product!.id
+              : 'PRD-${DateTime.now().millisecondsSinceEpoch.toRadixString(36).toUpperCase()}');
+
     final updatedProduct = PendingProductEntity(
-      id: skuController.text.isEmpty
-          ? (product?.id ?? 'AUTO-GEN')
-          : skuController.text,
+      id: uniqueId,
       name: nameController.text.trim(),
       price: double.tryParse(priceController.text) ?? 0.0,
       category: selectedCategory.value,
@@ -138,27 +144,46 @@ class GlobalCatalogEditController extends GetxController {
           : [],
       status: selectedStatus.value,
       vendorId: product?.vendorId ?? 'ADMIN',
-      vendorName: product?.vendorName ?? 'Internal',
-      sizes: product?.sizes ?? [],
+      vendorName: product?.vendorName ?? 'Internal Brand',
+      sizes: product?.sizes ?? const ['Standard'],
     );
 
     if (!SupabaseService.supabaseUrl.contains('placeholder')) {
       try {
         final supabase = Get.find<SupabaseService>().client;
-        await supabase
-            .from('products')
-            .update({
-              'name': updatedProduct.name,
-              'price': updatedProduct.price,
-              'category': updatedProduct.category,
-              'description': updatedProduct.description,
-              'status': selectedStatus.value.name,
-              if (updatedProduct.imageUrl.isNotEmpty)
-                'image_url': updatedProduct.imageUrl,
-            })
-            .eq('id', updatedProduct.id);
+        final payload = {
+          'id': updatedProduct.id,
+          'name': updatedProduct.name,
+          'price': updatedProduct.price,
+          'category': updatedProduct.category,
+          'description': updatedProduct.description,
+          'status': selectedStatus.value.name,
+          'vendor_name': updatedProduct.vendorName,
+          'in_stock': true,
+          'is_b2b': false,
+          'is_new': true,
+          'moq': 1,
+          'sourcing_type': 'Ready to Ship',
+          'location': 'Pakistan',
+          'sizes': updatedProduct.sizes.isNotEmpty
+              ? updatedProduct.sizes
+              : const ['S', 'M', 'L', 'XL'],
+          'colors': const ['Camel', 'Ink', 'White'],
+          if (updatedProduct.imageUrl.isNotEmpty)
+            'image_url': updatedProduct.imageUrl,
+          'images': galleryImages,
+        };
+
+        if (isEditing) {
+          await supabase
+              .from('products')
+              .update(payload)
+              .eq('id', updatedProduct.id);
+        } else {
+          await supabase.from('products').insert(payload);
+        }
       } catch (e) {
-        debugPrint('Supabase catalog update error: $e');
+        debugPrint('Supabase catalog save error: $e');
       }
     }
 
@@ -172,11 +197,16 @@ class GlobalCatalogEditController extends GetxController {
       }
     }
 
+    // Refresh B2C Shopper Home Feed
+    if (Get.isRegistered<HomeController>()) {
+      Get.find<HomeController>().loadTrendingProducts();
+    }
+
     isLoading.value = false;
     Get.back();
     Get.snackbar(
-      'Catalog Updated',
-      '${updatedProduct.name} status updated to ${selectedStatus.value.name.toUpperCase()}.',
+      isEditing ? 'Catalog Updated' : 'Product Added',
+      '${updatedProduct.name} successfully ${isEditing ? 'updated' : 'added to catalog'}.',
       backgroundColor: AppColors.success,
       colorText: AppColors.white,
     );

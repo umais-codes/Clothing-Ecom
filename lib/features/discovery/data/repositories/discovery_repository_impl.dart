@@ -1,6 +1,8 @@
 import '../../domain/repositories/discovery_repository.dart';
 import '../../../wishlist/domain/models/product_model.dart';
 import '../../../vendor_inventory/data/models/vendor_product_model.dart';
+import '../../../super_admin/presentation/controllers/admin_crud_controller.dart';
+import '../../../super_admin/domain/entities/admin_entities.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -24,7 +26,8 @@ class DiscoveryRepositoryImpl implements DiscoveryRepository {
               map['is_b2b'] == 1 ||
               map['is_b2b'] == 'true' ||
               map['isB2B'] == true;
-          if (pIsB2B == isB2B) {
+          final String status = (map['status'] ?? 'approved').toString().toLowerCase();
+          if (pIsB2B == isB2B && (status == 'approved' || status.isEmpty)) {
             publishedProducts.add(Product.fromMap(map));
           }
         }
@@ -33,7 +36,43 @@ class DiscoveryRepositoryImpl implements DiscoveryRepository {
       debugPrint('Error fetching products from Supabase: $e');
     }
 
-    // 2. Fetch local vendor products from Hive box as fallback/merge
+    // 2. Fetch admin created / approved products from active AdminCrudController state
+    try {
+      if (Get.isRegistered<AdminCrudController>()) {
+        final adminCrud = Get.find<AdminCrudController>();
+        for (var ap in adminCrud.allProducts) {
+          if (ap.status == ProductStatus.approved &&
+              !publishedProducts.any((p) => p.id == ap.id)) {
+            publishedProducts.insert(
+              0,
+              Product(
+                id: ap.id,
+                name: ap.name,
+                vendorName: ap.vendorName,
+                price: ap.price,
+                imageUrl: ap.imageUrl.isNotEmpty
+                    ? ap.imageUrl
+                    : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+                inStock: true,
+                description: ap.description,
+                isB2B: false,
+                category: ap.category,
+                sizes: ap.sizes.isNotEmpty ? ap.sizes : const ['S', 'M', 'L'],
+                colors: const ['Camel', 'Ink', 'White'],
+                moq: 1,
+                sourcingType: 'Ready to Ship',
+                location: 'Pakistan',
+                isNew: true,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error merging admin products: $e');
+    }
+
+    // 3. Fetch local vendor products from Hive box as fallback/merge
     try {
       if (!Hive.isBoxOpen('vendorProductsBox')) {
         await Hive.openBox<VendorProduct>('vendorProductsBox');
@@ -73,7 +112,7 @@ class DiscoveryRepositoryImpl implements DiscoveryRepository {
       debugPrint('Error loading local vendor products: $e');
     }
 
-    // 3. Combine published vendor products (at the top) with mock catalog items
+    // 4. Combine published vendor products (at the top) with mock catalog items
     final mockList = isB2B ? _mockB2BProducts : _mockB2CProducts;
     final Set<String> existingIds = publishedProducts.map((p) => p.id).toSet();
     final remainingMocks = mockList.where((p) => !existingIds.contains(p.id)).toList();

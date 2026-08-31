@@ -1,4 +1,6 @@
 import 'package:ecom_app/features/cart/presentation/controllers/b2c_cart_controller.dart';
+import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_controller.dart';
+import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -172,17 +174,22 @@ class _NavBarItem extends StatelessWidget {
   }
 
   Widget _buildBadge(double sw) {
-    final B2CCartController cartController = Get.find<B2CCartController>();
     return Positioned(
       top: -3,
       right: -6,
       child: Obx(() {
-        if (cartController.cartItems.isEmpty) return const SizedBox.shrink();
+        final AuthRole currentRole = Get.find<AuthController>().selectedRole.value;
+        final int itemCount = currentRole == AuthRole.corporate
+            ? Get.find<B2BCartController>().cartItems.length
+            : Get.find<B2CCartController>().cartItems.length;
+
+        if (itemCount <= 0) return const SizedBox.shrink();
+
         return Container(
-          padding: const .all(2),
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             color: AppColors.rose,
-            shape: .circle,
+            shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
                 color: AppColors.rose.withValues(alpha: 0.3),
@@ -197,13 +204,13 @@ class _NavBarItem extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              '${cartController.cartItems.length}',
+              '$itemCount',
               style: GoogleFonts.outfit(
                 color: AppColors.white,
                 fontSize: sw * 0.02,
-                fontWeight: .bold,
+                fontWeight: FontWeight.bold,
               ),
-              textAlign: .center,
+              textAlign: TextAlign.center,
             ),
           ),
         );

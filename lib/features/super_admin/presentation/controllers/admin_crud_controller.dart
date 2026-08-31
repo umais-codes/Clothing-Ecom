@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/features/vendor_inventory/data/models/vendor_product_model.dart';
 import '../../domain/entities/admin_entities.dart';
 
 class AdminCrudController extends GetxController {
@@ -8,6 +11,81 @@ class AdminCrudController extends GetxController {
   final TextEditingController searchController = TextEditingController();
   final RxString selectedCategoryFilter = 'All Categories'.obs;
   final RxString selectedStatusFilter = 'All Status'.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadCatalogProducts();
+  }
+
+  Future<void> loadCatalogProducts() async {
+    try {
+      // 1. From Hive
+      if (!Hive.isBoxOpen('vendorProductsBox')) {
+        await Hive.openBox<VendorProduct>('vendorProductsBox');
+      }
+      final box = Hive.box<VendorProduct>('vendorProductsBox');
+      for (var vp in box.values) {
+        if (!allProducts.any((p) => p.id == vp.id)) {
+          allProducts.insert(
+            0,
+            PendingProductEntity(
+              id: vp.id,
+              name: vp.title,
+              vendorName: 'Internal Brand',
+              vendorId: 'ADMIN',
+              price: vp.basePrice,
+              category: vp.category,
+              sizes: vp.variants.map((v) => v.size).toSet().toList(),
+              imageUrl: vp.imageUrls.isNotEmpty ? vp.imageUrls.first : '',
+              additionalImages:
+                  vp.imageUrls.length > 1 ? vp.imageUrls.sublist(1) : [],
+              status: ProductStatus.approved,
+              description: vp.description,
+            ),
+          );
+        }
+      }
+
+      // 2. From Supabase
+      if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+        final supabase = Get.find<SupabaseService>().client;
+        final res = await supabase.from('products').select();
+        if (res.isNotEmpty) {
+          for (var map in res) {
+            final id = map['id']?.toString() ?? '';
+            if (id.isNotEmpty && !allProducts.any((p) => p.id == id)) {
+              final List<String> images = List<String>.from(map['images'] ?? []);
+              final imgUrl = map['image_url']?.toString() ??
+                  (images.isNotEmpty ? images.first : '');
+              allProducts.insert(
+                0,
+                PendingProductEntity(
+                  id: id,
+                  name: map['name']?.toString() ?? 'Apparel Item',
+                  vendorName:
+                      map['vendor_name']?.toString() ?? 'Internal Brand',
+                  vendorId: map['vendor_id']?.toString() ?? 'ADMIN',
+                  price: (map['price'] as num?)?.toDouble() ?? 0.0,
+                  category: map['category']?.toString() ?? "Men's",
+                  sizes: List<String>.from(map['sizes'] ?? ['S', 'M', 'L']),
+                  imageUrl: imgUrl,
+                  additionalImages:
+                      images.length > 1 ? images.sublist(1) : [],
+                  status: (map['status']?.toString().toLowerCase() == 'pending')
+                      ? ProductStatus.pending
+                      : ProductStatus.approved,
+                  description: map['description']?.toString() ?? '',
+                ),
+              );
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('AdminCrudController loadCatalogProducts error: $e');
+    }
+  }
 
   // ── Catalog Management ───────────────────────────────────────────────────────
   final RxList<PendingProductEntity> allProducts = <PendingProductEntity>[

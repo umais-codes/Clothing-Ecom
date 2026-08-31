@@ -107,7 +107,10 @@ class B2BPortalView extends GetView<B2BPortalController> {
           SizedBox(height: sw * 0.06),
           const MatrixOrderWidget(),
           SizedBox(height: sw * 0.08),
-          CustomButton(text: "ADD TO BULK CART", onPressed: () {}),
+          CustomButton(
+            text: "ADD TO BULK CART",
+            onPressed: controller.addMatrixToCart,
+          ),
         ],
       ),
     );

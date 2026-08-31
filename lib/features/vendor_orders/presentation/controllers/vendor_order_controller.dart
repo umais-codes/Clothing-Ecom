@@ -26,7 +26,6 @@ class VendorOrderController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadMockOrders();
     fetchOrdersFromSupabase();
     subscribeToOrders();
   }
@@ -34,84 +33,143 @@ class VendorOrderController extends GetxController {
   Future<void> fetchOrdersFromSupabase() async {
     if (SupabaseService.supabaseUrl.contains('placeholder')) return;
     try {
-      final response = await _supabase
-          .from('orders')
-          .select('*, order_items(*)')
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        orders.clear();
+        return;
+      }
+
+      // 1. Resolve vendor ID for current user
+      final profileRes = await _supabase
+          .from('profiles')
+          .select('vendor_id')
+          .eq('id', user.id)
+          .maybeSingle();
+      String? vendorId = profileRes?['vendor_id']?.toString();
+
+      if (vendorId == null) {
+        final vendorRes = await _supabase
+            .from('vendors')
+            .select('id')
+            .eq('owner_id', user.id)
+            .maybeSingle();
+        vendorId = vendorRes?['id']?.toString();
+      }
+
+      if (vendorId == null) {
+        orders.clear();
+        return;
+      }
+
+      // 2. Fetch products owned by this vendor
+      final productsRes = await _supabase
+          .from('products')
+          .select('id')
+          .eq('vendor_id', vendorId);
+
+      final List<String> myProductIds = (productsRes as List)
+          .map((p) => p['id'].toString())
+          .toList();
+
+      if (myProductIds.isEmpty) {
+        orders.clear();
+        return;
+      }
+
+      // 3. Query order items strictly matching vendor products
+      final itemsResponse = await _supabase
+          .from('order_items')
+          .select('*, orders(*)')
+          .filter('product_id', 'in', myProductIds)
           .order('created_at', ascending: false);
 
-      if (response.isNotEmpty) {
-        final List<VendorOrder> dbOrders = [];
-        for (var row in response) {
-          final itemsList = (row['order_items'] as List<dynamic>? ?? []).map((item) {
-            return VendorOrderItem(
-              id: item['id']?.toString() ?? '',
-              name: item['product_name']?.toString() ?? 'Product',
-              quantity: (item['quantity'] as num?)?.toInt() ?? 1,
-              unitPrice: (item['unit_price'] as num?)?.toDouble() ?? 0.0,
-              size: item['size']?.toString(),
-              color: item['color']?.toString(),
-              imageUrl: item['image_url']?.toString() ??
-                  'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
-            );
-          }).toList();
+      if (itemsResponse.isEmpty) {
+        orders.clear();
+        return;
+      }
 
-          final timelineList = (row['timeline'] as List<dynamic>? ?? []).map((t) {
-            return OrderTimelineStep(
-              title: t['title']?.toString() ?? 'Update',
-              description: t['description']?.toString() ?? '',
-              timestamp: t['timestamp'] != null ? DateTime.tryParse(t['timestamp']) : null,
-              isCompleted: t['isCompleted'] == true,
-            );
-          }).toList();
+      // 4. Group items by parent order ID
+      final Map<String, List<dynamic>> groupedItems = {};
+      final Map<String, dynamic> ordersMap = {};
 
-          dbOrders.add(
-            VendorOrder(
-              id: row['id']?.toString() ?? '',
-              customerName: row['customer_name']?.toString() ?? 'Valued Customer',
-              amount: (row['amount'] as num?)?.toDouble() ?? 0.0,
-              status: row['status']?.toString() ?? 'Pending',
-              orderDate: row['created_at'] != null
-                  ? (DateTime.tryParse(row['created_at']) ?? DateTime.now())
-                  : DateTime.now(),
-              isB2B: row['is_b2b'] == true,
-              shippingAddress: row['shipping_address']?.toString(),
-              customerPhone: row['customer_phone']?.toString(),
-              trackingNumber: row['tracking_number']?.toString(),
-              courierPartner: row['courier_partner']?.toString(),
-              packageWeight: (row['package_weight'] as num?)?.toDouble(),
-              items: itemsList.isNotEmpty
-                  ? itemsList
-                  : [
-                      const VendorOrderItem(
-                        id: 'item_1',
-                        name: 'Luxury Apparel Item',
-                        quantity: 1,
-                        unitPrice: 150.00,
-                        imageUrl:
-                            'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
-                      ),
-                    ],
-              timeline: timelineList.isNotEmpty
-                  ? timelineList
-                  : [
-                      OrderTimelineStep(
-                        title: 'Order Placed',
-                        description: 'Order placed via ${row['payment_method'] ?? 'Checkout'}.',
-                        timestamp: row['created_at'] != null
-                            ? DateTime.tryParse(row['created_at'])
-                            : DateTime.now(),
-                        isCompleted: true,
-                      ),
-                    ],
-            ),
-          );
-        }
-        if (dbOrders.isNotEmpty) {
-          orders.assignAll(dbOrders);
+      for (var item in (itemsResponse as List<dynamic>)) {
+        final orderData = item['orders'];
+        if (orderData != null) {
+          final String orderId = orderData['id']?.toString() ?? '';
+          if (orderId.isNotEmpty) {
+            ordersMap[orderId] = orderData;
+            groupedItems.putIfAbsent(orderId, () => []).add(item);
+          }
         }
       }
+
+      final List<VendorOrder> scopedOrders = [];
+
+      for (var entry in ordersMap.entries) {
+        final row = entry.value;
+        final orderItemsRaw = groupedItems[entry.key] ?? [];
+
+        final itemsList = orderItemsRaw.map((item) {
+          return VendorOrderItem(
+            id: item['id']?.toString() ?? '',
+            name: item['product_name']?.toString() ?? 'Product',
+            quantity: (item['quantity'] as num?)?.toInt() ?? 1,
+            unitPrice: (item['unit_price'] as num?)?.toDouble() ?? 0.0,
+            size: item['size']?.toString(),
+            color: item['color']?.toString(),
+            imageUrl: item['image_url']?.toString() ??
+                'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
+          );
+        }).toList();
+
+        final timelineList = (row['timeline'] as List<dynamic>? ?? []).map((t) {
+          return OrderTimelineStep(
+            title: t['title']?.toString() ?? 'Update',
+            description: t['description']?.toString() ?? '',
+            timestamp: t['timestamp'] != null
+                ? DateTime.tryParse(t['timestamp'])
+                : null,
+            isCompleted: t['isCompleted'] == true,
+          );
+        }).toList();
+
+        scopedOrders.add(
+          VendorOrder(
+            id: row['id']?.toString() ?? '',
+            customerName:
+                row['customer_name']?.toString() ?? 'Valued Customer',
+            amount: (row['amount'] as num?)?.toDouble() ?? 0.0,
+            status: row['status']?.toString() ?? 'Pending',
+            orderDate: row['created_at'] != null
+                ? (DateTime.tryParse(row['created_at']) ?? DateTime.now())
+                : DateTime.now(),
+            isB2B: row['is_b2b'] == true,
+            shippingAddress: row['shipping_address']?.toString(),
+            customerPhone: row['customer_phone']?.toString(),
+            trackingNumber: row['tracking_number']?.toString(),
+            courierPartner: row['courier_partner']?.toString(),
+            packageWeight: (row['package_weight'] as num?)?.toDouble(),
+            items: itemsList,
+            timeline: timelineList.isNotEmpty
+                ? timelineList
+                : [
+                    OrderTimelineStep(
+                      title: 'Order Placed',
+                      description:
+                          'Order placed via ${row['payment_method'] ?? 'Checkout'}.',
+                      timestamp: row['created_at'] != null
+                          ? DateTime.tryParse(row['created_at'])
+                          : DateTime.now(),
+                      isCompleted: true,
+                    ),
+                  ],
+          ),
+        );
+      }
+
+      orders.assignAll(scopedOrders);
     } catch (e) {
-      debugPrint('Error fetching orders from Supabase: $e');
+      debugPrint('Error fetching vendor scoped orders from Supabase: $e');
     }
   }
 
@@ -120,192 +178,6 @@ class VendorOrderController extends GetxController {
     _ordersSubscriptionChannel?.unsubscribe();
     trackingController.dispose();
     super.onClose();
-  }
-
-  void _loadMockOrders() {
-    orders.assignAll([
-      VendorOrder(
-        id: '#ORD-9921',
-        customerName: 'Sarah Al-Fayed',
-        amount: 250.00,
-        status: 'Pending',
-        orderDate: DateTime.now().subtract(const Duration(minutes: 10)),
-        isB2B: false,
-        shippingAddress: 'Apt 4B, Beverly Hills Tower, Marina, Dubai, UAE',
-        customerPhone: '+971 50 123 4567',
-        items: [
-          const VendorOrderItem(
-            id: 'item_1',
-            name: 'Silk Slip Dress',
-            quantity: 1,
-            unitPrice: 120.00,
-            size: 'S',
-            color: 'Champagne',
-            imageUrl: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
-          ),
-          const VendorOrderItem(
-            id: 'item_2',
-            name: 'Cashmere Ribbed Knit',
-            quantity: 1,
-            unitPrice: 130.00,
-            size: 'M',
-            color: 'Soft Taupe',
-            imageUrl: 'https://images.unsplash.com/photo-1574164904299-3a102b110380?q=80&w=300&auto=format&fit=crop',
-          ),
-        ],
-        timeline: [
-          OrderTimelineStep(
-            title: 'Order Placed',
-            description: 'Order successfully authorized and paid.',
-            timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
-            isCompleted: true,
-          ),
-          const OrderTimelineStep(
-            title: 'Under Review',
-            description: 'Awaiting vendor confirmation and stock check.',
-            isCompleted: false,
-          ),
-          const OrderTimelineStep(
-            title: 'Fulfillment & Packing',
-            description: 'Items will be packed and printed with shipping labels.',
-            isCompleted: false,
-          ),
-        ],
-      ),
-      VendorOrder(
-        id: '#ORD-9920',
-        customerName: 'Luxe Apparel Retail Corp',
-        amount: 12450.00,
-        status: 'Processing',
-        orderDate: DateTime.now().subtract(const Duration(hours: 12)),
-        isB2B: true,
-        shippingAddress: 'Warehouse 12, Logistics Park South, Karachi, Pakistan',
-        customerPhone: '+92 300 987 6543',
-        items: [
-          const VendorOrderItem(
-            id: 'item_3',
-            name: 'Velvet Tuxedo Jacket',
-            quantity: 50,
-            unitPrice: 249.00,
-            imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=300&auto=format&fit=crop',
-          ),
-        ],
-        b2bMatrix: {
-          'Midnight Black': {'S': 10, 'M': 15, 'L': 15, 'XL': 10},
-          'Navy Blue': {'S': 5, 'M': 10, 'L': 10, 'XL': 5},
-          'Camel Gold': {'S': 5, 'M': 5, 'L': 5, 'XL': 5},
-        },
-        b2bSizes: ['S', 'M', 'L', 'XL'],
-        b2bColors: ['Midnight Black', 'Navy Blue', 'Camel Gold'],
-        timeline: [
-          OrderTimelineStep(
-            title: 'Order Placed',
-            description: 'Corporate PO processed. Payment terms: Net 30.',
-            timestamp: DateTime.now().subtract(const Duration(hours: 12)),
-            isCompleted: true,
-          ),
-          OrderTimelineStep(
-            title: 'Order Accepted',
-            description: 'Confirmed by Velvet Maison packing house.',
-            timestamp: DateTime.now().subtract(const Duration(hours: 11)),
-            isCompleted: true,
-          ),
-          const OrderTimelineStep(
-            title: 'Packing Order',
-            description: 'Sorting sizes and colors into custom garment covers.',
-            isCompleted: true,
-          ),
-          const OrderTimelineStep(
-            title: 'Dispatch & Courier',
-            description: 'Awaiting shipping manifest and carrier pickup.',
-            isCompleted: false,
-          ),
-        ],
-      ),
-      VendorOrder(
-        id: '#ORD-9919',
-        customerName: 'James Wilson',
-        amount: 120.00,
-        status: 'Shipped',
-        orderDate: DateTime.now().subtract(const Duration(days: 2)),
-        isB2B: false,
-        shippingAddress: '12 A, Street 5, Phase 6 DHA, Lahore, Pakistan',
-        customerPhone: '+92 333 456 7890',
-        trackingNumber: 'TRK88721992',
-        courierPartner: 'Trax Logistics',
-        packageWeight: 1.2,
-        items: [
-          const VendorOrderItem(
-            id: 'item_4',
-            name: 'Linen Lounge Pants',
-            quantity: 1,
-            unitPrice: 120.00,
-            size: 'L',
-            color: 'Natural Oatmeal',
-            imageUrl: 'https://images.unsplash.com/photo-1509551388413-e18d0ac5d495?q=80&w=300&auto=format&fit=crop',
-          ),
-        ],
-        timeline: [
-          OrderTimelineStep(
-            title: 'Order Placed',
-            description: 'Paid via Apple Pay.',
-            timestamp: DateTime.now().subtract(const Duration(days: 2)),
-            isCompleted: true,
-          ),
-          OrderTimelineStep(
-            title: 'Accepted',
-            description: 'Stock locked and confirmed.',
-            timestamp: DateTime.now().subtract(const Duration(days: 2, hours: 2)),
-            isCompleted: true,
-          ),
-          OrderTimelineStep(
-            title: 'Shipped',
-            description: 'Picked up by FedEx. Tracking: TRK88721992',
-            timestamp: DateTime.now().subtract(const Duration(days: 1)),
-            isCompleted: true,
-          ),
-        ],
-      ),
-      VendorOrder(
-        id: '#ORD-9918',
-        customerName: 'Elena Rossi',
-        amount: 450.00,
-        status: 'Returned',
-        orderDate: DateTime.now().subtract(const Duration(days: 5)),
-        isB2B: false,
-        shippingAddress: 'House 44, F-8/2, Islamabad, Pakistan',
-        customerPhone: '+92 321 654 0987',
-        returnReason: 'The classic trench coat fabric is stunning, but the size M runs slightly larger than standard charts. Requesting return.',
-        returnImages: [
-          'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=300&auto=format&fit=crop',
-          'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=300&auto=format&fit=crop',
-        ],
-        items: [
-          const VendorOrderItem(
-            id: 'item_5',
-            name: 'Classic Trench Coat',
-            quantity: 1,
-            unitPrice: 450.00,
-            size: 'M',
-            color: 'Honey Camel',
-            imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=300&auto=format&fit=crop',
-          ),
-        ],
-        timeline: [
-          OrderTimelineStep(
-            title: 'Return Requested',
-            description: 'Customer requested return: "Size was slightly too large."',
-            timestamp: DateTime.now().subtract(const Duration(days: 1)),
-            isCompleted: true,
-          ),
-          const OrderTimelineStep(
-            title: 'Awaiting Return Package',
-            description: 'RMA label generated. Pre-paid parcel is in transit.',
-            isCompleted: false,
-          ),
-        ],
-      ),
-    ]);
   }
 
   List<VendorOrder> get filteredOrders {

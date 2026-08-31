@@ -32,15 +32,16 @@ class CartItemTile extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(sw * 0.03),
         onTap: () {
-          final parts = item.id.split('_');
-          final productId = (parts.length >= 2) ? "${parts[0]}_${parts[1]}" : item.id;
           final productMap = {
-            'id': productId,
+            'id': item.baseProductId,
             'name': item.name,
             'price': item.price,
             'image': item.imageUrl,
+            'image_url': item.imageUrl,
             'isB2B': item.isB2B,
             'vendor': item.vendorName,
+            'sizes': item.size != null ? [item.size!] : ['S', 'M', 'L'],
+            'colors': item.color != null ? [item.color!] : ['Camel', 'White'],
           };
           Get.toNamed('/product-details', arguments: productMap);
         },

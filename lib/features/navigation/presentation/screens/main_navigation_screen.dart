@@ -12,9 +12,15 @@ class MainNavigationScreen extends GetView<MainNavigationController> {
     return Scaffold(
       backgroundColor: AppColors.offWhite,
       extendBody: true,
-      body: Obx(
-        () => PopScope(
-          canPop: controller.selectedIndex.value == 0,
+      body: Obx(() {
+        final currentPages = controller.pages;
+        final int index = controller.selectedIndex.value;
+        final int safeIndex = (index >= 0 && index < currentPages.length)
+            ? index
+            : 0;
+
+        return PopScope(
+          canPop: safeIndex == 0,
           onPopInvokedWithResult: (didPop, result) {
             if (didPop) return;
             if (controller.selectedIndex.value != 0) {
@@ -22,11 +28,12 @@ class MainNavigationScreen extends GetView<MainNavigationController> {
             }
           },
           child: IndexedStack(
-            index: controller.selectedIndex.value,
-            children: controller.pages,
+            key: ValueKey('main_nav_${controller.currentRole.name}'),
+            index: safeIndex,
+            children: currentPages,
           ),
-        ),
-      ),
+        );
+      }),
       bottomNavigationBar: CustomFloatingNavBar(controller: controller),
     );
   }

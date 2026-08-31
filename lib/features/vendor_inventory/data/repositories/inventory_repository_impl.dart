@@ -123,7 +123,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
       debugPrint('Error getting products from Supabase: $e');
     }
 
-    return _productsBox.values.toList();
+    return [];
   }
 
   @override

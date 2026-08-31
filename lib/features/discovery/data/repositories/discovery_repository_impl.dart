@@ -1,4 +1,5 @@
 import '../../domain/repositories/discovery_repository.dart';
+import '../../../vendor_inventory/data/models/product_variant_model.dart';
 import '../../../wishlist/domain/models/product_model.dart';
 import '../../../vendor_inventory/data/models/vendor_product_model.dart';
 import '../../../super_admin/presentation/controllers/admin_crud_controller.dart';
@@ -28,7 +29,7 @@ class DiscoveryRepositoryImpl implements DiscoveryRepository {
               map['isB2B'] == true;
           final String status = (map['status'] ?? 'approved').toString().toLowerCase();
           if (pIsB2B == isB2B && (status == 'approved' || status.isEmpty)) {
-            publishedProducts.add(Product.fromMap(map));
+            publishedProducts.insert(0, Product.fromMap(map));
           }
         }
       }
@@ -74,23 +75,41 @@ class DiscoveryRepositoryImpl implements DiscoveryRepository {
 
     // 3. Fetch local vendor products from Hive box as fallback/merge
     try {
-      if (!Hive.isBoxOpen('vendorProductsBox')) {
-        await Hive.openBox<VendorProduct>('vendorProductsBox');
+      if (!Hive.isAdapterRegistered(2)) {
+        Hive.registerAdapter(ProductVariantAdapter());
       }
-      final box = Hive.box<VendorProduct>('vendorProductsBox');
+      if (!Hive.isAdapterRegistered(3)) {
+        Hive.registerAdapter(VendorProductAdapter());
+      }
+
+      Box<VendorProduct> box;
+      try {
+        if (!Hive.isBoxOpen('vendorProductsBox')) {
+          box = await Hive.openBox<VendorProduct>('vendorProductsBox');
+        } else {
+          box = Hive.box<VendorProduct>('vendorProductsBox');
+        }
+      } catch (boxErr) {
+        debugPrint('Recovering corrupted vendorProductsBox: $boxErr');
+        await Hive.deleteBoxFromDisk('vendorProductsBox');
+        box = await Hive.openBox<VendorProduct>('vendorProductsBox');
+      }
+
       for (var vp in box.values) {
         if (vp.isB2B == isB2B && !vp.isDraft) {
           final alreadyAdded = publishedProducts.any((p) => p.id == vp.id);
           if (!alreadyAdded) {
-            publishedProducts.add(
+            final String primaryImg = vp.imageUrls.isNotEmpty
+                ? vp.imageUrls.first
+                : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop';
+            publishedProducts.insert(
+              0,
               Product(
                 id: vp.id,
                 name: vp.title,
                 vendorName: 'Boutique Apparel',
                 price: vp.basePrice,
-                imageUrl: vp.imageUrls.isNotEmpty
-                    ? vp.imageUrls.first
-                    : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+                imageUrl: primaryImg,
                 inStock: vp.variants.isEmpty
                     ? true
                     : vp.variants.any((v) => v.stockQuantity > 0),

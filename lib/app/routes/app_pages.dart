@@ -47,6 +47,10 @@ import 'package:ecom_app/features/vendor_orders/presentation/views/vendor_tracki
 import 'package:ecom_app/features/vendor_orders/bindings/dispatch_binding.dart';
 import 'package:ecom_app/features/vendor_orders/presentation/views/admin_dispatch_view.dart';
 
+import 'package:ecom_app/app/middleware/auth_guard.dart';
+import 'package:ecom_app/app/middleware/vendor_guard.dart';
+import 'package:ecom_app/app/middleware/corporate_guard.dart';
+
 abstract class AppPages {
   static const initial = AppRoutes.splash;
 
@@ -85,12 +89,14 @@ abstract class AppPages {
       name: AppRoutes.vendorDashboard,
       page: () => const VendorDashboardView(),
       binding: VendorDashboardBinding(),
+      middlewares: [AuthGuard(), VendorGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.b2bPortal,
       page: () => const B2BPortalView(),
       binding: B2BPortalBinding(),
+      middlewares: [AuthGuard(), CorporateGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
@@ -106,12 +112,14 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.b2bCart,
       page: () => const B2BCartScreen(),
+      middlewares: [AuthGuard(), CorporateGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.checkout,
       page: () => const CheckoutView(),
       binding: CheckoutBinding(),
+      middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
@@ -129,6 +137,7 @@ abstract class AppPages {
       name: AppRoutes.vendorInventory,
       page: () => const ecom_inventory.InventoryView(),
       binding: ecom_inventory_binding.VendorInventoryBinding(),
+      middlewares: [AuthGuard(), VendorGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
@@ -139,54 +148,62 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.vendorPlans,
       page: () => const SubscriptionPlansView(),
+      middlewares: [AuthGuard(), VendorGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.vendorOrders,
       page: () => const VendorOrdersView(),
       binding: VendorOrdersBinding(),
+      middlewares: [AuthGuard(), VendorGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.fulfillmentChecklist,
       page: () => const PackingChecklistView(),
       binding: FulfillmentBinding(),
+      middlewares: [AuthGuard(), VendorGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.adminSubscriptionBuilder,
       page: () => const SubscriptionPlanBuilderScreen(),
+      middlewares: [AuthGuard(), AdminGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.adminPanel,
       page: () => const AdminMainLayout(),
       binding: AdminBinding(),
-      middlewares: [AdminGuard()],
+      middlewares: [AuthGuard(), AdminGuard()],
       transition: Transition.fadeIn,
     ),
     GetPage(
       name: AppRoutes.customerTracking,
       page: () => const CustomerTrackingView(),
       binding: TrackingBinding(),
+      middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.rmaRequest,
       page: () => const RmaRequestView(),
       binding: PostPurchaseBinding(),
+      middlewares: [AuthGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.vendorTracking,
       page: () => const VendorTrackingView(),
       binding: VendorTrackingBinding(),
+      middlewares: [AuthGuard(), VendorGuard()],
       transition: Transition.rightToLeft,
     ),
     GetPage(
       name: AppRoutes.adminDispatch,
       page: () => const AdminDispatchView(),
       binding: DispatchBinding(),
+      middlewares: [AuthGuard(), AdminGuard()],
       transition: Transition.rightToLeft,
     ),
   ];

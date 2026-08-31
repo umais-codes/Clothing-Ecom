@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/features/super_admin/domain/models/subscription_plan.dart';
 import '../../domain/entities/order_entity.dart';
 
 class VendorDashboardController extends GetxController {
   final RxBool isYearlyBilling = false.obs;
+  final RxBool isLoading = false.obs;
 
   final List<SubscriptionPlan> availablePlans = [
     SubscriptionPlan(
@@ -64,69 +67,169 @@ class VendorDashboardController extends GetxController {
     Get.back();
   }
 
-  final RxDouble gmv = 125430.50.obs;
-  final RxInt totalSales = 1240.obs;
-  final RxDouble conversionRate = 3.8.obs;
+  final RxDouble gmv = 0.0.obs;
+  final RxInt totalSales = 0.obs;
+  final RxDouble conversionRate = 4.2.obs;
 
   // Financial Overview
-  final RxDouble availableBalance = 12400.00.obs;
-  final RxDouble pendingPayouts = 4500.00.obs;
-  final RxString nextPayoutDate = "May 5, 2026".obs;
+  final RxDouble availableBalance = 0.0.obs;
+  final RxDouble pendingPayouts = 0.0.obs;
+  final RxString nextPayoutDate = "15th of month".obs;
 
   // Active Subscription Plan details
   final RxString activePlanName = "Pro Plan".obs;
   final RxString planFee = "\$49.99 / month".obs;
   final RxString commissionRate = "5.0% flat platform fee".obs;
-  final RxInt currentProducts = 142.obs;
+  final RxInt currentProducts = 0.obs;
   final RxInt maxProducts = 500.obs;
-  final RxString nextPlanBillingDate = "June 9, 2026".obs;
+  final RxString nextPlanBillingDate = "Auto-renew".obs;
   final RxString activePlanBillingStatus = "Active".obs;
 
   // Operational SLA Metrics
-  final RxDouble slaFulfillmentRate = 98.2.obs;
-  final RxInt pendingReturns = 5.obs;
+  final RxDouble slaFulfillmentRate = 99.1.obs;
+  final RxInt pendingReturns = 0.obs;
 
   // Operational Tracking
-  final RxList<OrderEntity> recentOrders = <OrderEntity>[
-    const OrderEntity(
-      id: '#ORD-9921',
-      customerName: 'Sarah Al-Fayed',
-      amount: 250.00,
-      status: 'Processing',
-      itemsCount: 3,
-      isUrgent: true,
-      time: '10 mins ago',
-    ),
-    const OrderEntity(
-      id: '#ORD-9920',
-      customerName: 'James Wilson',
-      amount: 120.00,
-      status: 'Pending',
-      itemsCount: 1,
-      isUrgent: false,
-      time: '45 mins ago',
-    ),
-    const OrderEntity(
-      id: '#ORD-9919',
-      customerName: 'Elena Rossi',
-      amount: 850.00,
-      status: 'Shipped',
-      itemsCount: 5,
-      isUrgent: false,
-      time: '2 hours ago',
-    ),
-    const OrderEntity(
-      id: '#ORD-9918',
-      customerName: 'Ahmed Khan',
-      amount: 340.00,
-      status: 'Processing',
-      itemsCount: 2,
-      isUrgent: true,
-      time: '3 hours ago',
-    ),
-  ].obs;
+  final RxList<OrderEntity> recentOrders = <OrderEntity>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadLiveVendorMetrics();
+  }
+
+  Future<void> loadLiveVendorMetrics() async {
+    isLoading.value = true;
+    try {
+      final supabase = Get.find<SupabaseService>().client;
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        _resetMetrics();
+        return;
+      }
+
+      // 1. Resolve vendor ID
+      final profileRes = await supabase
+          .from('profiles')
+          .select('vendor_id')
+          .eq('id', user.id)
+          .maybeSingle();
+      String? vendorId = profileRes?['vendor_id']?.toString();
+
+      if (vendorId == null) {
+        final vendorRes = await supabase
+            .from('vendors')
+            .select('id')
+            .eq('owner_id', user.id)
+            .maybeSingle();
+        vendorId = vendorRes?['id']?.toString();
+      }
+
+      if (vendorId == null) {
+        _resetMetrics();
+        return;
+      }
+
+      // 2. Count products owned by this vendor
+      final productsRes = await supabase
+          .from('products')
+          .select('id')
+          .eq('vendor_id', vendorId);
+
+      final List<String> myProductIds = (productsRes as List)
+          .map((p) => p['id'].toString())
+          .toList();
+
+      currentProducts.value = myProductIds.length;
+
+      if (myProductIds.isEmpty) {
+        _resetOrderMetrics();
+        return;
+      }
+
+      // 3. Query order items for this vendor
+      final itemsRes = await supabase
+          .from('order_items')
+          .select('quantity, unit_price, order_id, orders!inner(id, status, created_at, customer_name, amount)')
+          .filter('product_id', 'in', myProductIds);
+
+      double gmvSum = 0.0;
+      int salesCount = 0;
+      int returnsCount = 0;
+      final Map<String, OrderEntity> ordersMap = {};
+
+      for (var item in (itemsRes as List<dynamic>)) {
+        final order = item['orders'];
+        if (order != null) {
+          final String status =
+              order['status']?.toString().toLowerCase() ?? '';
+          final double qty = (item['quantity'] as num?)?.toDouble() ?? 0.0;
+          final double price =
+              (item['unit_price'] as num?)?.toDouble() ?? 0.0;
+
+          if (status != 'cancelled') {
+            gmvSum += (qty * price);
+            salesCount++;
+          }
+          if (status == 'returned') {
+            returnsCount++;
+          }
+
+          final String orderId = order['id']?.toString() ?? '';
+          if (orderId.isNotEmpty && !ordersMap.containsKey(orderId)) {
+            final double ordAmount =
+                (order['amount'] as num?)?.toDouble() ?? (qty * price);
+            final String rawStatus = order['status']?.toString() ?? 'Pending';
+            final String custName =
+                order['customer_name']?.toString() ?? 'Valued Customer';
+
+            ordersMap[orderId] = OrderEntity(
+              id: orderId,
+              customerName: custName,
+              amount: ordAmount,
+              status: rawStatus,
+              itemsCount: (qty).toInt(),
+              isUrgent: rawStatus.toLowerCase() == 'pending',
+              time: 'Recent',
+            );
+          }
+        }
+      }
+
+      gmv.value = gmvSum;
+      totalSales.value = salesCount;
+      availableBalance.value = gmvSum * 0.95; // after 5% platform commission
+      pendingPayouts.value = gmvSum * 0.20;
+      pendingReturns.value = returnsCount;
+
+      recentOrders.assignAll(ordersMap.values.take(10).toList());
+    } catch (e) {
+      debugPrint('Error loading live vendor metrics: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _resetMetrics() {
+    gmv.value = 0.0;
+    totalSales.value = 0;
+    availableBalance.value = 0.0;
+    pendingPayouts.value = 0.0;
+    currentProducts.value = 0;
+    pendingReturns.value = 0;
+    recentOrders.clear();
+  }
+
+  void _resetOrderMetrics() {
+    gmv.value = 0.0;
+    totalSales.value = 0;
+    availableBalance.value = 0.0;
+    pendingPayouts.value = 0.0;
+    pendingReturns.value = 0;
+    recentOrders.clear();
+  }
 
   void refreshDashboard() {
-    gmv.value += 150.0;
+    loadLiveVendorMetrics();
   }
 }

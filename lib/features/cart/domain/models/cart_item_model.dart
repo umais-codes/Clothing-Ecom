@@ -72,4 +72,48 @@ class CartItem {
       isAiSizeMatched: isAiSizeMatched ?? this.isAiSizeMatched,
     );
   }
+
+  String get baseProductId {
+    final parts = id.split('_');
+    if (parts.length >= 3) {
+      // If formatted as {productId}_{size}_{color}
+      return parts.sublist(0, parts.length - 2).join('_');
+    } else if (parts.length == 2 && (parts[1] == 'S' || parts[1] == 'M' || parts[1] == 'L' || parts[1] == 'XL' || parts[1] == 'XXL')) {
+      return parts[0];
+    }
+    return id;
+  }
+
+  double get totalPrice => price * quantity;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'product_id': baseProductId,
+      'name': name,
+      'vendor_name': vendorName,
+      'price': price,
+      'image_url': imageUrl,
+      'quantity': quantity,
+      'is_b2b': isB2B,
+      'size': size,
+      'color': color,
+      'is_ai_size_matched': isAiSizeMatched,
+    };
+  }
+
+  factory CartItem.fromMap(Map<String, dynamic> map) {
+    return CartItem(
+      id: map['id']?.toString() ?? '',
+      name: map['name'] ?? map['product_name'] ?? 'Product',
+      vendorName: map['vendor_name'] ?? map['vendor'] ?? 'Brand Vendor',
+      price: (map['price'] ?? map['unit_price'] as num?)?.toDouble() ?? 0.0,
+      imageUrl: map['image_url'] ?? map['image'] ?? 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+      quantity: (map['quantity'] as num?)?.toInt() ?? 1,
+      isB2B: map['is_b2b'] == true || map['is_b2b'] == 1 || map['isB2B'] == true,
+      size: map['size']?.toString(),
+      color: map['color']?.toString(),
+      isAiSizeMatched: map['is_ai_size_matched'] == true || map['isAiSizeMatched'] == true,
+    );
+  }
 }

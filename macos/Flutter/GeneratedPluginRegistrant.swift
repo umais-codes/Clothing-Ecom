@@ -6,7 +6,7 @@ import FlutterMacOS
 import Foundation
 
 import app_links
-import file_picker
+import file_picker_darwin
 import file_selector_macos
 import flutter_inappwebview_macos
 import google_sign_in_ios

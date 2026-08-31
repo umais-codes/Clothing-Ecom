@@ -171,7 +171,11 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
                     color: AppColors.camel.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.inventory_2_outlined, color: AppColors.camel, size: sw * 0.06),
+                  child: Icon(
+                    Icons.inventory_2_outlined,
+                    color: AppColors.camel,
+                    size: sw * 0.06,
+                  ),
                 ),
                 SizedBox(width: sw * 0.03),
                 Column(
@@ -196,7 +200,11 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
                 ),
               ],
             ),
-            Icon(Icons.arrow_forward_ios_rounded, color: AppColors.camel, size: sw * 0.04),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: AppColors.camel,
+              size: sw * 0.04,
+            ),
           ],
         ),
       ),
@@ -580,15 +588,17 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
   }
 
   Widget _buildSubscriptionPlanDetails(BuildContext context, double sw) {
-    return Obx(() => SubscriptionPlanDetailsCard(
-          planName: controller.activePlanName.value,
-          planFee: controller.planFee.value,
-          commissionRate: controller.commissionRate.value,
-          currentProducts: controller.currentProducts.value,
-          maxProducts: controller.maxProducts.value,
-          nextBillingDate: controller.nextPlanBillingDate.value,
-          billingStatus: controller.activePlanBillingStatus.value,
-          onUpgradePressed: () => Get.toNamed('/vendor-plans'),
-        ));
+    return Obx(
+      () => SubscriptionPlanDetailsCard(
+        planName: controller.activePlanName.value,
+        planFee: controller.planFee.value,
+        commissionRate: controller.commissionRate.value,
+        currentProducts: controller.currentProducts.value,
+        maxProducts: controller.maxProducts.value,
+        nextBillingDate: controller.nextPlanBillingDate.value,
+        billingStatus: controller.activePlanBillingStatus.value,
+        onUpgradePressed: () => Get.toNamed('/vendor-plans'),
+      ),
+    );
   }
 }

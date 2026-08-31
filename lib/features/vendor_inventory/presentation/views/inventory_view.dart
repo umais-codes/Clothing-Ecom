@@ -10,12 +10,30 @@ import '../../../../app/widgets/custom_button.dart';
 import '../controllers/product_crud_controller.dart';
 import '../widgets/bulk_upload_sheet.dart';
 import '../../../../app/widgets/custom_confirm_dialog.dart';
+import '../../domain/repositories/inventory_repository.dart';
+import '../../data/repositories/inventory_repository_impl.dart';
 
 class InventoryView extends StatelessWidget {
   const InventoryView({super.key});
 
+  void _ensureDependencies() {
+    if (!Get.isRegistered<InventoryRepository>()) {
+      Get.put<InventoryRepository>(
+        InventoryRepositoryImpl()..init(),
+        permanent: true,
+      );
+    }
+    if (!Get.isRegistered<ProductCrudController>()) {
+      Get.put(
+        ProductCrudController(Get.find<InventoryRepository>()),
+        permanent: true,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    _ensureDependencies();
     final controller = Get.find<ProductCrudController>();
     final double sw = context.screenWidth;
 
@@ -106,7 +124,10 @@ class InventoryView extends StatelessWidget {
               prefixIcon: const Icon(Icons.search, color: AppColors.grey),
               filled: true,
               fillColor: AppColors.offWhite,
-              contentPadding: EdgeInsets.symmetric(horizontal: sw * 0.03, vertical: 10),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: sw * 0.03,
+                vertical: 10,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(sw * 0.02),
                 borderSide: BorderSide.none,
@@ -120,20 +141,27 @@ class InventoryView extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               children: ['All', ...AppConstants.categories].map((cat) {
                 return Obx(() {
-                  final isSelected = controller.selectedCategoryFilter.value == cat;
+                  final isSelected =
+                      controller.selectedCategoryFilter.value == cat;
                   return Padding(
                     padding: EdgeInsets.only(right: sw * 0.02),
                     child: ChoiceChip(
                       label: Text(cat),
                       selected: isSelected,
                       onSelected: (selected) {
-                        if (selected) controller.selectedCategoryFilter.value = cat;
+                        if (selected) {
+                          controller.selectedCategoryFilter.value = cat;
+                        }
                       },
                       selectedColor: AppColors.camel,
                       backgroundColor: AppColors.offWhite,
                       labelStyle: GoogleFonts.outfit(
-                        color: isSelected ? AppColors.white : AppColors.charcoal,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        color: isSelected
+                            ? AppColors.white
+                            : AppColors.charcoal,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                         fontSize: sw * 0.03,
                       ),
                     ),
@@ -173,10 +201,7 @@ class InventoryView extends StatelessWidget {
 
   Widget _buildProductList(ProductCrudController controller, double sw) {
     return ListView.separated(
-      padding: EdgeInsets.symmetric(
-        horizontal: sw * 0.03,
-        vertical: sw * 0.02,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: sw * 0.03, vertical: sw * 0.02),
       itemCount: controller.filteredProducts.length,
       separatorBuilder: (context, index) => SizedBox(height: sw * 0.02),
       itemBuilder: (context, index) {
@@ -240,7 +265,11 @@ class InventoryView extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.edit, color: AppColors.camel, size: sw * 0.055),
+                icon: Icon(
+                  Icons.edit,
+                  color: AppColors.camel,
+                  size: sw * 0.055,
+                ),
                 onPressed: () {
                   controller.editProduct(product);
                   Get.to(() => const ProductFormView());

@@ -147,17 +147,7 @@ class ProfileController extends GetxController {
           }
         }
 
-        // Auto-detect role cleanly without role-flicker
         final supabase = Get.find<SupabaseService>().client;
-        final String metaRole =
-            metadata?['role']?.toString().toLowerCase() ?? '';
-        final String dbRole = data?['role']?.toString().toLowerCase() ?? '';
-        final String hiveRole =
-            (Hive.box('settings').get('lastSelectedRole') as String?)
-                    ?.toLowerCase() ??
-                '';
-        final AuthRole activeRole = _authController.selectedRole.value;
-
         Map<String, dynamic>? vendorRes;
         try {
           vendorRes = await supabase
@@ -167,37 +157,6 @@ class ProfileController extends GetxController {
               .maybeSingle();
         } catch (ve) {
           debugPrint('Vendor check in profile controller error: $ve');
-        }
-
-        final String category =
-            vendorRes?['category']?.toString().toLowerCase() ?? '';
-
-        // Honor active perspective if explicitly set, otherwise detect based on account
-        AuthRole resolvedRole = activeRole;
-        if (activeRole == AuthRole.vendor) {
-          resolvedRole = AuthRole.vendor;
-        } else if (activeRole == AuthRole.corporate) {
-          resolvedRole = AuthRole.corporate;
-        } else if (activeRole == AuthRole.admin) {
-          resolvedRole = AuthRole.admin;
-        } else {
-          // If shopper or initial, detect partner account if available
-          if (category == 'corporate' || dbRole == 'corporate' || metaRole == 'corporate' || hiveRole == 'corporate') {
-            resolvedRole = AuthRole.corporate;
-          } else if (category == 'vendor' || dbRole == 'vendor' || metaRole == 'vendor' || hiveRole == 'vendor' || (vendorRes != null && category != 'corporate')) {
-            resolvedRole = AuthRole.vendor;
-          } else if (dbRole == 'admin' || metaRole == 'admin') {
-            resolvedRole = AuthRole.admin;
-          } else {
-            resolvedRole = AuthRole.shopper;
-          }
-        }
-
-        if (_authController.selectedRole.value != resolvedRole) {
-          _authController.selectedRole.value = resolvedRole;
-        }
-        if (resolvedRole != AuthRole.admin) {
-          Hive.box('settings').put('lastSelectedRole', resolvedRole.name);
         }
 
         // Fetch role-specific vendor / corporate data
@@ -652,10 +611,10 @@ class ProfileController extends GetxController {
       denyText: 'Cancel',
       onGrant: () async {
         try {
-          await _authRepository.signOut();
+          await _authController.signOut();
           _resetProfileData();
         } catch (e) {
-          debugPrint('Error signing out of Supabase: $e');
+          debugPrint('Error signing out: $e');
         }
         Get.offAllNamed('/onboarding');
       },

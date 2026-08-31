@@ -1,3 +1,6 @@
+import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/features/cart/domain/models/cart_item_model.dart';
+import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/entities/line_sheet_entity.dart';
@@ -66,6 +69,59 @@ class B2BPortalController extends GetxController {
     return totalMatrixQuantity * 35.0;
   }
 
+  void addMatrixToCart() {
+    if (totalMatrixQuantity <= 0) {
+      Get.snackbar(
+        'Empty Matrix',
+        'Please enter quantities for at least one size/color in the matrix.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.warning.withValues(alpha: 0.1),
+        colorText: AppColors.charcoal,
+      );
+      return;
+    }
+
+    final b2bCart = Get.find<B2BCartController>();
+    final List<CartItem> itemsToAdd = [];
+
+    matrixQuantities.forEach((key, qty) {
+      if (qty > 0) {
+        final parts = key.split('-');
+        final color = parts[0];
+        final size = parts.length > 1 ? parts[1] : 'M';
+        final id = "LS-001_${size}_$color";
+
+        itemsToAdd.add(
+          CartItem(
+            id: id,
+            name: "PREMIUM COTTON POLO",
+            vendorName: "Corporate Sourcing Direct",
+            price: 35.0,
+            imageUrl:
+                "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&q=80&w=800",
+            quantity: qty,
+            isB2B: true,
+            size: size,
+            color: color,
+          ),
+        );
+      }
+    });
+
+    final addedCount = totalMatrixQuantity;
+    b2bCart.addBatchItems(itemsToAdd);
+    matrixQuantities.clear();
+
+    Get.toNamed('/b2b-cart');
+    Get.snackbar(
+      'Bulk Matrix Added',
+      'Added $addedCount units to Corporate Procurement Cart.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: AppColors.camel,
+      colorText: AppColors.white,
+    );
+  }
+
   // RFQ Form State
   final companyNameController = TextEditingController();
   final rfqQuantityController = TextEditingController();
@@ -77,7 +133,7 @@ class B2BPortalController extends GetxController {
       Get.snackbar(
         'Error',
         'Please fill in required fields',
-        snackPosition: .TOP,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Get.theme.colorScheme.error.withValues(alpha: 0.1),
       );
       return;
@@ -85,10 +141,8 @@ class B2BPortalController extends GetxController {
     Get.snackbar(
       'Quote Requested',
       'Our team will contact ${companyNameController.text} shortly.',
-      snackPosition: .TOP,
+      snackPosition: SnackPosition.TOP,
       backgroundColor: Get.theme.colorScheme.secondary.withValues(alpha: 0.1),
     );
   }
-
-
 }

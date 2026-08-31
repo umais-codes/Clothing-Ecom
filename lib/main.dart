@@ -14,8 +14,24 @@ import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/auth/data/repositories/auth_repository_impl.dart';
 
+import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
+import 'package:ecom_app/features/vendor_inventory/data/models/product_variant_model.dart';
+import 'package:ecom_app/features/vendor_inventory/data/models/vendor_product_model.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+
+  if (!Hive.isAdapterRegistered(1)) {
+    Hive.registerAdapter(ProductAdapter());
+  }
+  if (!Hive.isAdapterRegistered(2)) {
+    Hive.registerAdapter(ProductVariantAdapter());
+  }
+  if (!Hive.isAdapterRegistered(3)) {
+    Hive.registerAdapter(VendorProductAdapter());
+  }
 
   await Get.putAsync(() => SupabaseService().init());
 

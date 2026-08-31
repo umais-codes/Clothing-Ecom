@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/core/error/error_handler.dart';
@@ -54,60 +53,31 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<User?> signInWithSocialProvider(String provider) async {
     try {
       if (provider.toLowerCase() == 'google') {
-        try {
-          const webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
-          const iosClientId = String.fromEnvironment('GOOGLE_IOS_CLIENT_ID');
-
-          final GoogleSignIn googleSignIn = GoogleSignIn(
-            clientId: iosClientId.isNotEmpty ? iosClientId : null,
-            serverClientId: webClientId.isNotEmpty ? webClientId : null,
-          );
-
-          final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-          if (googleUser == null) {
-            return null; // User cancelled native sign-in dialog
-          }
-
-          final GoogleSignInAuthentication googleAuth =
-              await googleUser.authentication;
-          final idToken = googleAuth.idToken;
-          final accessToken = googleAuth.accessToken;
-
-          if (idToken == null) {
-            throw Exception(
-              'Google Sign-In succeeded but did not return an ID Token.',
-            );
-          }
-
-          final response = await _supabase.auth.signInWithIdToken(
-            provider: OAuthProvider.google,
-            idToken: idToken,
-            accessToken: accessToken,
-          );
-          return response.user;
-        } catch (nativeError) {
-          debugPrint(
-            'Native Google Sign-In failed or was unconfigured, falling back to Web OAuth: $nativeError',
-          );
+        final res = await _supabase.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: kIsWeb
+              ? null
+              : 'io.supabase.velvetmaison://login-callback/',
+        );
+        if (res) {
+          return _supabase.auth.currentUser;
         }
-      }
-
-      OAuthProvider oauthProvider;
-      if (provider.toLowerCase() == 'google') {
-        oauthProvider = OAuthProvider.google;
+        return null;
       } else if (provider.toLowerCase() == 'apple') {
-        oauthProvider = OAuthProvider.apple;
-      } else {
-        throw Exception('Unsupported provider');
+        final res = await _supabase.auth.signInWithOAuth(
+          OAuthProvider.apple,
+          redirectTo: kIsWeb
+              ? null
+              : 'io.supabase.velvetmaison://login-callback/',
+        );
+        if (res) {
+          return _supabase.auth.currentUser;
+        }
+        return null;
       }
-
-      // Web-based OAuth Redirect fallback
-      await _supabase.auth.signInWithOAuth(
-        oauthProvider,
-        redirectTo: 'io.supabase.ecomapp://login-callback',
-      );
       return null;
     } catch (e) {
+      debugPrint('Error signing in with social provider: $e');
       throw Exception(ErrorHandler.getErrorMessage(e));
     }
   }

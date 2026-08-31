@@ -15,15 +15,21 @@ import 'package:ecom_app/features/vendor_inventory/presentation/views/inventory_
 class MainNavigationController extends GetxController {
   final RxInt selectedIndex = 0.obs;
 
-  final RxList<Widget> pages = <Widget>[].obs;
-
-  AuthRole get currentRole => Get.find<AuthController>().selectedRole.value;
+  AuthRole get currentRole {
+    if (!Get.isRegistered<AuthController>()) {
+      return AuthRole.shopper;
+    }
+    final authCtrl = Get.find<AuthController>();
+    if (authCtrl.currentUser == null) {
+      return AuthRole.shopper;
+    }
+    return authCtrl.selectedRole.value;
+  }
 
   @override
   void onInit() {
     super.onInit();
     _initializePages();
-
     ever(Get.find<AuthController>().selectedRole, (_) {
       _initializePages();
       selectedIndex.value = 0;
@@ -31,34 +37,41 @@ class MainNavigationController extends GetxController {
   }
 
   void _initializePages() {
-    if (currentRole == AuthRole.vendor) {
-      pages.assignAll([
-        const VendorDashboardView(),
-        const InventoryView(),
-        const VendorOrdersView(),
-        const ProfileView(),
-      ]);
-    } else if (currentRole == AuthRole.corporate) {
-      pages.assignAll([
+    // Retained for backward compatibility during live session hot reloads
+  }
+
+  List<Widget> get pages {
+    final role = currentRole;
+    if (role == AuthRole.vendor) {
+      return const [
+        VendorDashboardView(),
+        InventoryView(),
+        VendorOrdersView(),
+        ProfileView(),
+      ];
+    } else if (role == AuthRole.corporate) {
+      return [
         const B2BPortalView(),
         DiscoveryScreen(),
         const WishlistScreen(),
         const B2BCartScreen(),
         const ProfileView(),
-      ]);
+      ];
     } else {
-      pages.assignAll([
+      return [
         const HomeView(),
         DiscoveryScreen(),
         const WishlistScreen(),
         const B2CCartScreen(),
         const ProfileView(),
-      ]);
+      ];
     }
   }
 
   void changeTab(int index) {
-    selectedIndex.value = index;
+    if (index >= 0 && index < pages.length) {
+      selectedIndex.value = index;
+    }
   }
 
   List<NavigationItemData> get navItems {

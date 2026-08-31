@@ -17,7 +17,7 @@ class SupabaseService extends GetxService {
   Future<SupabaseService> init() async {
     await Supabase.initialize(
       url: supabaseUrl,
-      anonKey: supabaseAnonKey,
+      publishableKey: supabaseAnonKey,
       realtimeClientOptions: const RealtimeClientOptions(eventsPerSecond: 10),
     );
     client = Supabase.instance.client;

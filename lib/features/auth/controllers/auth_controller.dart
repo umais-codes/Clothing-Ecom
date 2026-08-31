@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:ecom_app/features/auth/presentation/screens/pending_approval_screen.dart';
+import 'package:ecom_app/features/discovery/presentation/controllers/filter_controller.dart';
+import 'package:ecom_app/features/home/presentation/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecom_app/features/auth/presentation/screens/pending_approval_screen.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/features/super_admin/presentation/controllers/admin_controller.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart'
     hide UserRole;
@@ -93,11 +95,32 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> signOut() async {
+    try {
+      await _authRepository.signOut();
+    } catch (e) {
+      debugPrint('Error in AuthController signOut: $e');
+    }
+    selectedRole.value = AuthRole.shopper;
+    final box = Hive.box('settings');
+    await box.delete('lastSelectedRole');
+    await box.delete('login_time');
+    await box.delete('corporate_ntn');
+    await box.delete('corporate_volume');
+    status.value = AuthStatus.initial;
+  }
+
   void setRole(AuthRole role) {
     selectedRole.value = role;
     status.value = AuthStatus.initial;
     if (role != AuthRole.admin) {
       Hive.box('settings').put('lastSelectedRole', role.name);
+    }
+    if (Get.isRegistered<HomeController>()) {
+      Get.find<HomeController>().loadTrendingProducts();
+    }
+    if (Get.isRegistered<FilterController>()) {
+      Get.find<FilterController>().loadProducts();
     }
   }
 
@@ -258,17 +281,15 @@ class AuthController extends GetxController {
     }
   }
 
-  // Vendor Actions
+  // --- Vendor Actions ---
   Future<void> pickCnicDocument() async {
     try {
-      FilePickerResult? result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      );
+      final picker = ImagePicker();
+      final XFile? result = await picker.pickImage(source: ImageSource.gallery);
 
       if (result != null) {
-        cnicFileName.value = result.files.first.name;
-        cnicFilePath.value = result.files.first.path ?? '';
+        cnicFileName.value = result.name;
+        cnicFilePath.value = result.path;
         hasCnicUploaded.value = true;
       }
     } catch (e) {
@@ -278,14 +299,12 @@ class AuthController extends GetxController {
 
   Future<void> pickSecpDocument() async {
     try {
-      FilePickerResult? result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      );
+      final picker = ImagePicker();
+      final XFile? result = await picker.pickImage(source: ImageSource.gallery);
 
       if (result != null) {
-        secpFileName.value = result.files.first.name;
-        secpFilePath.value = result.files.first.path ?? '';
+        secpFileName.value = result.name;
+        secpFilePath.value = result.path;
         hasSecpUploaded.value = true;
       }
     } catch (e) {
@@ -324,8 +343,8 @@ class AuthController extends GetxController {
       final ownerName = contactPersonController.text.trim().isNotEmpty
           ? contactPersonController.text.trim()
           : (brandNameController.text.trim().isNotEmpty
-                ? brandNameController.text.trim()
-                : 'Owner');
+              ? brandNameController.text.trim()
+              : 'Owner');
       final phoneNum = vendorPhoneController.text.trim().isNotEmpty
           ? vendorPhoneController.text.trim()
           : 'Not provided';
@@ -535,7 +554,7 @@ class AuthController extends GetxController {
     }
   }
 
-  // Corporate Actions
+  // --- Corporate Actions ---
   Future<void> registerCorporate() async {
     if (companyNameController.text.isEmpty ||
         corporateEmailController.text.isEmpty ||
@@ -546,9 +565,10 @@ class AuthController extends GetxController {
     status.value = AuthStatus.loading;
     try {
       final compName = companyNameController.text.trim();
-      final contactPerson = corporateContactPersonController.text.trim().isNotEmpty
-          ? corporateContactPersonController.text.trim()
-          : compName;
+      final contactPerson =
+          corporateContactPersonController.text.trim().isNotEmpty
+              ? corporateContactPersonController.text.trim()
+              : compName;
       final corpPhone = corporatePhoneController.text.trim().isNotEmpty
           ? corporatePhoneController.text.trim()
           : 'Not provided';
@@ -573,7 +593,11 @@ class AuthController extends GetxController {
       final authRes = await isolatedClient.auth.signUp(
         email: corpEmailStr,
         password: corporatePasswordController.text.trim(),
-        data: {'full_name': contactPerson, 'role': 'corporate', 'phone': corpPhone},
+        data: {
+          'full_name': contactPerson,
+          'role': 'corporate',
+          'phone': corpPhone,
+        },
       );
 
       final user = authRes.user;

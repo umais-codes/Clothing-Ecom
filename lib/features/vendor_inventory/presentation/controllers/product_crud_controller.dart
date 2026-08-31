@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/utils/constants.dart';
@@ -224,22 +224,19 @@ class ProductCrudController extends GetxController {
 
   Future<void> pickAndUploadProductImage() async {
     try {
-      FilePickerResult? result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
-        allowMultiple: true,
-      );
+      final picker = ImagePicker();
+      final List<XFile> result = await picker.pickMultiImage();
 
-      if (result != null && result.files.isNotEmpty) {
+      if (result.isNotEmpty) {
         isUploadingImage.value = true;
         final supabase = Get.find<SupabaseService>().client;
         final user = supabase.auth.currentUser;
         final vendorId = user?.id ?? 'guest_vendor';
 
-        for (var pickedFile in result.files) {
-          if (pickedFile.path != null && File(pickedFile.path!).existsSync()) {
-            final file = File(pickedFile.path!);
-            final ext = pickedFile.extension ?? 'jpg';
+        for (var pickedFile in result) {
+          final file = File(pickedFile.path);
+          if (file.existsSync()) {
+            final ext = pickedFile.path.split('.').last;
             final fileName =
                 'product_${DateTime.now().millisecondsSinceEpoch}_${const Uuid().v4().substring(0, 6)}.$ext';
             final storagePath = 'products/$vendorId/$fileName';

@@ -399,20 +399,28 @@ class PdpController extends GetxController {
   }
 
   void addToCart() {
-    final isB2B = product['isB2B'] ?? false;
+    final bool isB2B = product['isB2B'] == true || product['is_b2b'] == true;
     final dynamic cartController = isB2B
         ? Get.find<B2BCartController>()
         : Get.find<B2CCartController>();
 
+    final String pId = product['id']?.toString() ?? 'prod_${DateTime.now().millisecondsSinceEpoch}';
     final String variantId =
-        "${product['id']}_${selectedSize.value}_${selectedColor.value}";
+        "${pId}_${selectedSize.value}_${selectedColor.value}";
+
+    final String pName = product['name'] ?? product['title'] ?? 'Luxury Apparel';
+    final String pVendor = product['vendor'] ?? product['vendor_name'] ?? product['vendorName'] ?? 'Boutique Apparel';
+    final double pPrice = (product['price'] as num?)?.toDouble() ?? 0.0;
+    final String pImg = productImages.isNotEmpty
+        ? productImages.first
+        : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop';
 
     final cartItem = CartItem(
       id: variantId,
-      name: product['name'],
-      vendorName: product['vendor'] ?? 'Unknown Vendor',
-      price: product['price'].toDouble(),
-      imageUrl: product['image'],
+      name: pName,
+      vendorName: pVendor,
+      price: pPrice,
+      imageUrl: pImg,
       quantity: quantity.value,
       isB2B: isB2B,
       size: selectedSize.value,
@@ -426,10 +434,10 @@ class PdpController extends GetxController {
 
     Get.snackbar(
       'Added to Cart',
-      '${product['name']} has been added to your cart.',
+      '$pName has been added to your cart.',
       backgroundColor: AppColors.camel,
       colorText: AppColors.white,
-      snackPosition: .TOP,
+      snackPosition: SnackPosition.TOP,
     );
   }
 }

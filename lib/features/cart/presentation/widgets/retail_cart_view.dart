@@ -29,74 +29,73 @@ class RetailCartView extends StatelessWidget {
       return CustomScrollView(
         slivers: [
           // 1. Free Delivery Progress Banner
-          SliverToBoxAdapter(
-            child: _buildFreeDeliveryBanner(sw),
-          ),
+          SliverToBoxAdapter(child: _buildFreeDeliveryBanner(sw)),
 
           // 2. Multi-Vendor Grouped List
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final vendor = vendorNames[index];
-                final items = groupedItems[vendor]!;
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final vendor = vendorNames[index];
+              final items = groupedItems[vendor]!;
 
-                return Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: sw * 0.04,
-                    vertical: sw * 0.015,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Vendor Header Badge
-                      Row(
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: sw * 0.04,
+                  vertical: sw * 0.015,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Vendor Header Badge (Compact & Sleek)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        bottom: sw * 0.012,
+                        left: sw * 0.01,
+                        right: sw * 0.01,
+                      ),
+                      child: Row(
                         children: [
                           Icon(
-                            Icons.store_mall_directory_outlined,
-                            size: sw * 0.045,
+                            Icons.storefront_rounded,
+                            size: sw * 0.036,
                             color: AppColors.camel,
                           ),
-                          SizedBox(width: sw * 0.02),
+                          SizedBox(width: sw * 0.015),
                           Text(
                             vendor.toUpperCase(),
                             style: GoogleFonts.outfit(
-                              fontSize: sw * 0.032,
+                              fontSize: sw * 0.028,
                               fontWeight: FontWeight.w700,
                               color: AppColors.charcoal,
-                              letterSpacing: 1.0,
+                              letterSpacing: 0.8,
                             ),
                           ),
                           const Spacer(),
                           Text(
                             "${items.length} ${items.length == 1 ? 'item' : 'items'}",
                             style: GoogleFonts.outfit(
-                              fontSize: sw * 0.028,
+                              fontSize: sw * 0.024,
                               color: AppColors.grey,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: sw * 0.02),
+                    ),
 
-                      // Item Cards
-                      ...items.map(
-                        (item) => RetailCartItemTile(
-                          item: item,
-                          controller: controller,
-                        ),
+                    // Item Cards
+                    ...items.map(
+                      (item) => RetailCartItemTile(
+                        item: item,
+                        controller: controller,
                       ),
-                    ],
-                  ),
-                );
-              },
-              childCount: vendorNames.length,
-            ),
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: vendorNames.length),
           ),
 
-          SliverToBoxAdapter(
-            child: SizedBox(height: sw * 0.08),
-          ),
+          SliverToBoxAdapter(child: SizedBox(height: sw * 0.08)),
         ],
       );
     });
@@ -108,17 +107,21 @@ class RetailCartView extends StatelessWidget {
       final isFree = needed == 0.0 || controller.isFreeShippingPromo.value;
 
       return Container(
-        margin: EdgeInsets.fromLTRB(sw * 0.04, sw * 0.03, sw * 0.04, sw * 0.01),
-        padding: EdgeInsets.symmetric(horizontal: sw * 0.04, vertical: sw * 0.025),
+        margin: EdgeInsets.fromLTRB(sw * 0.04, sw * 0.02, sw * 0.04, sw * 0.01),
+        padding: EdgeInsets.symmetric(
+          horizontal: sw * 0.035,
+          vertical: sw * 0.018,
+        ),
         decoration: BoxDecoration(
           color: isFree
-              ? AppColors.success.withValues(alpha: 0.1)
+              ? AppColors.success.withValues(alpha: 0.08)
               : AppColors.camel.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(sw * 0.03),
+          borderRadius: BorderRadius.circular(sw * 0.025),
           border: Border.all(
             color: isFree
-                ? AppColors.success.withValues(alpha: 0.3)
-                : AppColors.camel.withValues(alpha: 0.25),
+                ? AppColors.success.withValues(alpha: 0.25)
+                : AppColors.camel.withValues(alpha: 0.2),
+            width: 0.7,
           ),
         ),
         child: Row(
@@ -126,16 +129,16 @@ class RetailCartView extends StatelessWidget {
             Icon(
               isFree ? Icons.local_shipping : Icons.local_shipping_outlined,
               color: isFree ? AppColors.success : AppColors.camel,
-              size: sw * 0.05,
+              size: sw * 0.042,
             ),
-            SizedBox(width: sw * 0.03),
+            SizedBox(width: sw * 0.025),
             Expanded(
               child: Text(
                 isFree
                     ? "Congratulations! You have unlocked FREE Express Delivery."
                     : "Add \$${needed.toStringAsFixed(2)} more for FREE Delivery (Orders over \$${controller.freeDeliveryThreshold.toInt()}).",
                 style: GoogleFonts.outfit(
-                  fontSize: sw * 0.03,
+                  fontSize: sw * 0.028,
                   fontWeight: FontWeight.w600,
                   color: isFree ? AppColors.success : AppColors.charcoal,
                 ),
@@ -229,7 +232,7 @@ class _RetailCartItemTileState extends State<RetailCartItemTile> {
     setState(() {
       _isRemoving = true;
     });
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 180));
     if (mounted) {
       widget.controller.removeItem(widget.item.id);
     }
@@ -238,160 +241,197 @@ class _RetailCartItemTileState extends State<RetailCartItemTile> {
   @override
   Widget build(BuildContext context) {
     final double sw = context.screenWidth;
+    final hasSize = widget.item.size != null && widget.item.size!.isNotEmpty;
+    final hasColor = widget.item.color != null && widget.item.color!.isNotEmpty;
 
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 180),
       opacity: _isRemoving ? 0.0 : 1.0,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,
-        margin: EdgeInsets.only(bottom: _isRemoving ? 0.0 : sw * 0.03),
-        padding: EdgeInsets.all(sw * 0.03),
+        margin: EdgeInsets.only(bottom: _isRemoving ? 0.0 : sw * 0.02),
+        padding: EdgeInsets.all(sw * 0.025),
         decoration: BoxDecoration(
           color: AppColors.white,
-          borderRadius: BorderRadius.circular(sw * 0.04),
+          borderRadius: BorderRadius.circular(sw * 0.03),
           border: Border.all(
             color: AppColors.greyLight.withValues(alpha: 0.5),
-            width: 0.8,
+            width: 0.7,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.charcoal.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: AppColors.charcoal.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Column(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product Image
-                GestureDetector(
-                  onTap: _openProductDetails,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(sw * 0.03),
-                    child: Image.network(
-                      widget.item.imageUrl.isNotEmpty
-                          ? widget.item.imageUrl
-                          : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
-                      width: sw * 0.22,
-                      height: sw * 0.26,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: sw * 0.22,
-                        height: sw * 0.26,
-                        color: AppColors.greySubtle,
-                        child: const Icon(Icons.broken_image, color: AppColors.grey),
-                      ),
+            // 1. Compact Thumbnail Image
+            GestureDetector(
+              onTap: _openProductDetails,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(sw * 0.02),
+                child: Image.network(
+                  widget.item.imageUrl.isNotEmpty
+                      ? widget.item.imageUrl
+                      : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+                  width: sw * 0.17,
+                  height: sw * 0.19,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: sw * 0.17,
+                    height: sw * 0.19,
+                    color: AppColors.greySubtle,
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      size: sw * 0.05,
+                      color: AppColors.grey,
                     ),
                   ),
                 ),
-                SizedBox(width: sw * 0.035),
+              ),
+            ),
+            SizedBox(width: sw * 0.028),
 
-                // Details Column
-                Expanded(
-                  child: Column(
+            // 2. Compact Info Column
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Title + Remove Button
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: _openProductDetails,
-                              child: Text(
-                                widget.item.name,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.outfit(
-                                  fontSize: sw * 0.038,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.charcoal,
-                                  height: 1.2,
-                                ),
-                              ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: _openProductDetails,
+                          child: Text(
+                            widget.item.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.outfit(
+                              fontSize: sw * 0.033,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.charcoal,
                             ),
                           ),
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            icon: Icon(
-                              Icons.close,
-                              size: sw * 0.045,
-                              color: AppColors.grey,
+                        ),
+                      ),
+                      SizedBox(width: sw * 0.01),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _onRemove,
+                          borderRadius: BorderRadius.circular(sw * 0.02),
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Icon(
+                              Icons.close_rounded,
+                              size: sw * 0.036,
+                              color: AppColors.grey.withValues(alpha: 0.7),
                             ),
-                            onPressed: _onRemove,
                           ),
-                        ],
+                        ),
                       ),
-                      SizedBox(height: sw * 0.015),
+                    ],
+                  ),
+                  SizedBox(height: sw * 0.006),
 
-                      // Variant Chips (Size, Color)
-                      Row(
-                        children: [
-                          if (widget.item.size != null && widget.item.size!.isNotEmpty)
-                            _buildChip("Size: ${widget.item.size!}", sw),
-                          if (widget.item.size != null &&
-                              widget.item.size!.isNotEmpty &&
-                              widget.item.color != null &&
-                              widget.item.color!.isNotEmpty)
-                            SizedBox(width: sw * 0.015),
-                          if (widget.item.color != null && widget.item.color!.isNotEmpty)
-                            _buildChip(widget.item.color!, sw),
-                        ],
-                      ),
-
+                  // Variants & AI badge
+                  Row(
+                    children: [
+                      if (hasSize || hasColor)
+                        Text(
+                          "${hasSize ? 'Size: ${widget.item.size}' : ''}${hasSize && hasColor ? '  •  ' : ''}${hasColor ? widget.item.color : ''}",
+                          style: GoogleFonts.outfit(
+                            fontSize: sw * 0.025,
+                            color: AppColors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       if (widget.item.isAiSizeMatched) ...[
-                        SizedBox(height: sw * 0.015),
+                        SizedBox(width: sw * 0.015),
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: sw * 0.02,
-                            vertical: sw * 0.005,
+                            horizontal: sw * 0.014,
+                            vertical: 1,
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(sw * 0.01),
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.auto_awesome,
-                                size: sw * 0.03,
-                                color: AppColors.success,
-                              ),
-                              SizedBox(width: sw * 0.01),
-                              Text(
-                                "AI Fit Matched",
-                                style: GoogleFonts.outfit(
-                                  fontSize: sw * 0.024,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.success,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            "AI Fit",
+                            style: GoogleFonts.outfit(
+                              fontSize: sw * 0.02,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.success,
+                            ),
                           ),
                         ),
                       ],
+                    ],
+                  ),
+                  SizedBox(height: sw * 0.014),
 
-                      SizedBox(height: sw * 0.02),
-
-                      // Price and Quantity Row
+                  // Price, Wishlist, and Stepper Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Price
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            "\$${widget.item.price.toStringAsFixed(2)}",
+                            "\$${(widget.item.price * widget.item.quantity).toStringAsFixed(2)}",
                             style: GoogleFonts.outfit(
-                              fontSize: sw * 0.04,
+                              fontSize: sw * 0.038,
                               fontWeight: FontWeight.w700,
                               color: AppColors.camel,
                             ),
                           ),
+                          if (widget.item.quantity > 1) ...[
+                            SizedBox(width: sw * 0.01),
+                            Text(
+                              "(\$${widget.item.price.toStringAsFixed(2)})",
+                              style: GoogleFonts.outfit(
+                                fontSize: sw * 0.022,
+                                color: AppColors.grey,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+
+                      // Wishlist + Stepper
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () =>
+                                  widget.controller.moveToWishlist(widget.item),
+                              borderRadius: BorderRadius.circular(sw * 0.02),
+                              child: Padding(
+                                padding: EdgeInsets.all(sw * 0.01),
+                                child: Icon(
+                                  Icons.favorite_border_rounded,
+                                  size: sw * 0.038,
+                                  color: AppColors.grey,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: sw * 0.015),
                           CustomStepper(
+                            size: sw * 0.065,
                             value: widget.item.quantity,
                             onChanged: (newQty) => widget.controller
                                 .updateQuantity(widget.item.id, newQty),
@@ -399,37 +439,6 @@ class _RetailCartItemTileState extends State<RetailCartItemTile> {
                         ],
                       ),
                     ],
-                  ),
-                ),
-              ],
-            ),
-
-            // Bottom Quick Actions
-            Padding(
-              padding: EdgeInsets.only(top: sw * 0.02),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: () => widget.controller.moveToWishlist(widget.item),
-                    icon: Icon(
-                      Icons.favorite_border,
-                      size: sw * 0.035,
-                      color: AppColors.grey,
-                    ),
-                    label: Text(
-                      "Move to Wishlist",
-                      style: GoogleFonts.outfit(
-                        fontSize: sw * 0.028,
-                        color: AppColors.grey,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -450,30 +459,10 @@ class _RetailCartItemTileState extends State<RetailCartItemTile> {
       'isB2B': widget.item.isB2B,
       'vendor': widget.item.vendorName,
       'sizes': widget.item.size != null ? [widget.item.size!] : ['S', 'M', 'L'],
-      'colors': widget.item.color != null ? [widget.item.color!] : ['Camel', 'White'],
+      'colors': widget.item.color != null
+          ? [widget.item.color!]
+          : ['Camel', 'White'],
     };
     Get.toNamed('/product-details', arguments: productMap);
-  }
-
-  Widget _buildChip(String label, double sw) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: sw * 0.02,
-        vertical: sw * 0.008,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.offWhite,
-        borderRadius: BorderRadius.circular(sw * 0.015),
-        border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.6)),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.outfit(
-          fontSize: sw * 0.026,
-          fontWeight: FontWeight.w500,
-          color: AppColors.charcoal,
-        ),
-      ),
-    );
   }
 }

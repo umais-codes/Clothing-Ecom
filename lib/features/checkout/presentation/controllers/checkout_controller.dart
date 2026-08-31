@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,6 +12,8 @@ import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_control
 import 'package:ecom_app/features/vendor_orders/presentation/controllers/vendor_order_controller.dart';
 import 'package:ecom_app/features/vendor_orders/domain/entities/vendor_order.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+
+import 'package:ecom_app/features/checkout/presentation/views/safepay_payment_gateway_screen.dart';
 
 class CheckoutController extends GetxController {
   // ignore: unused_field
@@ -49,92 +52,85 @@ class CheckoutController extends GetxController {
   // Toggle options
   final RxBool billingSameAsShipping = true.obs;
 
-  // Selected Payment Method:
+  // Form Validation
+  final RxBool isFormValid = false.obs;
+
+  // Payment Options
   // For B2C: 'Safepay' is the primary online payment.
   // For B2B: 'PO', 'Net30', or 'Safepay' (Raast/Bank Transfer)
   final RxString selectedPaymentOption = 'Safepay'.obs;
 
-  // Dynamic Validation state
-  final RxBool isFormValid = false.obs;
+  B2CCartController get b2cCart => Get.find<B2CCartController>();
+  B2BCartController get b2bCart => Get.find<B2BCartController>();
 
-  // Reference to cart controllers
-  late final B2CCartController b2cCart;
-  late final B2BCartController b2bCart;
+  double get subtotal => isB2B.value ? b2bCart.subtotal : b2cCart.subtotal;
+  double get shippingFee => isB2B.value ? 0.0 : b2cCart.deliveryFee;
+  double get discount =>
+      isB2B.value ? b2bCart.bulkSavings : b2cCart.discountAmount;
+  double get tax => 0.0;
+  double get total => isB2B.value ? b2bCart.subtotal : b2cCart.total;
 
   @override
   void onInit() {
     super.onInit();
-    b2cCart = Get.find<B2CCartController>();
-    b2bCart = Get.find<B2BCartController>();
-
-    // Parse route arguments
     final args = Get.arguments;
-    if (args != null) {
+    if (args != null && args is Map) {
       isB2B.value = args['isB2B'] == true;
-      if (isB2B.value) {
-        // Pre-select initial option from arguments (e.g. PO or Quote)
-        final initialOpt = args['initialOption'];
-        if (initialOpt == 'Quote') {
-          selectedPaymentOption.value = 'Quote';
-        } else {
-          selectedPaymentOption.value = 'PO';
-        }
-      } else {
-        selectedPaymentOption.value = 'Safepay';
-      }
     }
 
-    // Add validation listeners to all active controllers
-    final controllersList = [
-      fullNameController,
-      addressController,
-      cityController,
-      postalCodeController,
-      phoneController,
-      emailController,
-      companyNameController,
-      ntnController,
-      procurementEmailController,
-      poNumberController,
-    ];
-
-    for (var c in controllersList) {
-      c.addListener(validateForm);
+    if (isB2B.value) {
+      selectedPaymentOption.value = 'PO';
+    } else {
+      selectedPaymentOption.value = 'Safepay';
     }
 
-    billingSameAsShipping.listen((_) => validateForm());
-    selectedPaymentOption.listen((_) => validateForm());
+    _populateUserData();
+
+    fullNameController.addListener(validateForm);
+    addressController.addListener(validateForm);
+    cityController.addListener(validateForm);
+    phoneController.addListener(validateForm);
+    emailController.addListener(validateForm);
+
+    companyNameController.addListener(validateForm);
+    ntnController.addListener(validateForm);
+    procurementEmailController.addListener(validateForm);
+    poNumberController.addListener(validateForm);
 
     validateForm();
   }
 
+  void _populateUserData() {
+    final user = _supabase.auth.currentUser;
+    if (user != null) {
+      emailController.text = user.email ?? '';
+      fullNameController.text = user.userMetadata?['full_name'] ?? '';
+      phoneController.text = user.userMetadata?['phone'] ?? '';
+    }
+  }
 
-
-  // Checkout pricing values based on B2B / B2C pathways
-  double get subtotal => isB2B.value ? b2bCart.subtotal : b2cCart.subtotal;
-  double get shippingFee => isB2B.value ? 0.0 : b2cCart.deliveryFee;
-  double get total => isB2B.value ? b2bCart.subtotal : b2cCart.total;
+  void setPaymentOption(String option) {
+    selectedPaymentOption.value = option;
+    validateForm();
+  }
 
   void validateForm() {
-    // 1. Basic shipping details validation (Required for everyone)
     if (fullNameController.text.trim().isEmpty ||
         addressController.text.trim().isEmpty ||
         cityController.text.trim().isEmpty ||
-        postalCodeController.text.trim().isEmpty ||
-        phoneController.text.trim().length < 9 ||
-        !GetUtils.isEmail(emailController.text.trim())) {
+        phoneController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty) {
       isFormValid.value = false;
       return;
     }
 
-    // 2. Mode-specific validation
     if (isB2B.value) {
       if (companyNameController.text.trim().isEmpty ||
-          ntnController.text.trim().isEmpty) {
+          ntnController.text.trim().isEmpty ||
+          procurementEmailController.text.trim().isEmpty) {
         isFormValid.value = false;
         return;
       }
-
       if (selectedPaymentOption.value == 'PO' &&
           poNumberController.text.trim().isEmpty) {
         isFormValid.value = false;
@@ -145,97 +141,31 @@ class CheckoutController extends GetxController {
     isFormValid.value = true;
   }
 
-  /// Initialize Safepay transaction session dynamically and securely via Supabase Edge Functions
-  Future<Map<String, String>> _initSafepaySession(
-    double amount,
-    String currency,
-  ) async {
-    // Invoke secure backend edge function
-    final FunctionResponse response = await _supabase.functions.invoke(
-      'init-safepay-session',
-      body: {'amount': amount, 'currency': currency},
-    );
-
-    if (response.status != 200) {
-      throw Exception(
-        'Failed to initialize Safepay session via Edge Function (Status: ${response.status}): ${response.data}',
-      );
-    }
-
-    final data = response.data;
-    if (data == null || data['tbt'] == null || data['tracker'] == null) {
-      throw Exception(
-        'Invalid response structure returned from checkout Edge Function.',
-      );
-    }
-
-    return {
-      'tbt': data['tbt'].toString(),
-      'tracker': data['tracker'].toString(),
-    };
-  }
-
   Future<void> submitCheckout() async {
     if (!isFormValid.value || isProcessing.value) return;
 
-    // Determine if it is B2C Online Payment or B2B Bank Transfer (which triggers Safepay Checkout)
+    // Determine if it is B2C Online Payment or B2B Bank Transfer
     final bool triggerOnlinePayment = selectedPaymentOption.value == 'Safepay';
 
     if (!triggerOnlinePayment) {
-      // Offline B2B Procurement terms (PO, Net-30, Custom Quote)
+      // Offline / COD / B2B Procurement terms (PO, Net-30, Cash on Delivery)
       await _completeOrderPlacement(paymentMethod: selectedPaymentOption.value);
     } else {
-      // Safepay Gateway Integration Flow
-      isProcessing.value = true;
-      try {
-        // Detect currency (default to PKR, fallback to USD if configured)
-        final String currency = 'PKR';
-        final double orderAmount = total;
-
-        // Fetch Safepay Session Tokens (TBT + Tracker)
-        final session = await _initSafepaySession(orderAmount, currency);
-        final String tbt = session['tbt']!;
-        final String tracker = session['tracker']!;
-
-        isProcessing.value = false;
-
-        // Launch Safepay Checkout Full-Screen WebView Widget
-        Get.to(
-          () => SafepayCheckout(
-            environment: SafePayEnvironment.sandbox,
-            tbt: tbt,
-            tracker: tracker,
-            successUrl: 'https://velvetmaison.pk/checkout/success',
-            failUrl: 'https://velvetmaison.pk/checkout/fail',
-            onPaymentFailed: () {
-              Get.back();
-              Get.snackbar(
-                'Payment Failed',
-                'Safepay transaction was cancelled or declined.',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: AppColors.error.withValues(alpha: 0.1),
-                colorText: AppColors.error,
-              );
-            },
-            onPaymentCompleted: () {
-              Get.back();
-              _completeOrderPlacement(
-                paymentMethod: 'Safepay',
-                trackerToken: tracker,
-              );
-            },
-          ),
-        );
-      } catch (e) {
-        isProcessing.value = false;
-        Get.snackbar(
-          'Payment Error',
-          'Unable to initialize Safepay session: $e',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.error.withValues(alpha: 0.1),
-          colorText: AppColors.error,
-        );
-      }
+      // Safepay Gateway Integration Flow - Launch full interactive Safepay Gateway screen
+      final String orderIdStr = '#ORD-${_uuid.v4().substring(0, 4).toUpperCase()}';
+      Get.to(
+        () => SafepayPaymentGatewayScreen(
+          amount: total,
+          orderId: orderIdStr,
+          customerEmail: emailController.text.trim(),
+          onPaymentSuccess: (trackerToken) async {
+            await _completeOrderPlacement(
+              paymentMethod: 'Safepay',
+              trackerToken: trackerToken,
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -281,12 +211,12 @@ class CheckoutController extends GetxController {
         'Inserting Order Payload into Supabase [public.orders]: $orderPayload',
       );
 
-      // STUB: Insert order items payload
+      // Insert order items payload using baseProductId for foreign key integrity
       final itemsPayload = (isB2B.value ? b2bCart.cartItems : b2cCart.cartItems)
           .map(
             (item) => {
               'order_id': orderIdStr,
-              'product_id': item.id,
+              'product_id': item.baseProductId,
               'product_name': item.name,
               'quantity': item.quantity,
               'unit_price': item.price,

@@ -414,84 +414,46 @@ class CheckoutView extends GetView<CheckoutController> {
     );
   }
 
-  // --- B2C Secure Safepay Section ---
+  // --- B2C Payment Methods Section ---
   Widget _buildB2CPaymentSection(double sw) {
-    return Container(
-      padding: EdgeInsets.all(sw * 0.04),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Obx(() {
+      final activeOpt = controller.selectedPaymentOption.value;
+
+      return Column(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(sw * 0.02),
-                decoration: BoxDecoration(
-                  color: AppColors.camel.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.shield_outlined,
-                  color: AppColors.camel,
-                  size: sw * 0.055,
-                ),
+          _buildPaymentCardOption(
+            value: "Safepay",
+            title: "Online Payment via Safepay",
+            desc:
+                "Instant secure checkout with Visa, Mastercard, Raast ID, and UnionPay.",
+            icon: Icons.lock_outline_rounded,
+            activeOpt: activeOpt,
+            sw: sw,
+            extraContent: Padding(
+              padding: EdgeInsets.only(top: sw * 0.025),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildPaymentLogoMock("Visa/Mastercard", sw),
+                  _buildPaymentLogoMock("Raast Pay", sw),
+                  _buildPaymentLogoMock("Bank Transfer", sw),
+                ],
               ),
-              SizedBox(width: sw * 0.03),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Secure Checkout via Safepay",
-                      style: GoogleFonts.outfit(
-                        fontSize: sw * 0.035,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.charcoal,
-                      ),
-                    ),
-                    Text(
-                      "Supports Raast, Bank Transfer, & Cards",
-                      style: GoogleFonts.outfit(
-                        fontSize: sw * 0.028,
-                        color: AppColors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: sw * 0.03),
-          Text(
-            "Velvet Maison handles your order configuration dynamically. Once you proceed, Safepay will host a secure payment terminal where you can finalize payments utilizing cards, digital wallets, or quick bank payments.",
-            style: GoogleFonts.outfit(
-              fontSize: sw * 0.03,
-              color: AppColors.ink,
-              height: 1.4,
             ),
           ),
           SizedBox(height: sw * 0.03),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildPaymentLogoMock("Visa/Mastercard", sw),
-              _buildPaymentLogoMock("Raast Pay", sw),
-              _buildPaymentLogoMock("Bank Transfer", sw),
-            ],
+          _buildPaymentCardOption(
+            value: "Cash on Delivery",
+            title: "Cash on Delivery (COD)",
+            desc:
+                "Pay in cash when your luxury parcel arrives at your doorstep.",
+            icon: Icons.local_shipping_outlined,
+            activeOpt: activeOpt,
+            sw: sw,
           ),
         ],
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildPaymentLogoMock(String label, double sw) {

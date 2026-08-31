@@ -44,26 +44,68 @@ class MainNavigationController extends GetxController {
     final role = currentRole;
     if (role == AuthRole.vendor) {
       return const [
-        VendorDashboardView(),
-        InventoryView(),
-        VendorOrdersView(),
-        ProfileView(),
+        KeyedSubtree(
+          key: ValueKey('vendor_page_dashboard'),
+          child: VendorDashboardView(),
+        ),
+        KeyedSubtree(
+          key: ValueKey('vendor_page_inventory'),
+          child: InventoryView(),
+        ),
+        KeyedSubtree(
+          key: ValueKey('vendor_page_orders'),
+          child: VendorOrdersView(),
+        ),
+        KeyedSubtree(
+          key: ValueKey('vendor_page_profile'),
+          child: ProfileView(),
+        ),
       ];
     } else if (role == AuthRole.corporate) {
       return [
-        const B2BPortalView(),
-        DiscoveryScreen(),
-        const WishlistScreen(),
-        const B2BCartScreen(),
-        const ProfileView(),
+        const KeyedSubtree(
+          key: ValueKey('corp_page_sourcing'),
+          child: B2BPortalView(),
+        ),
+        KeyedSubtree(
+          key: const ValueKey('corp_page_discovery'),
+          child: DiscoveryScreen(),
+        ),
+        const KeyedSubtree(
+          key: ValueKey('corp_page_wishlist'),
+          child: WishlistScreen(),
+        ),
+        const KeyedSubtree(
+          key: ValueKey('corp_page_cart'),
+          child: B2BCartScreen(),
+        ),
+        const KeyedSubtree(
+          key: ValueKey('corp_page_profile'),
+          child: ProfileView(),
+        ),
       ];
     } else {
       return [
-        const HomeView(),
-        DiscoveryScreen(),
-        const WishlistScreen(),
-        const B2CCartScreen(),
-        const ProfileView(),
+        const KeyedSubtree(
+          key: ValueKey('shopper_page_home'),
+          child: HomeView(),
+        ),
+        KeyedSubtree(
+          key: const ValueKey('shopper_page_discovery'),
+          child: DiscoveryScreen(),
+        ),
+        const KeyedSubtree(
+          key: ValueKey('shopper_page_wishlist'),
+          child: WishlistScreen(),
+        ),
+        const KeyedSubtree(
+          key: ValueKey('shopper_page_cart'),
+          child: B2CCartScreen(),
+        ),
+        const KeyedSubtree(
+          key: ValueKey('shopper_page_profile'),
+          child: ProfileView(),
+        ),
       ];
     }
   }

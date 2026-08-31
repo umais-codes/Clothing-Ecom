@@ -7,6 +7,7 @@ import '../controllers/vendor_dashboard_controller.dart';
 import '../widgets/metric_card.dart';
 import '../widgets/subscription_plan_details_card.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/features/navigation/presentation/controllers/main_navigation_controller.dart';
 
 class VendorDashboardView extends GetView<VendorDashboardController> {
   const VendorDashboardView({super.key});
@@ -151,7 +152,13 @@ class VendorDashboardView extends GetView<VendorDashboardController> {
 
   Widget _buildInventoryAction(BuildContext context, double sw) {
     return GestureDetector(
-      onTap: () => Get.toNamed('/vendor-inventory'),
+      onTap: () {
+        if (Get.isRegistered<MainNavigationController>()) {
+          Get.find<MainNavigationController>().changeTab(1);
+        } else {
+          Get.toNamed('/vendor-inventory');
+        }
+      },
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(sw * 0.04),

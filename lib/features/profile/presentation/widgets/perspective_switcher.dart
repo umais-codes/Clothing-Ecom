@@ -43,10 +43,11 @@ class PerspectiveSwitcher extends StatelessWidget {
                   title: 'Consumer Mode',
                   onTap: () {
                     if (activeRole != AuthRole.shopper) {
-                      _confirmSwitch(
+                      _trySwitchRole(
                         context,
+                        authController,
+                        AuthRole.shopper,
                         'Consumer Mode',
-                        () => authController.setRole(AuthRole.shopper),
                       );
                     }
                   },
@@ -135,19 +136,21 @@ class PerspectiveSwitcher extends StatelessWidget {
     AuthRole targetRole,
     String roleName,
   ) async {
-    // 1. Consumer Mode switches immediately (anyone can act as shopper)
-    if (targetRole == AuthRole.shopper) {
-      _confirmSwitch(
-        context,
-        roleName,
-        () => authController.setRole(AuthRole.shopper),
-      );
+    // Admin switch goes directly to admin login flow
+    if (targetRole == AuthRole.admin) {
+      _confirmSwitch(context, roleName, () => Get.toNamed('/admin-login'));
       return;
     }
 
-    // 2. Admin switch goes directly to admin login flow
-    if (targetRole == AuthRole.admin) {
-      _confirmSwitch(context, roleName, () => Get.toNamed('/admin-login'));
+    final user = authController.currentUser;
+    if (user == null) {
+      _showRoleAccountMismatchDialog(
+        context: context,
+        authController: authController,
+        currentRoleName: 'Guest',
+        targetRole: targetRole,
+        targetRoleName: roleName,
+      );
       return;
     }
 
@@ -163,65 +166,77 @@ class PerspectiveSwitcher extends StatelessWidget {
     );
 
     try {
-      final user = authController.currentUser;
-      if (user == null) {
-        Get.back(); // close loader
-        _showPermissionRequiredDialog(context, authController, targetRole);
-        return;
+      final supabase = Get.find<SupabaseService>().client;
+
+      // 1. Fetch user's actual database registered profile
+      Map<String, dynamic>? profile;
+      try {
+        profile = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
+      } catch (pe) {
+        debugPrint('Failed to load user profile role in switcher: $pe');
       }
 
-      final supabase = Get.find<SupabaseService>().client;
-      final res = await supabase
-          .from('vendors')
-          .select('*')
-          .eq('owner_id', user.id)
-          .maybeSingle();
+      final String dbRole =
+          profile?['role']?.toString().toLowerCase() ?? 'shopper';
+
+      // 2. Fetch vendor registration details
+      Map<String, dynamic>? vendorRes;
+      try {
+        vendorRes = await supabase
+            .from('vendors')
+            .select('*')
+            .eq('owner_id', user.id)
+            .maybeSingle();
+      } catch (_) {}
 
       Get.back(); // close loader
       if (!context.mounted) return;
 
-      if (res == null) {
-        _showPermissionRequiredDialog(context, authController, targetRole);
-      } else {
-        Map<String, dynamic>? profile;
-        try {
-          profile = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', user.id)
-              .maybeSingle();
-        } catch (pe) {
-          debugPrint('Failed to load user profile role in switcher: $pe');
+      // Case A: Switching to Shopper when logged in with a Vendor/Corporate account
+      if (targetRole == AuthRole.shopper) {
+        if (dbRole == 'vendor' || vendorRes != null || dbRole == 'corporate') {
+          _showRoleAccountMismatchDialog(
+            context: context,
+            authController: authController,
+            currentRoleName: dbRole.toUpperCase(),
+            targetRole: AuthRole.shopper,
+            targetRoleName: 'Consumer Mode',
+          );
+        } else {
+          _confirmSwitch(
+            context,
+            roleName,
+            () => authController.setRole(AuthRole.shopper),
+          );
         }
+        return;
+      }
 
-        if (!context.mounted) return;
-
-        final String roleStr =
-            profile?['role']?.toString().toLowerCase() ?? '';
-        final String vendorCategory =
-            res['category']?.toString().toLowerCase() ?? '';
-        final String kycStatus =
-            res['kyc_status']?.toString().toLowerCase() ?? 'pending';
-
-        final bool isVendorMatch = targetRole == AuthRole.vendor &&
-            (roleStr == 'vendor' ||
-                (vendorCategory.isNotEmpty && vendorCategory != 'corporate') ||
-                vendorCategory.isEmpty);
-        final bool isCorporateMatch = targetRole == AuthRole.corporate &&
-            (roleStr == 'corporate' || vendorCategory == 'corporate');
-
-        final isCorrectRole = isVendorMatch || isCorporateMatch;
-
-        if (!isCorrectRole) {
-          _showPermissionRequiredDialog(context, authController, targetRole);
+      // Case B: Switching to Vendor
+      if (targetRole == AuthRole.vendor) {
+        if (vendorRes == null || (dbRole != 'vendor' && dbRole.isNotEmpty && dbRole != 'shopper')) {
+          _showRoleAccountMismatchDialog(
+            context: context,
+            authController: authController,
+            currentRoleName: dbRole.toUpperCase(),
+            targetRole: AuthRole.vendor,
+            targetRoleName: 'Vendor Portal',
+          );
           return;
         }
+
+        final String kycStatus =
+            vendorRes['kyc_status']?.toString().toLowerCase() ?? 'pending';
 
         if (kycStatus == 'approved') {
           _confirmSwitch(
             context,
             roleName,
-            () => authController.setRole(targetRole),
+            () => authController.setRole(AuthRole.vendor),
           );
         } else if (kycStatus == 'rejected') {
           CustomPermissionDialog.show(
@@ -231,7 +246,7 @@ class PerspectiveSwitcher extends StatelessWidget {
             iconBgColor: AppColors.errorBg,
             title: 'Application Rejected',
             description:
-                'Your application has been rejected. Please contact partner support for more information.',
+                'Your vendor application was rejected. Please contact partner support.',
             grantText: 'Close',
             denyText: 'Not Now',
             onGrant: () {},
@@ -244,36 +259,96 @@ class PerspectiveSwitcher extends StatelessWidget {
             iconBgColor: AppColors.warningBg,
             title: 'Application Pending',
             description:
-                'Your application is currently pending admin approval. You will receive portal access once approved.',
+                'Your vendor partner application is pending admin approval.',
             grantText: 'Close',
             denyText: 'Not Now',
             onGrant: () {},
           );
         }
+        return;
+      }
+
+      // Case C: Switching to Corporate
+      if (targetRole == AuthRole.corporate) {
+        if (dbRole != 'corporate') {
+          _showRoleAccountMismatchDialog(
+            context: context,
+            authController: authController,
+            currentRoleName: dbRole.toUpperCase(),
+            targetRole: AuthRole.corporate,
+            targetRoleName: 'Corporate Sourcing',
+          );
+          return;
+        }
+
+        _confirmSwitch(
+          context,
+          roleName,
+          () => authController.setRole(AuthRole.corporate),
+        );
+        return;
       }
     } catch (e) {
       Get.back(); // close loader
       if (!context.mounted) return;
-      _showPermissionRequiredDialog(context, authController, targetRole);
+      _showRoleAccountMismatchDialog(
+        context: context,
+        authController: authController,
+        currentRoleName: 'Current Account',
+        targetRole: targetRole,
+        targetRoleName: roleName,
+      );
     }
   }
 
-  void _showPermissionRequiredDialog(
-    BuildContext context,
-    AuthController authController,
-    AuthRole targetRole,
-  ) {
+  void _showRoleAccountMismatchDialog({
+    required BuildContext context,
+    required AuthController authController,
+    required String currentRoleName,
+    required AuthRole targetRole,
+    required String targetRoleName,
+  }) {
     CustomPermissionDialog.show(
       context: context,
-      icon: Icons.lock_outline,
-      title: 'Permission Required',
-      description:
-          'You have not registered for a ${targetRole == AuthRole.vendor ? "Vendor" : "Corporate"} partner account yet. To access this portal, please apply first.',
-      grantText: 'Register Now',
-      denyText: 'Cancel',
-      onGrant: () {
+      icon: Icons.switch_account_outlined,
+      title: 'Separate Account Required',
+      description: Text.rich(
+        TextSpan(
+          text: 'You are currently signed in with a ',
+          style: GoogleFonts.outfit(
+            fontSize: context.sp(13),
+            color: AppColors.grey,
+            height: 1.5,
+          ),
+          children: [
+            TextSpan(
+              text: '$currentRoleName ',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.w700,
+                color: AppColors.charcoal,
+              ),
+            ),
+            const TextSpan(text: 'account. To access '),
+            TextSpan(
+              text: '$targetRoleName, ',
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.w700,
+                color: AppColors.camel,
+              ),
+            ),
+            const TextSpan(
+              text: 'please sign in with your separate account credentials.',
+            ),
+          ],
+        ),
+        textAlign: TextAlign.center,
+      ),
+      grantText: 'Sign In as $targetRoleName',
+      denyText: 'Stay on Current Account',
+      onGrant: () async {
+        await authController.signOut();
         authController.setRole(targetRole);
-        Get.to(() => const AuthGatewayScreen());
+        Get.offAll(() => const AuthGatewayScreen());
       },
     );
   }

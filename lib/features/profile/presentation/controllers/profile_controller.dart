@@ -232,9 +232,26 @@ class ProfileController extends GetxController {
           }
         } else if (currentRole == AuthRole.corporate) {
           final box = Hive.box('settings');
+          final metaCompany =
+              metadata?['company_name']?.toString() ??
+              data?['company_name']?.toString();
+          final metaNtn =
+              metadata?['ntn']?.toString() ??
+              metadata?['ntn_number']?.toString() ??
+              data?['ntn_number']?.toString();
+          final metaVolume =
+              metadata?['volume']?.toString() ??
+              metadata?['employee_volume']?.toString() ??
+              data?['employee_volume']?.toString();
+
+          if (metaCompany != null && metaCompany.isNotEmpty) {
+            userName.value = metaCompany;
+          }
           companyNtn.value =
+              metaNtn ??
               box.get('corporate_ntn', defaultValue: 'NTN-8762541-0') as String;
           employeeVolume.value =
+              metaVolume ??
               box.get('corporate_volume', defaultValue: '51-200 Employees')
                   as String;
         }

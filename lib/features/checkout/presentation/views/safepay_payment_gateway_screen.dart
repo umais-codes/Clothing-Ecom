@@ -29,7 +29,9 @@ class SafepayPaymentGatewayScreen extends StatefulWidget {
 class _SafepayPaymentGatewayScreenState
     extends State<SafepayPaymentGatewayScreen> {
   int _selectedTabIndex = 0; // 0: Card, 1: Raast, 2: Wallets
-  final _cardNumberController = TextEditingController(text: '4242 4242 4242 4242');
+  final _cardNumberController = TextEditingController(
+    text: '4242 4242 4242 4242',
+  );
   final _cardHolderController = TextEditingController(text: 'Valued Customer');
   final _expiryController = TextEditingController(text: '12/28');
   final _cvvController = TextEditingController(text: '123');
@@ -58,21 +60,17 @@ class _SafepayPaymentGatewayScreenState
 
   void _show3DSecureDialog() {
     final double sw = context.screenWidth;
-    final otpControllers = List.generate(6, (_) => TextEditingController());
-    final otpFocusNodes = List.generate(6, (_) => FocusNode());
+    final otpController = TextEditingController(text: '123456');
+    final focusNode = FocusNode();
     int secondsRemaining = 60;
     Timer? countdownTimer;
-
-    // Pre-fill demo OTP
-    const demoOtp = "123456";
-    for (int i = 0; i < 6; i++) {
-      otpControllers[i].text = demoOtp[i];
-    }
 
     Get.dialog(
       StatefulBuilder(
         builder: (dialogContext, setDialogState) {
-          countdownTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+          countdownTimer ??= Timer.periodic(const Duration(seconds: 1), (
+            timer,
+          ) {
             if (secondsRemaining > 0) {
               setDialogState(() {
                 secondsRemaining--;
@@ -81,6 +79,8 @@ class _SafepayPaymentGatewayScreenState
               timer.cancel();
             }
           });
+
+          final currentOtp = otpController.text;
 
           return Dialog(
             backgroundColor: Colors.transparent,
@@ -155,7 +155,7 @@ class _SafepayPaymentGatewayScreenState
 
                   // Info message
                   Text(
-                    "A one-time verification passcode (OTP) has been sent to your registered mobile number ending in **567.",
+                    "A 6-digit verification passcode (OTP) has been sent to your registered number ending in **567.",
                     textAlign: TextAlign.center,
                     style: GoogleFonts.outfit(
                       fontSize: sw * 0.028,
@@ -165,58 +165,123 @@ class _SafepayPaymentGatewayScreenState
                   ),
                   SizedBox(height: sw * 0.04),
 
-                  // OTP Input Boxes
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(6, (index) {
-                      return Container(
-                        width: sw * 0.1,
-                        height: sw * 0.12,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.offWhite,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: AppColors.camel.withValues(alpha: 0.5),
-                            width: 1.5,
-                          ),
-                        ),
+                  // Interactive OTP Segment Display with Hidden Keyboard Input
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Hidden Native TextField to capture hardware/software keyboard
+                      Opacity(
+                        opacity: 0.0,
                         child: TextField(
-                          controller: otpControllers[index],
-                          focusNode: otpFocusNodes[index],
-                          textAlign: TextAlign.center,
+                          controller: otpController,
+                          focusNode: focusNode,
+                          autofocus: true,
                           keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          style: GoogleFonts.outfit(
-                            fontSize: sw * 0.045,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.charcoal,
-                          ),
-                          decoration: const InputDecoration(
-                            counterText: '',
-                            border: InputBorder.none,
-                          ),
+                          maxLength: 6,
                           onChanged: (val) {
-                            if (val.isNotEmpty && index < 5) {
-                              otpFocusNodes[index + 1].requestFocus();
-                            }
+                            setDialogState(() {});
                           },
                         ),
-                      );
-                    }),
-                  ),
-                  SizedBox(height: sw * 0.03),
+                      ),
 
-                  // Countdown & Resend
-                  Text(
-                    secondsRemaining > 0
-                        ? "Expires in 00:${secondsRemaining.toString().padLeft(2, '0')}"
-                        : "Code expired. Tap to resend.",
-                    style: GoogleFonts.outfit(
-                      fontSize: sw * 0.026,
-                      color: secondsRemaining > 0 ? AppColors.grey : AppColors.error,
-                      fontWeight: FontWeight.w600,
-                    ),
+                      // Visual 6-Box Segment Row
+                      GestureDetector(
+                        onTap: () => focusNode.requestFocus(),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(6, (index) {
+                            final bool hasChar = index < currentOtp.length;
+                            final bool isFocused = index == currentOtp.length;
+                            final String char = hasChar
+                                ? currentOtp[index]
+                                : '';
+
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              width: sw * 0.11,
+                              height: sw * 0.13,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: hasChar
+                                    ? AppColors.white
+                                    : AppColors.offWhite,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isFocused
+                                      ? AppColors.camel
+                                      : (hasChar
+                                            ? AppColors.charcoal
+                                            : AppColors.greyLight),
+                                  width: isFocused ? 2.0 : 1.2,
+                                ),
+                                boxShadow: isFocused
+                                    ? [
+                                        BoxShadow(
+                                          color: AppColors.camel.withValues(
+                                            alpha: 0.2,
+                                          ),
+                                          blurRadius: 6,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Text(
+                                char,
+                                style: GoogleFonts.outfit(
+                                  fontSize: sw * 0.055,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.charcoal,
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: sw * 0.025),
+
+                  // Quick Auto-fill button & timer
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          otpController.text = "123456";
+                          setDialogState(() {});
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.camel.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            "Auto-Fill (123456)",
+                            style: GoogleFonts.outfit(
+                              fontSize: sw * 0.025,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.camelDark,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        secondsRemaining > 0
+                            ? "Expires: 00:${secondsRemaining.toString().padLeft(2, '0')}"
+                            : "Expired",
+                        style: GoogleFonts.outfit(
+                          fontSize: sw * 0.026,
+                          color: secondsRemaining > 0
+                              ? AppColors.grey
+                              : AppColors.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: sw * 0.05),
 
@@ -265,35 +330,47 @@ class _SafepayPaymentGatewayScreenState
         backgroundColor: AppColors.charcoal,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.white, size: 18),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.white,
+            size: 18,
+          ),
           onPressed: () => Get.back(),
         ),
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(4),
               decoration: const BoxDecoration(
                 color: AppColors.camel,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.lock_rounded, color: AppColors.white, size: 14),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              "Safepay Checkout",
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+              child: const Icon(
+                Icons.lock_rounded,
                 color: AppColors.white,
-                letterSpacing: 0.5,
+                size: 12,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                "Safepay",
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.white,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
           ],
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: AppColors.camel.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
@@ -303,21 +380,21 @@ class _SafepayPaymentGatewayScreenState
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 6,
-                  height: 6,
+                  width: 5,
+                  height: 5,
                   decoration: const BoxDecoration(
                     color: AppColors.success,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 5),
                 Text(
                   "SANDBOX",
                   style: GoogleFonts.outfit(
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: FontWeight.w800,
                     color: AppColors.camel,
-                    letterSpacing: 0.8,
+                    letterSpacing: 0.6,
                   ),
                 ),
               ],
@@ -338,7 +415,9 @@ class _SafepayPaymentGatewayScreenState
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.6)),
+                    border: Border.all(
+                      color: AppColors.greyLight.withValues(alpha: 0.6),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.02),
@@ -406,9 +485,17 @@ class _SafepayPaymentGatewayScreenState
                   ),
                   child: Row(
                     children: [
-                      _buildTabBtn("Credit/Debit Card", 0, Icons.credit_card_rounded),
+                      _buildTabBtn(
+                        "Credit/Debit Card",
+                        0,
+                        Icons.credit_card_rounded,
+                      ),
                       _buildTabBtn("Raast Pay", 1, Icons.bolt_rounded),
-                      _buildTabBtn("Wallets", 2, Icons.account_balance_wallet_rounded),
+                      _buildTabBtn(
+                        "Wallets",
+                        2,
+                        Icons.account_balance_wallet_rounded,
+                      ),
                     ],
                   ),
                 ),
@@ -437,7 +524,11 @@ class _SafepayPaymentGatewayScreenState
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.grey),
+                      const Icon(
+                        Icons.lock_outline_rounded,
+                        size: 14,
+                        color: AppColors.grey,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         "End-to-end encrypted via Safepay Checkout Terminal",
@@ -460,7 +551,10 @@ class _SafepayPaymentGatewayScreenState
               color: Colors.black.withValues(alpha: 0.5),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 24,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -517,19 +611,24 @@ class _SafepayPaymentGatewayScreenState
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 16,
+                size: 14,
                 color: isSelected ? AppColors.camel : AppColors.grey,
               ),
-              const SizedBox(width: 6),
-              Text(
-                title,
-                style: GoogleFonts.outfit(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? AppColors.charcoal : AppColors.grey,
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.outfit(
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? AppColors.charcoal : AppColors.grey,
+                  ),
                 ),
               ),
             ],
@@ -583,7 +682,11 @@ class _SafepayPaymentGatewayScreenState
                         letterSpacing: 1.5,
                       ),
                     ),
-                    const Icon(Icons.contactless_rounded, color: AppColors.white, size: 20),
+                    const Icon(
+                      Icons.contactless_rounded,
+                      color: AppColors.white,
+                      size: 20,
+                    ),
                   ],
                 ),
                 const SizedBox(height: 18),
@@ -719,7 +822,11 @@ class _SafepayPaymentGatewayScreenState
                   color: AppColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.bolt_rounded, color: AppColors.success, size: 22),
+                child: const Icon(
+                  Icons.bolt_rounded,
+                  color: AppColors.success,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -817,7 +924,9 @@ class _SafepayPaymentGatewayScreenState
           padding: const EdgeInsets.symmetric(vertical: 12),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.camel.withValues(alpha: 0.1) : AppColors.offWhite,
+            color: isSelected
+                ? AppColors.camel.withValues(alpha: 0.1)
+                : AppColors.offWhite,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected ? AppColors.camel : AppColors.greyLight,
@@ -827,7 +936,11 @@ class _SafepayPaymentGatewayScreenState
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 16, color: isSelected ? AppColors.camel : AppColors.charcoal),
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? AppColors.camel : AppColors.charcoal,
+              ),
               const SizedBox(width: 6),
               Text(
                 name,
@@ -869,7 +982,9 @@ class _SafepayPaymentGatewayScreenState
           decoration: BoxDecoration(
             color: AppColors.offWhite,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.greyLight.withValues(alpha: 0.6)),
+            border: Border.all(
+              color: AppColors.greyLight.withValues(alpha: 0.6),
+            ),
           ),
           child: TextField(
             controller: controller,
@@ -879,10 +994,16 @@ class _SafepayPaymentGatewayScreenState
             style: GoogleFonts.outfit(fontSize: 14, color: AppColors.charcoal),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.outfit(fontSize: 13, color: AppColors.grey),
+              hintStyle: GoogleFonts.outfit(
+                fontSize: 13,
+                color: AppColors.grey,
+              ),
               prefixIcon: Icon(icon, size: 18, color: AppColors.grey),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
             ),
           ),
         ),

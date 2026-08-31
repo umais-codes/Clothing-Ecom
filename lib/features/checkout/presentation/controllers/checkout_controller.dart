@@ -1,18 +1,15 @@
-import 'package:dio/dio.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
-import 'package:safepay_checkout/safepay_payment_gateway.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/b2c_cart_controller.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_controller.dart';
 import 'package:ecom_app/features/vendor_orders/presentation/controllers/vendor_order_controller.dart';
 import 'package:ecom_app/features/vendor_orders/domain/entities/vendor_order.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
-
 import 'package:ecom_app/features/checkout/presentation/views/safepay_payment_gateway_screen.dart';
 
 class CheckoutController extends GetxController {
@@ -404,7 +401,10 @@ class CheckoutController extends GetxController {
                     (route) =>
                         route.settings.name == homeRoute || route.isFirst,
                   );
-                  Get.toNamed('/customer-tracking');
+                  Get.toNamed(
+                    '/customer-tracking',
+                    arguments: {'orderId': orderId},
+                  );
                 },
               ),
             ],

@@ -29,6 +29,12 @@ class TrackingController extends GetxController {
   final RxList<Map<String, dynamic>> userOrders = <Map<String, dynamic>>[].obs;
 
   final RxInt activeStepIndex = 0.obs;
+  final RxBool isCancelling = false.obs;
+
+  bool get canCancel {
+    final s = status.value.toLowerCase();
+    return s == 'pending' || s == 'paid' || s == 'processing';
+  }
 
   final List<Map<String, String>> steps = [
     {
@@ -84,7 +90,9 @@ class TrackingController extends GetxController {
         try {
           final res = await _supabase
               .from('orders')
-              .select('id, amount, status, created_at, tracking_number, courier_partner')
+              .select(
+                'id, amount, status, created_at, tracking_number, courier_partner',
+              )
               .eq('customer_id', user.id)
               .order('created_at', ascending: false)
               .limit(10);
@@ -157,27 +165,36 @@ class TrackingController extends GetxController {
     customerName.value = row['customer_name']?.toString() ?? 'Valued Customer';
     customerEmail.value = row['customer_email']?.toString() ?? '';
     customerPhone.value = row['customer_phone']?.toString() ?? '';
-    shippingAddress.value = row['shipping_address']?.toString() ?? 'Standard Delivery';
+    shippingAddress.value =
+        row['shipping_address']?.toString() ?? 'Standard Delivery';
     amount.value = (row['amount'] as num?)?.toDouble() ?? 0.0;
     paymentMethod.value = row['payment_method']?.toString() ?? 'Safepay';
     courierName.value = row['courier_partner']?.toString() ?? 'Trax Logistics';
-    
+
     final awb = row['tracking_number']?.toString();
-    trackingId.value = (awb != null && awb.isNotEmpty) 
-        ? awb 
+    trackingId.value = (awb != null && awb.isNotEmpty)
+        ? awb
         : (row['safepay_tracker']?.toString() ?? 'AWB-PENDING');
 
     final createdStr = row['created_at']?.toString();
     if (createdStr != null) {
       final dt = DateTime.tryParse(createdStr);
       if (dt != null) {
-        createdAtFormatted.value = DateFormat('MMM dd, yyyy • hh:mm a').format(dt.toLocal());
+        createdAtFormatted.value = DateFormat(
+          'MMM dd, yyyy • hh:mm a',
+        ).format(dt.toLocal());
         final estDelivery = dt.add(const Duration(days: 3));
-        expectedDelivery.value = DateFormat('EEEE, MMM dd, yyyy').format(estDelivery);
+        expectedDelivery.value = DateFormat(
+          'EEEE, MMM dd, yyyy',
+        ).format(estDelivery);
       }
     } else {
-      createdAtFormatted.value = DateFormat('MMM dd, yyyy').format(DateTime.now());
-      expectedDelivery.value = DateFormat('EEEE, MMM dd, yyyy').format(DateTime.now().add(const Duration(days: 3)));
+      createdAtFormatted.value = DateFormat(
+        'MMM dd, yyyy',
+      ).format(DateTime.now());
+      expectedDelivery.value = DateFormat(
+        'EEEE, MMM dd, yyyy',
+      ).format(DateTime.now().add(const Duration(days: 3)));
     }
 
     _updateStepperIndexFromStatus(st);
@@ -242,6 +259,67 @@ class TrackingController extends GetxController {
       index = 4;
     }
     activeStepIndex.value = index;
+  }
+
+  Future<bool> cancelOrder(String reason) async {
+    if (!canCancel || orderId.value.isEmpty) return false;
+
+    try {
+      isCancelling.value = true;
+      final orderToCancel = orderId.value;
+
+      try {
+        await _supabase.from('orders').update({
+          'status': 'Cancelled',
+          'cancellation_reason': reason,
+          'cancelled_at': DateTime.now().toIso8601String(),
+        }).eq('id', orderToCancel);
+      } catch (colErr) {
+        debugPrint(
+          'Detailed cancellation metadata update failed ($colErr). Falling back to basic status update.',
+        );
+        await _supabase.from('orders').update({
+          'status': 'Cancelled',
+        }).eq('id', orderToCancel);
+      }
+
+      status.value = 'Cancelled';
+
+      // Update in local user orders list
+      final idx =
+          userOrders.indexWhere((o) => o['id']?.toString() == orderToCancel);
+      if (idx != -1) {
+        userOrders[idx]['status'] = 'Cancelled';
+        userOrders.refresh();
+      }
+
+      Get.snackbar(
+        'Order Cancelled',
+        'Order $orderToCancel has been cancelled. Any authorized charges will be refunded automatically.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.errorBg,
+        colorText: AppColors.error,
+        duration: const Duration(seconds: 4),
+      );
+
+      return true;
+    } catch (e) {
+      debugPrint('Error cancelling order: $e');
+      final errorMsg = e.toString().contains('column')
+          ? 'Database schema error. Please retry.'
+          : 'Unable to cancel order at this time. Please contact support.';
+
+      Get.snackbar(
+        'Cancellation Failed',
+        errorMsg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.errorBg,
+        colorText: AppColors.error,
+      );
+      return false;
+    } finally {
+      isCancelling.value = false;
+    }
   }
 
   void copyTrackingId() {

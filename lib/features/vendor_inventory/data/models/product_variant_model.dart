@@ -18,12 +18,16 @@ class ProductVariant {
   @HiveField(4)
   final String sku;
 
+  @HiveField(5)
+  final double? price;
+
   ProductVariant({
     required this.id,
     required this.color,
     required this.size,
     required this.stockQuantity,
     required this.sku,
+    this.price,
   });
 
   ProductVariant copyWith({
@@ -32,6 +36,7 @@ class ProductVariant {
     String? size,
     int? stockQuantity,
     String? sku,
+    double? price,
   }) {
     return ProductVariant(
       id: id ?? this.id,
@@ -39,6 +44,7 @@ class ProductVariant {
       size: size ?? this.size,
       stockQuantity: stockQuantity ?? this.stockQuantity,
       sku: sku ?? this.sku,
+      price: price ?? this.price,
     );
   }
 }

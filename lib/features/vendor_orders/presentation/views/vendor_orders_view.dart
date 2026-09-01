@@ -8,6 +8,9 @@ import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import '../controllers/vendor_order_controller.dart';
 import '../../domain/entities/vendor_order.dart';
 import '../widgets/order_details_sheet.dart';
+import '../widgets/shipping_label_modal.dart';
+import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import 'package:ecom_app/app/widgets/custom_text_field.dart';
 
 class VendorOrdersView extends GetView<VendorOrderController> {
   const VendorOrdersView({super.key});
@@ -351,17 +354,38 @@ class VendorOrdersView extends GetView<VendorOrderController> {
     VendorOrder order,
     double sw,
   ) {
-    if (order.status == 'Pending') {
-      return CustomButton(
-        text: "Accept Order",
-        variant: ButtonVariant.primary,
-        buttonColor: AppColors.camel,
-        textColor: AppColors.white,
-        height: sw * 0.1,
-        fontSize: context.sp(12),
-        onPressed: () => controller.acceptOrder(order.id),
+    final s = order.status.toLowerCase();
+
+    if (s == 'pending' || s == 'paid' || s == 'authorized') {
+      return Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: CustomButton(
+              text: "Decline",
+              variant: ButtonVariant.outlined,
+              textColor: AppColors.error,
+              height: sw * 0.1,
+              fontSize: context.sp(12),
+              onPressed: () => _showRejectOrderDialog(context, order),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 2,
+            child: CustomButton(
+              text: "Accept Order",
+              variant: ButtonVariant.primary,
+              buttonColor: AppColors.camel,
+              textColor: AppColors.white,
+              height: sw * 0.1,
+              fontSize: context.sp(12),
+              onPressed: () => controller.acceptOrder(order.id),
+            ),
+          ),
+        ],
       );
-    } else if (order.status == 'Processing') {
+    } else if (s == 'processing' || s == 'packed') {
       return CustomButton(
         text: "Fulfill & Ship",
         variant: ButtonVariant.primary,
@@ -372,7 +396,7 @@ class VendorOrdersView extends GetView<VendorOrderController> {
         onPressed: () =>
             Get.toNamed('/fulfillment-checklist', arguments: order),
       );
-    } else if (order.status == 'Returned') {
+    } else if (s == 'returned' || s == 'cancelled' || s == 'refunded') {
       return CustomButton(
         text: "Process Refund",
         variant: ButtonVariant.primary,
@@ -382,64 +406,95 @@ class VendorOrdersView extends GetView<VendorOrderController> {
         fontSize: context.sp(12),
         onPressed: () => controller.processReturn(order.id),
       );
-    } else if (order.status == 'Shipped' && order.trackingNumber != null) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    } else if (s == 'shipped') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Icon(
-                Icons.local_shipping_outlined,
-                color: AppColors.success,
-                size: 16,
+              Row(
+                children: [
+                  const Icon(
+                    Icons.local_shipping_outlined,
+                    color: AppColors.success,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    "AWB: ${order.trackingNumber ?? 'In Transit'}",
+                    style: GoogleFonts.outfit(
+                      fontSize: context.sp(11),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.success,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 6),
-              Text(
-                "Tracking: ${order.trackingNumber}",
-                style: GoogleFonts.outfit(
-                  fontSize: context.sp(11),
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.success,
-                ),
+              Row(
+                children: [
+                  CustomButton(
+                    text: "Slip",
+                    variant: ButtonVariant.outlined,
+                    height: 28,
+                    width: sw * 0.14,
+                    fontSize: context.sp(9),
+                    fontWeight: FontWeight.w600,
+                    onPressed: () {
+                      ShippingLabelModal.show(context: context, order: order);
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                  CustomButton(
+                    text: "Track",
+                    variant: ButtonVariant.outlined,
+                    textColor: AppColors.camel,
+                    height: 28,
+                    width: sw * 0.14,
+                    fontSize: context.sp(9),
+                    fontWeight: FontWeight.w600,
+                    onPressed: () {
+                      Get.toNamed('/vendor-tracking');
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-          Row(
-            children: [
-              CustomButton(
-                text: "Slip",
-                variant: ButtonVariant.outlined,
-                height: 32,
-                width: sw * 0.16,
-                fontSize: context.sp(10),
-                fontWeight: FontWeight.w600,
-                onPressed: () {
-                  Get.snackbar(
-                    'Slip Generated',
-                    'Fulfillment slip for ${order.id} sent to printer.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.success.withValues(alpha: 0.1),
-                    colorText: AppColors.success,
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-              CustomButton(
-                text: "Track",
-                variant: ButtonVariant.primary,
-                buttonColor: AppColors.camel,
-                textColor: AppColors.white,
-                height: 32,
-                width: sw * 0.16,
-                fontSize: context.sp(10),
-                fontWeight: FontWeight.w600,
-                onPressed: () {
-                  Get.toNamed('/vendor-tracking');
-                },
-              ),
-            ],
+          const SizedBox(height: 8),
+          CustomButton(
+            text: "Mark As Delivered",
+            variant: ButtonVariant.primary,
+            buttonColor: AppColors.success,
+            textColor: AppColors.white,
+            height: sw * 0.09,
+            fontSize: context.sp(11),
+            onPressed: () => controller.markAsDelivered(order.id),
           ),
         ],
+      );
+    } else if (s == 'delivered') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.success.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              "Delivered • Fulfilled Successfully",
+              style: GoogleFonts.outfit(
+                fontSize: context.sp(11),
+                fontWeight: FontWeight.w700,
+                color: AppColors.success,
+              ),
+            ),
+          ],
+        ),
       );
     } else {
       return const SizedBox.shrink();
@@ -481,5 +536,82 @@ class VendorOrdersView extends GetView<VendorOrderController> {
       totalItems += item.quantity;
     }
     return totalItems == 1 ? "item" : "items";
+  }
+
+  void _showRejectOrderDialog(BuildContext context, VendorOrder order) {
+    final reasons = [
+      'Item Out of Stock / Fabric Defect',
+      'Bespoke Size / Pattern Unavailable',
+      'Delivery Address Unserviceable',
+      'Catalog Pricing / Quantity Error',
+      'Suspected Fraud / Duplicate Order',
+    ];
+    final selectedReason = reasons.first.obs;
+    final notesController = TextEditingController();
+
+    CustomPermissionDialog.show(
+      context: context,
+      icon: Icons.cancel_outlined,
+      iconColor: AppColors.error,
+      iconBgColor: AppColors.errorBg,
+      grantButtonColor: AppColors.error,
+      title: 'Decline Order ${order.id}',
+      description:
+          'Select a reason for declining this order. A full customer refund will be initiated immediately.',
+      content: Obx(
+        () => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...reasons.map((r) {
+              final isSel = selectedReason.value == r;
+              return InkWell(
+                onTap: () => selectedReason.value = r,
+                borderRadius: BorderRadius.circular(6),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isSel
+                            ? Icons.radio_button_checked
+                            : Icons.radio_button_off,
+                        size: 16,
+                        color: isSel ? AppColors.error : AppColors.grey,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          r,
+                          style: GoogleFonts.outfit(
+                            fontSize: context.sp(11),
+                            fontWeight:
+                                isSel ? FontWeight.w700 : FontWeight.w500,
+                            color: isSel ? AppColors.charcoal : AppColors.grey,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            CustomTextField(
+              controller: notesController,
+              hinttext: 'Additional notes (optional)',
+            ),
+          ],
+        ),
+      ),
+      grantText: 'Decline & Refund',
+      denyText: 'Keep Order',
+      onGrant: () {
+        final reasonText = notesController.text.trim().isNotEmpty
+            ? '${selectedReason.value} - ${notesController.text.trim()}'
+            : selectedReason.value;
+        controller.rejectOrder(order.id, reasonText);
+      },
+    );
   }
 }

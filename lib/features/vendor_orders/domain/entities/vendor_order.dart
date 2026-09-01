@@ -1,4 +1,3 @@
-
 class VendorOrderItem {
   final String id;
   final String name;
@@ -37,7 +36,7 @@ class VendorOrder {
   final String id;
   final String customerName;
   final double amount;
-  final String status; // 'Pending', 'Processing', 'Shipped', 'Returned'
+  final String status; // 'Pending', 'Processing', 'Shipped', 'Returned', 'Cancelled'
   final DateTime orderDate;
   final bool isB2B;
   final List<VendorOrderItem> items;
@@ -51,7 +50,8 @@ class VendorOrder {
   final String? courierPartner;
   final String? returnReason;
   final List<String>? returnImages;
-  
+  final String? cancellationReason;
+
   // Matrix data for B2B orders: color -> {size: quantity}
   final Map<String, Map<String, int>>? b2bMatrix;
   final List<String>? b2bSizes;
@@ -73,6 +73,7 @@ class VendorOrder {
     this.courierPartner,
     this.returnReason,
     this.returnImages,
+    this.cancellationReason,
     this.b2bMatrix,
     this.b2bSizes,
     this.b2bColors,
@@ -86,6 +87,10 @@ class VendorOrder {
     String? courierPartner,
     String? returnReason,
     List<String>? returnImages,
+    String? cancellationReason,
+    Map<String, Map<String, int>>? b2bMatrix,
+    List<String>? b2bSizes,
+    List<String>? b2bColors,
   }) {
     return VendorOrder(
       id: id,
@@ -97,15 +102,16 @@ class VendorOrder {
       items: items,
       trackingNumber: trackingNumber ?? this.trackingNumber,
       timeline: timeline ?? this.timeline,
-      shippingAddress: shippingAddress,
-      customerPhone: customerPhone,
+      shippingAddress: shippingAddress ?? this.shippingAddress,
+      customerPhone: customerPhone ?? this.customerPhone,
       packageWeight: packageWeight ?? this.packageWeight,
       courierPartner: courierPartner ?? this.courierPartner,
       returnReason: returnReason ?? this.returnReason,
       returnImages: returnImages ?? this.returnImages,
-      b2bMatrix: b2bMatrix,
-      b2bSizes: b2bSizes,
-      b2bColors: b2bColors,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      b2bMatrix: b2bMatrix ?? this.b2bMatrix,
+      b2bSizes: b2bSizes ?? this.b2bSizes,
+      b2bColors: b2bColors ?? this.b2bColors,
     );
   }
 }

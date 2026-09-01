@@ -83,6 +83,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
                     size: v['size']?.toString() ?? '',
                     stockQuantity: (v['stock'] as num?)?.toInt() ?? 0,
                     sku: v['sku']?.toString() ?? '',
+                    price: (v['price'] as num?)?.toDouble(),
                   ),
                 );
               }
@@ -175,6 +176,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
           'size': v.size,
           'stock': v.stockQuantity,
           'sku': v.sku,
+          'price': v.price ?? product.basePrice,
         }).toList();
 
         await supabase.from('products').upsert({

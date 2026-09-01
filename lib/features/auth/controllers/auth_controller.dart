@@ -69,8 +69,7 @@ class AuthController extends GetxController {
       TextEditingController();
   final TextEditingController corporatePhoneController =
       TextEditingController();
-  final TextEditingController corporateCityController =
-      TextEditingController();
+  final TextEditingController corporateCityController = TextEditingController();
   final TextEditingController ntnController = TextEditingController();
   final RxString selectedVolume = '1-50 Employees'.obs;
   final List<String> volumeOptions = [
@@ -187,6 +186,41 @@ class AuthController extends GetxController {
     Get.offAllNamed(nextRoute);
   }
 
+  Future<String> _resolveUserDbRole(String userId) async {
+    final supabase = Get.find<SupabaseService>().client;
+    try {
+      final profile = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .maybeSingle();
+      final role = profile?['role']?.toString().toLowerCase();
+      if (role != null && role.isNotEmpty) {
+        return role;
+      }
+    } catch (e) {
+      debugPrint('Error checking profile role: $e');
+    }
+
+    try {
+      final vendor = await supabase
+          .from('vendors')
+          .select('id, category')
+          .or('id.eq.$userId,owner_id.eq.$userId')
+          .maybeSingle();
+      if (vendor != null) {
+        if (vendor['category']?.toString().toLowerCase() == 'corporate') {
+          return 'corporate';
+        }
+        return 'vendor';
+      }
+    } catch (e) {
+      debugPrint('Error checking vendor role: $e');
+    }
+
+    return 'shopper';
+  }
+
   Future<void> signInShopper() async {
     if (shopperEmailController.text.trim().isEmpty ||
         shopperPasswordController.text.trim().isEmpty) {
@@ -200,6 +234,23 @@ class AuthController extends GetxController {
         password: shopperPasswordController.text.trim(),
       );
       if (user != null) {
+        final dbRole = await _resolveUserDbRole(user.id);
+        if (dbRole == 'vendor') {
+          await _authRepository.signOut();
+          selectedRole.value = AuthRole.vendor;
+          _showError(
+            'This account is registered as a Brand/Vendor. Please sign in through the Brand Portal tab.',
+          );
+          return;
+        } else if (dbRole == 'corporate') {
+          await _authRepository.signOut();
+          selectedRole.value = AuthRole.corporate;
+          _showError(
+            'This account is registered as a Corporate Buyer. Please sign in through the Corporate Access tab.',
+          );
+          return;
+        }
+
         _handleAuthSuccess(AuthRole.shopper);
         Get.snackbar(
           'Success',
@@ -343,8 +394,8 @@ class AuthController extends GetxController {
       final ownerName = contactPersonController.text.trim().isNotEmpty
           ? contactPersonController.text.trim()
           : (brandNameController.text.trim().isNotEmpty
-              ? brandNameController.text.trim()
-              : 'Owner');
+                ? brandNameController.text.trim()
+                : 'Owner');
       final phoneNum = vendorPhoneController.text.trim().isNotEmpty
           ? vendorPhoneController.text.trim()
           : 'Not provided';
@@ -520,6 +571,23 @@ class AuthController extends GetxController {
         password: vendorPasswordController.text.trim(),
       );
       if (user != null) {
+        final dbRole = await _resolveUserDbRole(user.id);
+        if (dbRole == 'shopper') {
+          await _authRepository.signOut();
+          selectedRole.value = AuthRole.shopper;
+          _showError(
+            'This account is registered as a Consumer/Shopper. Please sign in through the Shopper tab or register your Brand.',
+          );
+          return;
+        } else if (dbRole == 'corporate') {
+          await _authRepository.signOut();
+          selectedRole.value = AuthRole.corporate;
+          _showError(
+            'This account is registered as a Corporate Buyer. Please sign in through the Corporate Access tab.',
+          );
+          return;
+        }
+
         final supabase = Get.find<SupabaseService>().client;
         try {
           final vendorRes = await supabase
@@ -567,8 +635,8 @@ class AuthController extends GetxController {
       final compName = companyNameController.text.trim();
       final contactPerson =
           corporateContactPersonController.text.trim().isNotEmpty
-              ? corporateContactPersonController.text.trim()
-              : compName;
+          ? corporateContactPersonController.text.trim()
+          : compName;
       final corpPhone = corporatePhoneController.text.trim().isNotEmpty
           ? corporatePhoneController.text.trim()
           : 'Not provided';
@@ -747,6 +815,23 @@ class AuthController extends GetxController {
         password: corporatePasswordController.text.trim(),
       );
       if (user != null) {
+        final dbRole = await _resolveUserDbRole(user.id);
+        if (dbRole == 'shopper') {
+          await _authRepository.signOut();
+          selectedRole.value = AuthRole.shopper;
+          _showError(
+            'This account is registered as a Consumer/Shopper. Please sign in through the Shopper tab or register as a Corporate Buyer.',
+          );
+          return;
+        } else if (dbRole == 'vendor') {
+          await _authRepository.signOut();
+          selectedRole.value = AuthRole.vendor;
+          _showError(
+            'This account is registered as a Brand/Vendor. Please sign in through the Brand Portal tab.',
+          );
+          return;
+        }
+
         final supabase = Get.find<SupabaseService>().client;
         try {
           final vendorRes = await supabase

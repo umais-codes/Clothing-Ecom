@@ -22,13 +22,14 @@ class ProductVariantAdapter extends TypeAdapter<ProductVariant> {
       size: fields[2] as String,
       stockQuantity: fields[3] as int,
       sku: fields[4] as String,
+      price: (fields[5] as num?)?.toDouble(),
     );
   }
 
   @override
   void write(BinaryWriter writer, ProductVariant obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class ProductVariantAdapter extends TypeAdapter<ProductVariant> {
       ..writeByte(3)
       ..write(obj.stockQuantity)
       ..writeByte(4)
-      ..write(obj.sku);
+      ..write(obj.sku)
+      ..writeByte(5)
+      ..write(obj.price);
   }
 
   @override

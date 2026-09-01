@@ -218,7 +218,8 @@ class PerspectiveSwitcher extends StatelessWidget {
 
       // Case B: Switching to Vendor
       if (targetRole == AuthRole.vendor) {
-        if (vendorRes == null || (dbRole != 'vendor' && dbRole.isNotEmpty && dbRole != 'shopper')) {
+        if (vendorRes == null ||
+            (dbRole != 'vendor' && dbRole.isNotEmpty && dbRole != 'shopper')) {
           _showRoleAccountMismatchDialog(
             context: context,
             authController: authController,
@@ -308,17 +309,30 @@ class PerspectiveSwitcher extends StatelessWidget {
     required AuthRole targetRole,
     required String targetRoleName,
   }) {
+    IconData dialogIcon = Icons.manage_accounts_rounded;
+    String cleanTargetName = targetRoleName;
+    if (targetRole == AuthRole.vendor) {
+      dialogIcon = Icons.storefront_rounded;
+      cleanTargetName = "Vendor";
+    } else if (targetRole == AuthRole.corporate) {
+      dialogIcon = Icons.business_center_rounded;
+      cleanTargetName = "Corporate";
+    } else if (targetRole == AuthRole.shopper) {
+      dialogIcon = Icons.shopping_bag_rounded;
+      cleanTargetName = "Shopper";
+    }
+
     CustomPermissionDialog.show(
       context: context,
-      icon: Icons.switch_account_outlined,
+      icon: dialogIcon,
       title: 'Separate Account Required',
       description: Text.rich(
         TextSpan(
           text: 'You are currently signed in with a ',
           style: GoogleFonts.outfit(
-            fontSize: context.sp(13),
+            fontSize: context.sp(12),
             color: AppColors.grey,
-            height: 1.5,
+            height: 1.45,
           ),
           children: [
             TextSpan(
@@ -337,14 +351,14 @@ class PerspectiveSwitcher extends StatelessWidget {
               ),
             ),
             const TextSpan(
-              text: 'please sign in with your separate account credentials.',
+              text: 'please sign in with your separate credentials.',
             ),
           ],
         ),
         textAlign: TextAlign.center,
       ),
-      grantText: 'Sign In as $targetRoleName',
-      denyText: 'Stay on Current Account',
+      grantText: 'Sign In',
+      denyText: 'Stay on Account',
       onGrant: () async {
         await authController.signOut();
         authController.setRole(targetRole);

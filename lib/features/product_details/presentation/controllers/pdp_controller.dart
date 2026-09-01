@@ -398,19 +398,42 @@ class PdpController extends GetxController {
     quantity.value = val;
   }
 
+  double get currentPrice {
+    final rawVariants = product['variants_json'];
+    if (rawVariants is List && rawVariants.isNotEmpty) {
+      for (var v in rawVariants) {
+        final sMatch = v['size']?.toString().toLowerCase() ==
+            selectedSize.value.toLowerCase();
+        final cMatch = selectedColor.value.isEmpty ||
+            v['color']?.toString().toLowerCase() ==
+                selectedColor.value.toLowerCase();
+        if (sMatch && cMatch && v['price'] != null) {
+          final p = (v['price'] as num).toDouble();
+          if (p > 0) return p;
+        }
+      }
+    }
+    return (product['price'] as num?)?.toDouble() ?? 0.0;
+  }
+
   void addToCart() {
     final bool isB2B = product['isB2B'] == true || product['is_b2b'] == true;
     final dynamic cartController = isB2B
         ? Get.find<B2BCartController>()
         : Get.find<B2CCartController>();
 
-    final String pId = product['id']?.toString() ?? 'prod_${DateTime.now().millisecondsSinceEpoch}';
+    final String pId = product['id']?.toString() ??
+        'prod_${DateTime.now().millisecondsSinceEpoch}';
     final String variantId =
         "${pId}_${selectedSize.value}_${selectedColor.value}";
 
-    final String pName = product['name'] ?? product['title'] ?? 'Luxury Apparel';
-    final String pVendor = product['vendor'] ?? product['vendor_name'] ?? product['vendorName'] ?? 'Boutique Apparel';
-    final double pPrice = (product['price'] as num?)?.toDouble() ?? 0.0;
+    final String pName =
+        product['name'] ?? product['title'] ?? 'Luxury Apparel';
+    final String pVendor = product['vendor'] ??
+        product['vendor_name'] ??
+        product['vendorName'] ??
+        'Boutique Apparel';
+    final double pPrice = currentPrice;
     final String pImg = productImages.isNotEmpty
         ? productImages.first
         : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop';

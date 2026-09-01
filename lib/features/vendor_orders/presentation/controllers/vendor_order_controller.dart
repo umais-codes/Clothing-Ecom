@@ -39,85 +39,62 @@ class VendorOrderController extends GetxController {
         return;
       }
 
-      // 1. Resolve vendor ID for current user
-      final profileRes = await _supabase
-          .from('profiles')
-          .select('vendor_id')
-          .eq('id', user.id)
-          .maybeSingle();
-      String? vendorId = profileRes?['vendor_id']?.toString();
+      // 1. Fetch orders from Supabase public.orders
+      final ordersRes = await _supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', ascending: false)
+          .limit(50);
 
-      if (vendorId == null) {
-        final vendorRes = await _supabase
-            .from('vendors')
-            .select('id')
-            .eq('owner_id', user.id)
-            .maybeSingle();
-        vendorId = vendorRes?['id']?.toString();
-      }
-
-      if (vendorId == null) {
+      if ((ordersRes as List).isEmpty) {
         orders.clear();
         return;
       }
 
-      // 2. Fetch products owned by this vendor
-      final productsRes = await _supabase
-          .from('products')
-          .select('id')
-          .eq('vendor_id', vendorId);
-
-      final List<String> myProductIds = (productsRes as List)
-          .map((p) => p['id'].toString())
+      final List<dynamic> ordersList = ordersRes;
+      final List<String> orderIds = ordersList
+          .map((o) => o['id']?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
           .toList();
 
-      if (myProductIds.isEmpty) {
-        orders.clear();
-        return;
-      }
-
-      // 3. Query order items strictly matching vendor products
-      final itemsResponse = await _supabase
-          .from('order_items')
-          .select('*, orders(*)')
-          .filter('product_id', 'in', myProductIds)
-          .order('created_at', ascending: false);
-
-      if (itemsResponse.isEmpty) {
-        orders.clear();
-        return;
-      }
-
-      // 4. Group items by parent order ID
-      final Map<String, List<dynamic>> groupedItems = {};
-      final Map<String, dynamic> ordersMap = {};
-
-      for (var item in (itemsResponse as List<dynamic>)) {
-        final orderData = item['orders'];
-        if (orderData != null) {
-          final String orderId = orderData['id']?.toString() ?? '';
-          if (orderId.isNotEmpty) {
-            ordersMap[orderId] = orderData;
-            groupedItems.putIfAbsent(orderId, () => []).add(item);
-          }
+      // 2. Fetch all corresponding order items
+      List<dynamic> allOrderItems = [];
+      if (orderIds.isNotEmpty) {
+        try {
+          allOrderItems = await _supabase
+              .from('order_items')
+              .select('*')
+              .filter('order_id', 'in', orderIds);
+        } catch (e) {
+          debugPrint('Error fetching order items: $e');
         }
       }
 
-      final List<VendorOrder> scopedOrders = [];
+      // Group items by order_id
+      final Map<String, List<dynamic>> itemsMap = {};
+      for (var it in allOrderItems) {
+        final oId = it['order_id']?.toString() ?? '';
+        if (oId.isNotEmpty) {
+          itemsMap.putIfAbsent(oId, () => []).add(it);
+        }
+      }
 
-      for (var entry in ordersMap.entries) {
-        final row = entry.value;
-        final orderItemsRaw = groupedItems[entry.key] ?? [];
+      final List<VendorOrder> loadedOrders = [];
 
-        final itemsList = orderItemsRaw.map((item) {
+      for (var row in ordersList) {
+        final oId = row['id']?.toString() ?? '';
+        final rawItems = itemsMap[oId] ?? [];
+
+        final itemsList = rawItems.map((item) {
           return VendorOrderItem(
-            id: item['id']?.toString() ?? '',
-            name: item['product_name']?.toString() ?? 'Product',
+            id: item['product_id']?.toString() ?? item['id']?.toString() ?? '',
+            name: item['product_name']?.toString() ?? 'Garment',
             quantity: (item['quantity'] as num?)?.toInt() ?? 1,
             unitPrice: (item['unit_price'] as num?)?.toDouble() ?? 0.0,
             size: item['size']?.toString(),
             color: item['color']?.toString(),
-            imageUrl: item['image_url']?.toString() ??
+            imageUrl:
+                item['image_url']?.toString() ??
                 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=300&auto=format&fit=crop',
           );
         }).toList();
@@ -133,11 +110,10 @@ class VendorOrderController extends GetxController {
           );
         }).toList();
 
-        scopedOrders.add(
+        loadedOrders.add(
           VendorOrder(
-            id: row['id']?.toString() ?? '',
-            customerName:
-                row['customer_name']?.toString() ?? 'Valued Customer',
+            id: oId,
+            customerName: row['customer_name']?.toString() ?? 'Valued Customer',
             amount: (row['amount'] as num?)?.toDouble() ?? 0.0,
             status: row['status']?.toString() ?? 'Pending',
             orderDate: row['created_at'] != null
@@ -167,9 +143,9 @@ class VendorOrderController extends GetxController {
         );
       }
 
-      orders.assignAll(scopedOrders);
+      orders.assignAll(loadedOrders);
     } catch (e) {
-      debugPrint('Error fetching vendor scoped orders from Supabase: $e');
+      debugPrint('Error fetching orders in VendorOrderController: $e');
     }
   }
 
@@ -185,15 +161,42 @@ class VendorOrderController extends GetxController {
     if (filter == 'All') {
       return orders;
     } else if (filter == 'New Orders') {
-      return orders.where((o) => o.status == 'Pending').toList();
+      return orders
+          .where(
+            (o) =>
+                o.status.toLowerCase() == 'pending' ||
+                o.status.toLowerCase() == 'paid' ||
+                o.status.toLowerCase() == 'authorized',
+          )
+          .toList();
     } else if (filter == 'Processing') {
-      return orders.where((o) => o.status == 'Processing').toList();
+      return orders
+          .where(
+            (o) =>
+                o.status.toLowerCase() == 'processing' ||
+                o.status.toLowerCase() == 'packed',
+          )
+          .toList();
     } else if (filter == 'Shipped') {
-      return orders.where((o) => o.status == 'Shipped').toList();
+      return orders
+          .where(
+            (o) =>
+                o.status.toLowerCase() == 'shipped' ||
+                o.status.toLowerCase() == 'dispatched' ||
+                o.status.toLowerCase() == 'in_transit',
+          )
+          .toList();
     } else if (filter == 'Returns (RMA)') {
-      return orders.where((o) => o.status == 'Returned').toList();
+      return orders
+          .where(
+            (o) =>
+                o.status.toLowerCase() == 'returned' ||
+                o.status.toLowerCase() == 'cancelled' ||
+                o.status.toLowerCase() == 'refunded',
+          )
+          .toList();
     }
-    return [];
+    return orders;
   }
 
   void acceptOrder(String orderId) {
@@ -201,33 +204,43 @@ class VendorOrderController extends GetxController {
     if (index != -1) {
       final oldOrder = orders[index];
       final updatedTimeline = List<OrderTimelineStep>.from(oldOrder.timeline)
-        ..add(OrderTimelineStep(
-          title: 'Order Accepted',
-          description: 'Confirmed by vendor. Moving to fulfillment.',
-          timestamp: DateTime.now(),
-          isCompleted: true,
-        ));
-      
+        ..add(
+          OrderTimelineStep(
+            title: 'Order Accepted',
+            description: 'Confirmed by vendor. Moving to fulfillment.',
+            timestamp: DateTime.now(),
+            isCompleted: true,
+          ),
+        );
+
       final updatedOrder = oldOrder.copyWith(
         status: 'Processing',
         timeline: updatedTimeline,
       );
       orders[index] = updatedOrder;
-      
+
       if (!SupabaseService.supabaseUrl.contains('placeholder')) {
-        _supabase.from('orders').update({
-          'status': 'Processing',
-          'timeline': updatedTimeline.map((t) => {
-            'title': t.title,
-            'description': t.description,
-            'timestamp': t.timestamp?.toIso8601String(),
-            'isCompleted': t.isCompleted,
-          }).toList(),
-        }).eq('id', orderId).catchError((e) {
-          debugPrint('Error updating order in Supabase: $e');
-        });
+        _supabase
+            .from('orders')
+            .update({
+              'status': 'Processing',
+              'timeline': updatedTimeline
+                  .map(
+                    (t) => {
+                      'title': t.title,
+                      'description': t.description,
+                      'timestamp': t.timestamp?.toIso8601String(),
+                      'isCompleted': t.isCompleted,
+                    },
+                  )
+                  .toList(),
+            })
+            .eq('id', orderId)
+            .catchError((e) {
+              debugPrint('Error updating order in Supabase: $e');
+            });
       }
-      
+
       Get.snackbar(
         'Order Accepted',
         'Order $orderId has been moved to Processing.',
@@ -246,17 +259,80 @@ class VendorOrderController extends GetxController {
     }
   }
 
+  Future<void> rejectOrder(String orderId, String reason) async {
+    final index = orders.indexWhere((o) => o.id == orderId);
+    if (index != -1) {
+      final oldOrder = orders[index];
+      final updatedTimeline = List<OrderTimelineStep>.from(oldOrder.timeline)
+        ..add(
+          OrderTimelineStep(
+            title: 'Order Declined',
+            description: 'Declined by Brand: "$reason". Full refund initiated.',
+            timestamp: DateTime.now(),
+            isCompleted: true,
+          ),
+        );
+
+      orders[index] = oldOrder.copyWith(
+        status: 'Cancelled',
+        cancellationReason: reason,
+        timeline: updatedTimeline,
+      );
+
+      if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+        try {
+          await _supabase
+              .from('orders')
+              .update({
+                'status': 'Cancelled',
+                'cancellation_reason': 'Declined by Vendor: $reason',
+                'cancelled_at': DateTime.now().toIso8601String(),
+                'refund_status': 'Refund Initiated (Vendor Declined)',
+                'timeline': updatedTimeline
+                    .map(
+                      (t) => {
+                        'title': t.title,
+                        'description': t.description,
+                        'timestamp': t.timestamp?.toIso8601String(),
+                        'isCompleted': t.isCompleted,
+                      },
+                    )
+                    .toList(),
+              })
+              .eq('id', orderId);
+        } catch (e) {
+          debugPrint('Error updating rejected order in Supabase: $e');
+          await _supabase
+              .from('orders')
+              .update({'status': 'Cancelled'})
+              .eq('id', orderId);
+        }
+      }
+
+      Get.snackbar(
+        'Order Declined',
+        'Order $orderId has been declined. Customer refund initiated.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.errorBg,
+        colorText: AppColors.error,
+        duration: const Duration(seconds: 4),
+      );
+    }
+  }
+
   void markAsShipped(String orderId, String trackingNumber) {
     final index = orders.indexWhere((o) => o.id == orderId);
     if (index != -1) {
       final oldOrder = orders[index];
       final updatedTimeline = List<OrderTimelineStep>.from(oldOrder.timeline)
-        ..add(OrderTimelineStep(
-          title: 'Shipped',
-          description: 'Dispatched via carrier. Tracking: $trackingNumber',
-          timestamp: DateTime.now(),
-          isCompleted: true,
-        ));
+        ..add(
+          OrderTimelineStep(
+            title: 'Shipped',
+            description: 'Dispatched via carrier. Tracking: $trackingNumber',
+            timestamp: DateTime.now(),
+            isCompleted: true,
+          ),
+        );
 
       orders[index] = oldOrder.copyWith(
         status: 'Shipped',
@@ -265,23 +341,87 @@ class VendorOrderController extends GetxController {
       );
 
       if (!SupabaseService.supabaseUrl.contains('placeholder')) {
-        _supabase.from('orders').update({
-          'status': 'Shipped',
-          'tracking_number': trackingNumber,
-          'timeline': updatedTimeline.map((t) => {
-            'title': t.title,
-            'description': t.description,
-            'timestamp': t.timestamp?.toIso8601String(),
-            'isCompleted': t.isCompleted,
-          }).toList(),
-        }).eq('id', orderId).catchError((e) {
-          debugPrint('Error marking order as shipped in Supabase: $e');
-        });
+        _supabase
+            .from('orders')
+            .update({
+              'status': 'Shipped',
+              'tracking_number': trackingNumber,
+              'timeline': updatedTimeline
+                  .map(
+                    (t) => {
+                      'title': t.title,
+                      'description': t.description,
+                      'timestamp': t.timestamp?.toIso8601String(),
+                      'isCompleted': t.isCompleted,
+                    },
+                  )
+                  .toList(),
+            })
+            .eq('id', orderId)
+            .catchError((e) {
+              debugPrint('Error marking order as shipped in Supabase: $e');
+            });
       }
 
       Get.snackbar(
         'Order Shipped',
         'Order $orderId marked as Shipped. Tracking ID added.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.successBg,
+        colorText: AppColors.success,
+      );
+    }
+  }
+
+  Future<void> markAsDelivered(String orderId) async {
+    final index = orders.indexWhere((o) => o.id == orderId);
+    if (index != -1) {
+      final oldOrder = orders[index];
+      final updatedTimeline = List<OrderTimelineStep>.from(oldOrder.timeline)
+        ..add(
+          OrderTimelineStep(
+            title: 'Delivered',
+            description: 'Package handed over to recipient successfully.',
+            timestamp: DateTime.now(),
+            isCompleted: true,
+          ),
+        );
+
+      orders[index] = oldOrder.copyWith(
+        status: 'Delivered',
+        timeline: updatedTimeline,
+      );
+
+      if (!SupabaseService.supabaseUrl.contains('placeholder')) {
+        try {
+          await _supabase
+              .from('orders')
+              .update({
+                'status': 'Delivered',
+                'delivered_at': DateTime.now().toIso8601String(),
+                'timeline': updatedTimeline
+                    .map(
+                      (t) => {
+                        'title': t.title,
+                        'description': t.description,
+                        'timestamp': t.timestamp?.toIso8601String(),
+                        'isCompleted': t.isCompleted,
+                      },
+                    )
+                    .toList(),
+              })
+              .eq('id', orderId);
+        } catch (colErr) {
+          await _supabase
+              .from('orders')
+              .update({'status': 'Delivered'})
+              .eq('id', orderId);
+        }
+      }
+
+      Get.snackbar(
+        'Delivery Confirmed',
+        'Order $orderId marked as Delivered. Customer notified.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.successBg,
         colorText: AppColors.success,
@@ -296,13 +436,15 @@ class VendorOrderController extends GetxController {
       orders.removeAt(index);
 
       if (!SupabaseService.supabaseUrl.contains('placeholder')) {
-        _supabase.from('orders').update({
-          'status': 'Returned',
-        }).eq('id', orderId).catchError((e) {
-          debugPrint('Error updating return status in Supabase: $e');
-        });
+        _supabase
+            .from('orders')
+            .update({'status': 'Returned'})
+            .eq('id', orderId)
+            .catchError((e) {
+              debugPrint('Error updating return status in Supabase: $e');
+            });
       }
-      
+
       Get.snackbar(
         'Refund Completed',
         'RMA for order $orderId completed successfully. Refund initiated.',
@@ -315,7 +457,9 @@ class VendorOrderController extends GetxController {
 
   void subscribeToOrders() {
     if (SupabaseService.supabaseUrl.contains('placeholder')) {
-      debugPrint('Supabase placeholder URL detected; skipping realtime orders subscription.');
+      debugPrint(
+        'Supabase placeholder URL detected; skipping realtime orders subscription.',
+      );
       return;
     }
     _ordersSubscriptionChannel = _supabase

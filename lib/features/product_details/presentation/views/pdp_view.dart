@@ -167,13 +167,15 @@ class PdpView extends GetView<PdpController> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        /// PRICE
-                        Text(
-                          '\$${controller.product['price'].toStringAsFixed(0)}',
-                          style: GoogleFonts.outfit(
-                            fontSize: sw * 0.045,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.camel,
+                        /// PRICE (Dynamic per size / variant)
+                        Obx(
+                          () => Text(
+                            '\$${controller.currentPrice.toStringAsFixed(0)}',
+                            style: GoogleFonts.outfit(
+                              fontSize: sw * 0.045,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.camel,
+                            ),
                           ),
                         ),
 

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
-import 'package:ecom_app/core/supabase/supabase_client.dart';
 
 class SplashController extends GetxController {
   Timer? _timer;
@@ -72,30 +71,9 @@ class SplashController extends GetxController {
             }
 
             if (matchedRole != null) {
-              if (matchedRole == AuthRole.vendor ||
-                  matchedRole == AuthRole.corporate) {
-                try {
-                  final supabase = Get.find<SupabaseService>().client;
-                  final vendorRes = await supabase
-                      .from('vendors')
-                      .select('kyc_status')
-                      .eq('owner_id', user.id)
-                      .maybeSingle();
-
-                  final kyc = vendorRes?['kyc_status']
-                      ?.toString()
-                      .toLowerCase();
-                  if (kyc != 'approved') {
-                    matchedRole = AuthRole.shopper;
-                    authCtrl.setRole(AuthRole.shopper);
-                  }
-                } catch (e) {
-                  matchedRole = AuthRole.shopper;
-                  authCtrl.setRole(AuthRole.shopper);
-                }
-              }
-
               authCtrl.selectedRole.value = matchedRole;
+              box.put('lastSelectedRole', matchedRole.name);
+
               if (matchedRole == AuthRole.admin) {
                 Get.offAllNamed('/admin-panel');
               } else {

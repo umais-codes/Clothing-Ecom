@@ -270,7 +270,7 @@ class ProductFormView extends StatelessWidget {
 
   Widget _buildPricingCard(ProductCrudController controller, double sw) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: sw * 0.01, horizontal: sw * 0.02),
+      padding: EdgeInsets.symmetric(vertical: sw * 0.02, horizontal: sw * 0.03),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(sw * 0.03),
@@ -282,13 +282,26 @@ class ProductFormView extends StatelessWidget {
           ),
         ],
       ),
-      child: CustomTextField(
-        controller: controller.basePriceController,
-        hinttext: 'Base Price',
-        textAlign: TextAlign.left,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        prefixIcon: Icon(Icons.attach_money, color: AppColors.charcoal),
-        onChanged: (_) => controller.saveDraft(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTextField(
+            controller: controller.basePriceController,
+            hinttext: 'Base Price (Optional if size prices set)',
+            textAlign: TextAlign.left,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            prefixIcon: const Icon(
+              Icons.attach_money,
+              color: AppColors.charcoal,
+            ),
+            onChanged: (_) => controller.saveDraft(),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Leave empty if setting individual size prices (lowest size price will be used as starting price).',
+            style: GoogleFonts.outfit(fontSize: 11, color: AppColors.grey),
+          ),
+        ],
       ),
     );
   }
@@ -321,10 +334,7 @@ class ProductFormView extends StatelessWidget {
               ),
               subtitle: Text(
                 'Show this product on the B2B Sourcing Portal instead of the B2C shop.',
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: AppColors.grey,
-                ),
+                style: GoogleFonts.outfit(fontSize: 12, color: AppColors.grey),
               ),
               value: controller.isB2B.value,
               activeThumbColor: AppColors.camel,
@@ -343,7 +353,10 @@ class ProductFormView extends StatelessWidget {
                 hinttext: 'Minimum Order Quantity (MOQ)',
                 textAlign: TextAlign.left,
                 keyboardType: TextInputType.number,
-                prefixIcon: Icon(Icons.production_quantity_limits_rounded, color: AppColors.charcoal),
+                prefixIcon: Icon(
+                  Icons.production_quantity_limits_rounded,
+                  color: AppColors.charcoal,
+                ),
                 onChanged: (_) => controller.saveDraft(),
               ),
             );

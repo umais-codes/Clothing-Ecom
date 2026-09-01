@@ -26,11 +26,18 @@ class ProductCrudController extends GetxController {
 
   List<VendorProduct> get filteredProducts {
     return products.where((product) {
-      final matchesSearch = searchQuery.value.isEmpty ||
-          product.title.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-          product.description.toLowerCase().contains(searchQuery.value.toLowerCase());
-      final matchesCategory = selectedCategoryFilter.value == 'All' ||
-          product.category.toLowerCase() == selectedCategoryFilter.value.toLowerCase();
+      final matchesSearch =
+          searchQuery.value.isEmpty ||
+          product.title.toLowerCase().contains(
+            searchQuery.value.toLowerCase(),
+          ) ||
+          product.description.toLowerCase().contains(
+            searchQuery.value.toLowerCase(),
+          );
+      final matchesCategory =
+          selectedCategoryFilter.value == 'All' ||
+          product.category.toLowerCase() ==
+              selectedCategoryFilter.value.toLowerCase();
       return matchesSearch && matchesCategory;
     }).toList();
   }
@@ -93,7 +100,10 @@ class ProductCrudController extends GetxController {
     for (var c in formSelectedColors) {
       for (var s in formSelectedSizes) {
         final exists = variants.any(
-            (v) => v.color.toLowerCase() == c.toLowerCase() && v.size.toLowerCase() == s.toLowerCase());
+          (v) =>
+              v.color.toLowerCase() == c.toLowerCase() &&
+              v.size.toLowerCase() == s.toLowerCase(),
+        );
         if (!exists) {
           variants.add(
             ProductVariant(
@@ -144,21 +154,31 @@ class ProductCrudController extends GetxController {
         descriptionController.text = draft.description;
       }
       if (draft.category.isNotEmpty) {
-        selectedCategory.value = AppConstants.categories.contains(draft.category)
+        selectedCategory.value =
+            AppConstants.categories.contains(draft.category)
             ? draft.category
             : AppConstants.categories.first;
       }
       if (basePriceController.text.isEmpty) {
-        basePriceController.text =
-            draft.basePrice > 0 ? draft.basePrice.toString() : '';
+        basePriceController.text = draft.basePrice > 0
+            ? draft.basePrice.toString()
+            : '';
       }
       isB2B.value = draft.isB2B;
       moqController.text = draft.moq.toString();
       variants.assignAll(draft.variants);
       imageUrls.assignAll(draft.imageUrls);
-      
-      final colors = draft.variants.map((v) => v.color).where((c) => c.isNotEmpty).toSet().toList();
-      final sizes = draft.variants.map((v) => v.size).where((s) => s.isNotEmpty).toSet().toList();
+
+      final colors = draft.variants
+          .map((v) => v.color)
+          .where((c) => c.isNotEmpty)
+          .toSet()
+          .toList();
+      final sizes = draft.variants
+          .map((v) => v.size)
+          .where((s) => s.isNotEmpty)
+          .toSet()
+          .toList();
       if (colors.isNotEmpty) formSelectedColors.assignAll(colors);
       if (sizes.isNotEmpty) formSelectedSizes.assignAll(sizes);
     }
@@ -177,8 +197,16 @@ class ProductCrudController extends GetxController {
     variants.assignAll(product.variants);
     imageUrls.assignAll(product.imageUrls);
 
-    final colors = product.variants.map((v) => v.color).where((c) => c.isNotEmpty).toSet().toList();
-    final sizes = product.variants.map((v) => v.size).where((s) => s.isNotEmpty).toSet().toList();
+    final colors = product.variants
+        .map((v) => v.color)
+        .where((c) => c.isNotEmpty)
+        .toSet()
+        .toList();
+    final sizes = product.variants
+        .map((v) => v.size)
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList();
     formSelectedColors.assignAll(colors);
     formSelectedSizes.assignAll(sizes);
   }
@@ -201,15 +229,55 @@ class ProductCrudController extends GetxController {
     _repository.saveDraft(draft);
   }
 
-  void addVariant(String color, String size, int stockQuantity) {
+  int get totalStockUnits =>
+      variants.fold(0, (sum, v) => sum + v.stockQuantity);
+
+  void updateVariantStock(String id, int newQty) {
+    final idx = variants.indexWhere((v) => v.id == id);
+    if (idx != -1) {
+      variants[idx] = variants[idx].copyWith(
+        stockQuantity: newQty.clamp(0, 99999),
+      );
+      variants.refresh();
+      saveDraft();
+    }
+  }
+
+  void bulkSetAllStock(int qty) {
+    for (int i = 0; i < variants.length; i++) {
+      variants[i] = variants[i].copyWith(stockQuantity: qty);
+    }
+    variants.refresh();
+    saveDraft();
+  }
+
+  void updateVariantPrice(String id, double? newPrice) {
+    final idx = variants.indexWhere((v) => v.id == id);
+    if (idx != -1) {
+      variants[idx] = variants[idx].copyWith(
+        price: newPrice != null && newPrice > 0 ? newPrice : null,
+      );
+      variants.refresh();
+      saveDraft();
+    }
+  }
+
+  void addVariant(
+    String color,
+    String size,
+    int stockQuantity, [
+    double? price,
+  ]) {
+    final titlePrefix = titleController.text.replaceAll(' ', '').toUpperCase();
+    final prefix = titlePrefix.isNotEmpty ? titlePrefix : 'PROD';
     variants.add(
       ProductVariant(
         id: const Uuid().v4(),
         color: color,
         size: size,
         stockQuantity: stockQuantity,
-        sku:
-            '${titleController.text.replaceAll(' ', '').toUpperCase()}-$color-$size',
+        sku: '$prefix-$color-$size',
+        price: price,
       ),
     );
     saveDraft();
@@ -243,13 +311,23 @@ class ProductCrudController extends GetxController {
 
             String uploadedUrl = '';
             try {
-              await supabase.storage.from('product-images').upload(storagePath, file);
-              uploadedUrl = supabase.storage.from('product-images').getPublicUrl(storagePath);
+              await supabase.storage
+                  .from('product-images')
+                  .upload(storagePath, file);
+              uploadedUrl = supabase.storage
+                  .from('product-images')
+                  .getPublicUrl(storagePath);
             } catch (e1) {
-              debugPrint('Uploading to product-images failed, trying rma-evidence: $e1');
+              debugPrint(
+                'Uploading to product-images failed, trying rma-evidence: $e1',
+              );
               try {
-                await supabase.storage.from('rma-evidence').upload(storagePath, file);
-                uploadedUrl = supabase.storage.from('rma-evidence').getPublicUrl(storagePath);
+                await supabase.storage
+                    .from('rma-evidence')
+                    .upload(storagePath, file);
+                uploadedUrl = supabase.storage
+                    .from('rma-evidence')
+                    .getPublicUrl(storagePath);
               } catch (e2) {
                 debugPrint('Secondary storage upload failed: $e2');
               }
@@ -280,14 +358,29 @@ class ProductCrudController extends GetxController {
   }
 
   Future<bool> saveProduct() async {
-    if (titleController.text.trim().isEmpty || basePriceController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Title and Base Price are required');
+    if (titleController.text.trim().isEmpty) {
+      Get.snackbar('Error', 'Product Title is required');
       return false;
     }
 
-    final price = double.tryParse(basePriceController.text);
+    double? price = double.tryParse(basePriceController.text.trim());
     if (price == null || price <= 0) {
-      Get.snackbar('Error', 'Invalid price format');
+      // Auto-compute from lowest variant price
+      final variantPrices = variants
+          .map((v) => v.price)
+          .whereType<double>()
+          .where((p) => p > 0)
+          .toList();
+      if (variantPrices.isNotEmpty) {
+        price = variantPrices.reduce((a, b) => a < b ? a : b);
+      }
+    }
+
+    if (price == null || price <= 0) {
+      Get.snackbar(
+        'Pricing Required',
+        'Please enter a Base Price or set price on at least one size variant.',
+      );
       return false;
     }
 
@@ -327,7 +420,12 @@ class ProductCrudController extends GetxController {
       _notifyShopperViews();
 
       Get.back();
-      Get.snackbar('Success', isEditing ? 'Product updated successfully' : 'Product published successfully');
+      Get.snackbar(
+        'Success',
+        isEditing
+            ? 'Product updated successfully'
+            : 'Product published successfully',
+      );
       return true;
     } catch (e) {
       Get.snackbar('Error', 'Failed to save product: $e');
@@ -374,4 +472,3 @@ class ProductCrudController extends GetxController {
     await _repository.clearDraft();
   }
 }
-

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class DispatchController extends GetxController {
   // Input Controllers
@@ -14,14 +14,18 @@ class DispatchController extends GetxController {
   );
 
   // States
-  final RxString selectedCourier = 'Trax'.obs;
-  final RxBool isBooked = false.obs;
+  final selectedCourier = 'Leopard Logistics'.obs;
+  final isBooked = false.obs;
+  final generatedAwb = ''.obs;
   final RxBool notifyCustomer = true.obs;
-  final RxString generatedAwb = ''.obs;
 
-  final List<String> couriers = ['Trax', 'PostEx', 'Leopards'];
-
-
+  final List<String> couriers = [
+    'Leopard Logistics',
+    'TCS Express',
+    'M&P Logistics',
+    'Trax Logistics',
+    'DHL Express International',
+  ];
 
   bool get isFormValid {
     final weightVal = double.tryParse(weightController.text.trim());
@@ -41,12 +45,9 @@ class DispatchController extends GetxController {
 
   void bookShipment() async {
     if (!isFormValid) {
-      Get.snackbar(
-        'Validation Failure',
-        'Please enter correct packaging specifications and address.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.errorBg,
-        colorText: AppColors.error,
+      AppSnackbar.error(
+        title: 'Validation Failure',
+        message: 'Please enter correct packaging specifications and address.',
       );
       return;
     }
@@ -61,7 +62,8 @@ class DispatchController extends GetxController {
           'courier': selectedCourier.value,
           'weight': double.tryParse(weightController.text.trim()) ?? 1.0,
           'address': addressController.text.trim(),
-          'dimensions': '${lengthController.text.trim()}x${widthController.text.trim()}x${heightController.text.trim()}',
+          'dimensions':
+              '${lengthController.text.trim()}x${widthController.text.trim()}x${heightController.text.trim()}',
         },
       );
 
@@ -72,41 +74,34 @@ class DispatchController extends GetxController {
         generatedAwb.value = awb;
         isBooked.value = true;
 
-        Get.snackbar(
-          'Shipment Booked',
-          'Air Waybill generated: ${generatedAwb.value}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.successBg,
-          colorText: AppColors.success,
+        AppSnackbar.success(
+          title: 'Shipment Booked',
+          message: 'Air Waybill generated: ${generatedAwb.value}',
         );
       } else {
         // Fallback mock AWB if edge function runs in demo/local mode without keys
         final prefix = selectedCourier.value.toUpperCase();
-        final mockAwb = '$prefix-DEMO-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+        final mockAwb =
+            '$prefix-DEMO-${DateTime.now().millisecondsSinceEpoch % 1000000}';
         generatedAwb.value = mockAwb;
         isBooked.value = true;
 
-        Get.snackbar(
-          'Shipment Booked (Demo)',
-          'Generated offline AWB label: $mockAwb',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.successBg,
-          colorText: AppColors.success,
+        AppSnackbar.success(
+          title: 'Shipment Booked',
+          message: 'Generated offline AWB label: $mockAwb',
         );
       }
     } catch (e) {
       // Offline/local fallback for presentation robustness
       final prefix = selectedCourier.value.toUpperCase();
-      final mockAwb = '$prefix-DEMO-${DateTime.now().millisecondsSinceEpoch % 1000000}';
+      final mockAwb =
+          '$prefix-DEMO-${DateTime.now().millisecondsSinceEpoch % 1000000}';
       generatedAwb.value = mockAwb;
       isBooked.value = true;
 
-      Get.snackbar(
-        'Offline Gateway Mode',
-        'Booked in sandbox database. AWB generated: $mockAwb',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warningBg,
-        colorText: AppColors.warning,
+      AppSnackbar.warning(
+        title: 'Sandbox Gateway',
+        message: 'Booked in sandbox database. AWB generated: $mockAwb',
       );
     }
   }
@@ -114,5 +109,15 @@ class DispatchController extends GetxController {
   void resetBooking() {
     isBooked.value = false;
     generatedAwb.value = '';
+  }
+
+  @override
+  void onClose() {
+    weightController.dispose();
+    lengthController.dispose();
+    widthController.dispose();
+    heightController.dispose();
+    addressController.dispose();
+    super.onClose();
   }
 }

@@ -85,121 +85,53 @@ class AdminDropdownField extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AdminStatusDropdown — reusable GetX-safe status selector
+// AdminStatusDropdown — reusable GetX-safe status selector using CustomDropdownField
 // ─────────────────────────────────────────────────────────────────────────────
 
-typedef _StatusConfig = ({String label, Color color, IconData icon, Color bg});
+class AdminStatusDropdown extends StatelessWidget {
+  final String label;
+  final IconData labelIcon;
+  final ProductStatus initialStatus;
+  final ValueChanged<ProductStatus>? onChanged;
+  final Rx<ProductStatus> selected;
 
-const Map<ProductStatus, _StatusConfig> _kStatusConfig = {
-  ProductStatus.approved: (
-    label: 'Approved',
-    color: AppColors.success,
-    icon: Icons.check_circle_outline_rounded,
-    bg: AppColors.successBg,
-  ),
-  ProductStatus.pending: (
-    label: 'Pending Review',
-    color: AppColors.warning,
-    icon: Icons.hourglass_empty_rounded,
-    bg: AppColors.warningBg,
-  ),
-  ProductStatus.rejected: (
-    label: 'Rejected',
-    color: AppColors.error,
-    icon: Icons.cancel_outlined,
-    bg: AppColors.errorBg,
-  ),
-};
-
-class AdminStatusDropdown extends StatefulWidget {
-  const AdminStatusDropdown({
+  AdminStatusDropdown({
     super.key,
     required this.label,
     required this.labelIcon,
     required this.initialStatus,
     this.onChanged,
-  });
+  }) : selected = initialStatus.obs;
 
-  final String label;
-  final IconData labelIcon;
-  final ProductStatus initialStatus;
-  final ValueChanged<ProductStatus>? onChanged;
+  static const Map<ProductStatus, String> _statusToLabel = {
+    ProductStatus.approved: 'Approved',
+    ProductStatus.pending: 'Pending Review',
+    ProductStatus.rejected: 'Rejected',
+  };
 
-  @override
-  State<AdminStatusDropdown> createState() => _AdminStatusDropdownState();
-}
-
-class _AdminStatusDropdownState extends State<AdminStatusDropdown> {
-  late ProductStatus _selected;
-
-  @override
-  void initState() {
-    super.initState();
-    _selected = widget.initialStatus;
-  }
+  static const Map<String, ProductStatus> _labelToStatus = {
+    'Approved': ProductStatus.approved,
+    'Pending Review': ProductStatus.pending,
+    'Rejected': ProductStatus.rejected,
+  };
 
   @override
   Widget build(BuildContext context) {
-    final width = context.screenWidth;
-    final height = context.screenHeight;
-    final Color focusColor = AppColors.camel;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _FieldLabel(label: widget.label, icon: widget.labelIcon),
-        const SizedBox(height: 7),
-        DropdownButtonFormField<ProductStatus>(
-          initialValue: _selected,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.offWhite,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: width * 0.04,
-              vertical: height * 0.012,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(width * 0.028),
-              borderSide: BorderSide(
-                color: AppColors.greyLight.withValues(alpha: 0.9),
-                width: 1.2,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(width * 0.028),
-              borderSide: BorderSide(color: focusColor, width: 1.8),
-            ),
-          ),
-          dropdownColor: AppColors.white,
-          borderRadius: BorderRadius.circular(width * 0.035),
-          elevation: 4,
-          menuMaxHeight: height * 0.35,
-          alignment: AlignmentDirectional.bottomStart,
-          icon: const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: AppColors.charcoal,
-          ),
-          // Selected item shown inside the button
-          selectedItemBuilder: (_) => ProductStatus.values.map((s) {
-            final c = _kStatusConfig[s]!;
-            return _StatusTile(config: c);
-          }).toList(),
-          // Full items in the dropdown menu
-          items: ProductStatus.values.map((s) {
-            final c = _kStatusConfig[s]!;
-            return DropdownMenuItem<ProductStatus>(
-              value: s,
-              child: _StatusTile(config: c),
-            );
-          }).toList(),
-          onChanged: (v) {
-            if (v != null) {
-              setState(() => _selected = v);
-              widget.onChanged?.call(v);
-            }
-          },
-        ),
-      ],
+    return Obx(
+      () => CustomDropdownField(
+        label: label,
+        icon: labelIcon,
+        value: _statusToLabel[selected.value] ?? 'Approved',
+        items: _statusToLabel.values.toList(),
+        onChanged: (val) {
+          if (val != null && _labelToStatus.containsKey(val)) {
+            final newStatus = _labelToStatus[val]!;
+            selected.value = newStatus;
+            onChanged?.call(newStatus);
+          }
+        },
+        margin: EdgeInsets.zero,
+      ),
     );
   }
 }
@@ -403,67 +335,5 @@ class AdminAddPhotoTile extends StatelessWidget {
         ),
       );
     });
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Private helpers (internal to this file)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _FieldLabel extends StatelessWidget {
-  const _FieldLabel({required this.label, required this.icon});
-
-  final String label;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 13, color: AppColors.grey),
-        const SizedBox(width: 5),
-        Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppColors.ink,
-            letterSpacing: 0.1,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatusTile extends StatelessWidget {
-  const _StatusTile({required this.config});
-
-  final _StatusConfig config;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: config.bg,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Icon(config.icon, size: 13, color: config.color),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          config.label,
-          style: GoogleFonts.outfit(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.charcoal,
-          ),
-        ),
-      ],
-    );
   }
 }

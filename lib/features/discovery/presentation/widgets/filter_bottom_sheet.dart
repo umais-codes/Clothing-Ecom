@@ -5,6 +5,7 @@ import '../../../../app/utils/responsive.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
 import '../../../../app/widgets/custom_dropdown_field.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../controllers/filter_controller.dart';
 
@@ -27,7 +28,7 @@ class FilterBottomSheet extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(sw * 0.06)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: AppColors.charcoal.withValues(alpha: 0.1),
             blurRadius: 20,
             spreadRadius: 2,
           )
@@ -65,13 +66,9 @@ class FilterBottomSheet extends StatelessWidget {
                   CustomButton(
                     onPressed: () {
                       controller.clearAll();
-                      Get.snackbar(
-                        'Cleared',
-                        'All filters reset successfully.',
-                        backgroundColor: AppColors.offWhite,
-                        colorText: AppColors.charcoal,
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(seconds: 1),
+                      AppSnackbar.info(
+                        title: 'Filters Reset',
+                        message: 'All search filters have been cleared.',
                       );
                     },
                     text: 'Reset All',

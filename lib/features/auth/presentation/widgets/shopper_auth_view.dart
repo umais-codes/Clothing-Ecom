@@ -332,14 +332,15 @@ class ShopperAuthView extends StatelessWidget {
   }
 }
 
-class _SocialButton extends StatefulWidget {
+class _SocialButton extends StatelessWidget {
   final VoidCallback onTap;
   final IconData icon;
   final String label;
   final double w;
   final bool isGoogle;
+  final RxBool _isPressed = false.obs;
 
-  const _SocialButton({
+  _SocialButton({
     required this.onTap,
     required this.icon,
     required this.label,
@@ -348,67 +349,62 @@ class _SocialButton extends StatefulWidget {
   });
 
   @override
-  State<_SocialButton> createState() => _SocialButtonState();
-}
-
-class _SocialButtonState extends State<_SocialButton> {
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapDown: (_) => _isPressed.value = true,
       onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onTap();
+        _isPressed.value = false;
+        onTap();
       },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedScale(
-        scale: _isPressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOutCubic,
-        child: Container(
-          padding: .symmetric(vertical: widget.w * 0.03),
-          decoration: BoxDecoration(
-            color: widget.isGoogle
-                ? AppColors.camel.withValues(alpha: 0.2)
-                : AppColors.charcoal,
-            borderRadius: BorderRadius.circular(12),
-            border: widget.isGoogle
-                ? .all(
-                    color: AppColors.camel.withValues(alpha: 0.2),
-                    width: 1.0,
-                  )
-                : null,
-            boxShadow: widget.isGoogle
-                ? [
-                    BoxShadow(
-                      color: AppColors.charcoal.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                widget.icon,
-                size: widget.w * 0.06,
-                color: widget.isGoogle ? AppColors.charcoal : AppColors.white,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                widget.label,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: widget.isGoogle ? AppColors.charcoal : AppColors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: widget.w * 0.036,
+      onTapCancel: () => _isPressed.value = false,
+      child: Obx(
+        () => AnimatedScale(
+          scale: _isPressed.value ? 0.97 : 1.0,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOutCubic,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: w * 0.03),
+            decoration: BoxDecoration(
+              color: isGoogle
+                  ? AppColors.camel.withValues(alpha: 0.2)
+                  : AppColors.charcoal,
+              borderRadius: BorderRadius.circular(12),
+              border: isGoogle
+                  ? Border.all(
+                      color: AppColors.camel.withValues(alpha: 0.2),
+                      width: 1.0,
+                    )
+                  : null,
+              boxShadow: isGoogle
+                  ? [
+                      BoxShadow(
+                        color: AppColors.charcoal.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: w * 0.06,
+                  color: isGoogle ? AppColors.charcoal : AppColors.white,
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: isGoogle ? AppColors.charcoal : AppColors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: w * 0.036,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

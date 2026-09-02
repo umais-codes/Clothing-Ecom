@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../controllers/tracking_controller.dart';
 
 class OrderRefundReceiptCard extends GetView<TrackingController> {
@@ -113,11 +114,9 @@ class OrderRefundReceiptCard extends GetView<TrackingController> {
                     GestureDetector(
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: refCode));
-                        Get.snackbar(
-                          'Copied',
-                          'Refund Reference copied to clipboard',
-                          snackPosition: SnackPosition.BOTTOM,
-                          duration: const Duration(seconds: 1),
+                        AppSnackbar.info(
+                          title: 'Copied',
+                          message: 'Refund Reference copied to clipboard.',
                         );
                       },
                       child: const Icon(

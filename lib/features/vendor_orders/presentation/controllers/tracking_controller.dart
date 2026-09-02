@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class TrackingController extends GetxController {
   final SupabaseClient _supabase = Get.find<SupabaseService>().client;
@@ -231,13 +231,9 @@ class TrackingController extends GetxController {
               courierName.value = updatedCourier;
             }
 
-            Get.snackbar(
-              'Live Order Update',
-              'Status updated to: $updatedStatus',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppColors.camelLight,
-              colorText: AppColors.charcoal,
-              duration: const Duration(seconds: 3),
+            AppSnackbar.info(
+              title: 'Live Order Update',
+              message: 'Status updated to: $updatedStatus',
             );
           },
         );
@@ -293,13 +289,9 @@ class TrackingController extends GetxController {
         userOrders.refresh();
       }
 
-      Get.snackbar(
-        'Order Cancelled',
-        'Order $orderToCancel has been cancelled. Any authorized charges will be refunded automatically.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.errorBg,
-        colorText: AppColors.error,
-        duration: const Duration(seconds: 4),
+      AppSnackbar.error(
+        title: 'Order Cancelled',
+        message: 'Order $orderToCancel has been cancelled. Any authorized charges will be refunded automatically.',
       );
 
       return true;
@@ -309,12 +301,9 @@ class TrackingController extends GetxController {
           ? 'Database schema error. Please retry.'
           : 'Unable to cancel order at this time. Please contact support.';
 
-      Get.snackbar(
-        'Cancellation Failed',
-        errorMsg,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.errorBg,
-        colorText: AppColors.error,
+      AppSnackbar.error(
+        title: 'Cancellation Failed',
+        message: errorMsg,
       );
       return false;
     } finally {
@@ -324,13 +313,9 @@ class TrackingController extends GetxController {
 
   void copyTrackingId() {
     Clipboard.setData(ClipboardData(text: trackingId.value));
-    Get.snackbar(
-      'AWB Copied',
-      'Tracking Code ${trackingId.value} copied to clipboard.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.successBg,
-      colorText: AppColors.success,
-      duration: const Duration(seconds: 2),
+    AppSnackbar.success(
+      title: 'AWB Copied',
+      message: 'Tracking Code ${trackingId.value} copied to clipboard.',
     );
   }
 }

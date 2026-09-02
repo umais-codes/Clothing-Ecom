@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/super_admin/domain/models/subscription_plan.dart';
 import '../../domain/entities/order_entity.dart';
 
@@ -21,17 +21,18 @@ class VendorDashboardController extends GetxController {
     SubscriptionPlan(
       id: '2',
       name: 'Pro',
-      priceMonthly: 49.99,
-      priceYearly: 499.99,
+      priceMonthly: 29,
+      priceYearly: 290,
       maxProducts: 500,
       maxStaffAccounts: 5,
       enableAiSizePredictor: true,
+      enableCustomStorefront: true,
     ),
     SubscriptionPlan(
       id: '3',
       name: 'Enterprise',
-      priceMonthly: 199.99,
-      priceYearly: 1999.99,
+      priceMonthly: 99,
+      priceYearly: 990,
       maxProducts: 999999, // unlimited
       maxStaffAccounts: 25,
       enableAiSizePredictor: true,
@@ -42,10 +43,9 @@ class VendorDashboardController extends GetxController {
 
   void selectNewPlan(SubscriptionPlan plan) {
     if (activePlanName.value == plan.name) {
-      Get.snackbar(
-        'Info',
-        'You are already on the ${plan.name} plan.',
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.info(
+        title: 'Subscription',
+        message: 'You are already on the ${plan.name} plan.',
       );
       return;
     }
@@ -56,12 +56,9 @@ class VendorDashboardController extends GetxController {
     planFee.value = "\$$price / $period";
     maxProducts.value = plan.maxProducts;
 
-    Get.snackbar(
-      'Plan Updated',
-      'Successfully subscribed to the ${plan.name} plan!',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.success.withValues(alpha: 0.1),
-      colorText: AppColors.success,
+    AppSnackbar.success(
+      title: 'Plan Updated',
+      message: 'Successfully subscribed to the ${plan.name} plan!',
     );
 
     Get.back();
@@ -205,6 +202,10 @@ class VendorDashboardController extends GetxController {
       recentOrders.assignAll(ordersMap.values.take(10).toList());
     } catch (e) {
       debugPrint('Error loading live vendor metrics: $e');
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('jwt') || errStr.contains('pgrst303') || errStr.contains('401')) {
+        SupabaseService.handleSessionExpired('JWT expired in vendor dashboard');
+      }
     } finally {
       isLoading.value = false;
     }

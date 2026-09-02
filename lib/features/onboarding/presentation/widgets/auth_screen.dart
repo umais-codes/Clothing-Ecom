@@ -325,13 +325,14 @@ class AuthScreen extends GetView<OnboardingController> {
   }
 }
 
-class _GhostSocialButton extends StatefulWidget {
+class _GhostSocialButton extends StatelessWidget {
   final VoidCallback onTap;
   final IconData icon;
   final String label;
   final double w;
+  final RxBool _isPressed = false.obs;
 
-  const _GhostSocialButton({
+  _GhostSocialButton({
     required this.onTap,
     required this.icon,
     required this.label,
@@ -339,59 +340,54 @@ class _GhostSocialButton extends StatefulWidget {
   });
 
   @override
-  State<_GhostSocialButton> createState() => _GhostSocialButtonState();
-}
-
-class _GhostSocialButtonState extends State<_GhostSocialButton> {
-  bool _isPressed = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapDown: (_) => _isPressed.value = true,
       onTapUp: (_) {
-        setState(() => _isPressed = false);
-        widget.onTap();
+        _isPressed.value = false;
+        onTap();
       },
-      onTapCancel: () => setState(() => _isPressed = false),
-      child: AnimatedScale(
-        scale: _isPressed ? 0.98 : 1.0,
-        duration: const Duration(milliseconds: 100),
-        child: Container(
-          padding: const .symmetric(vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: .circular(widget.w * 0.03),
-            border: Border.all(
-              color: AppColors.grey.withValues(alpha: 0.15),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.charcoal.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+      onTapCancel: () => _isPressed.value = false,
+      child: Obx(
+        () => AnimatedScale(
+          scale: _isPressed.value ? 0.98 : 1.0,
+          duration: const Duration(milliseconds: 100),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(w * 0.03),
+              border: Border.all(
+                color: AppColors.grey.withValues(alpha: 0.15),
+                width: 1.2,
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: .center,
-            children: [
-              Icon(
-                widget.icon,
-                size: widget.w * 0.06,
-                color: AppColors.charcoal,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                widget.label,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: .w600,
-                  fontSize: widget.w * 0.036,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.charcoal.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: w * 0.06,
+                  color: AppColors.charcoal,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  label,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: w * 0.036,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

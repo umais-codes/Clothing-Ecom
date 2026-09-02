@@ -10,6 +10,7 @@ import '../../domain/repositories/inventory_repository.dart';
 import '../../data/models/vendor_product_model.dart';
 import '../../data/models/product_variant_model.dart';
 import 'package:uuid/uuid.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class ProductCrudController extends GetxController {
   final InventoryRepository _repository;
@@ -341,7 +342,10 @@ class ProductCrudController extends GetxController {
         saveDraft();
       }
     } catch (e) {
-      Get.snackbar('Upload Error', 'Failed to pick or upload image: $e');
+      AppSnackbar.error(
+        title: 'Upload Error',
+        message: 'Failed to pick or upload image: $e',
+      );
     } finally {
       isUploadingImage.value = false;
     }
@@ -359,7 +363,10 @@ class ProductCrudController extends GetxController {
 
   Future<bool> saveProduct() async {
     if (titleController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Product Title is required');
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Product Title is required.',
+      );
       return false;
     }
 
@@ -377,9 +384,9 @@ class ProductCrudController extends GetxController {
     }
 
     if (price == null || price <= 0) {
-      Get.snackbar(
-        'Pricing Required',
-        'Please enter a Base Price or set price on at least one size variant.',
+      AppSnackbar.warning(
+        title: 'Pricing Required',
+        message: 'Please enter a Base Price or set price on at least one size variant.',
       );
       return false;
     }
@@ -420,15 +427,18 @@ class ProductCrudController extends GetxController {
       _notifyShopperViews();
 
       Get.back();
-      Get.snackbar(
-        'Success',
-        isEditing
-            ? 'Product updated successfully'
-            : 'Product published successfully',
+      AppSnackbar.success(
+        title: 'Product Saved',
+        message: isEditing
+            ? 'Product updated successfully.'
+            : 'Product published to store successfully.',
       );
       return true;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to save product: $e');
+      AppSnackbar.error(
+        title: 'Save Failed',
+        message: 'Failed to save product: $e',
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -440,9 +450,15 @@ class ProductCrudController extends GetxController {
       await _repository.deleteProduct(id);
       products.removeWhere((p) => p.id == id);
       _notifyShopperViews();
-      Get.snackbar('Success', 'Product deleted successfully');
+      AppSnackbar.success(
+        title: 'Product Deleted',
+        message: 'Product removed from catalog successfully.',
+      );
     } catch (e) {
-      Get.snackbar('Error', 'Failed to delete product: $e');
+      AppSnackbar.error(
+        title: 'Delete Failed',
+        message: 'Failed to delete product: $e',
+      );
     }
   }
 

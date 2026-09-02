@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_app_bar.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/account_menu_section.dart';
@@ -147,12 +148,9 @@ class AdminProfileView extends GetView<ProfileController> {
               'System Diagnostics',
               'Inspect logs and health stats',
               () {
-                Get.snackbar(
-                  'Diagnostics Checked',
-                  'All database connection signals are normal.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: AppColors.camelLight,
-                  colorText: AppColors.camel,
+                AppSnackbar.info(
+                  title: 'Diagnostics Checked',
+                  message: 'All database connection signals are normal.',
                 );
               },
             ),

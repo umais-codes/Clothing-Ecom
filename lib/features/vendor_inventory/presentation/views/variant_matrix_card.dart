@@ -6,6 +6,7 @@ import '../../../../app/widgets/custom_text_field.dart';
 import '../controllers/product_crud_controller.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 
 class VariantMatrixCard extends StatelessWidget {
@@ -770,7 +771,10 @@ class VariantMatrixCard extends StatelessWidget {
         if (c.isNotEmpty && s.isNotEmpty) {
           controller.addVariant(c, s, q, p);
         } else {
-          Get.snackbar('Error', 'Please fill all required fields');
+          AppSnackbar.warning(
+            title: 'Incomplete Variant',
+            message: 'Please provide both a color and a size for the variant.',
+          );
         }
       },
     );

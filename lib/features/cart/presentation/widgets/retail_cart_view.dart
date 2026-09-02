@@ -211,239 +211,231 @@ class RetailCartView extends StatelessWidget {
   }
 }
 
-class RetailCartItemTile extends StatefulWidget {
+class RetailCartItemTile extends StatelessWidget {
   final CartItem item;
   final B2CCartController controller;
+  final RxBool _isRemoving = false.obs;
 
-  const RetailCartItemTile({
+  RetailCartItemTile({
     super.key,
     required this.item,
     required this.controller,
   });
 
-  @override
-  State<RetailCartItemTile> createState() => _RetailCartItemTileState();
-}
-
-class _RetailCartItemTileState extends State<RetailCartItemTile> {
-  bool _isRemoving = false;
-
   void _onRemove() async {
-    setState(() {
-      _isRemoving = true;
-    });
+    _isRemoving.value = true;
     await Future.delayed(const Duration(milliseconds: 180));
-    if (mounted) {
-      widget.controller.removeItem(widget.item.id);
-    }
+    controller.removeItem(item.id);
   }
 
   @override
   Widget build(BuildContext context) {
     final double sw = context.screenWidth;
-    final hasSize = widget.item.size != null && widget.item.size!.isNotEmpty;
-    final hasColor = widget.item.color != null && widget.item.color!.isNotEmpty;
+    final hasSize = item.size != null && item.size!.isNotEmpty;
+    final hasColor = item.color != null && item.color!.isNotEmpty;
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 180),
-      opacity: _isRemoving ? 0.0 : 1.0,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeInOut,
-        margin: EdgeInsets.only(bottom: _isRemoving ? 0.0 : sw * 0.02),
-        padding: EdgeInsets.all(sw * 0.025),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(sw * 0.03),
-          border: Border.all(
-            color: AppColors.greyLight.withValues(alpha: 0.5),
-            width: 0.7,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.charcoal.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+    return Obx(
+      () => AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: _isRemoving.value ? 0.0 : 1.0,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          margin: EdgeInsets.only(bottom: _isRemoving.value ? 0.0 : sw * 0.02),
+          padding: EdgeInsets.all(sw * 0.025),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(sw * 0.03),
+            border: Border.all(
+              color: AppColors.greyLight.withValues(alpha: 0.5),
+              width: 0.7,
             ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 1. Compact Thumbnail Image
-            GestureDetector(
-              onTap: _openProductDetails,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(sw * 0.02),
-                child: Image.network(
-                  widget.item.imageUrl.isNotEmpty
-                      ? widget.item.imageUrl
-                      : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
-                  width: sw * 0.17,
-                  height: sw * 0.19,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.charcoal.withValues(alpha: 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 1. Compact Thumbnail Image
+              GestureDetector(
+                onTap: _openProductDetails,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(sw * 0.02),
+                  child: Image.network(
+                    item.imageUrl.isNotEmpty
+                        ? item.imageUrl
+                        : 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
                     width: sw * 0.17,
                     height: sw * 0.19,
-                    color: AppColors.greySubtle,
-                    child: Icon(
-                      Icons.broken_image_outlined,
-                      size: sw * 0.05,
-                      color: AppColors.grey,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: sw * 0.17,
+                      height: sw * 0.19,
+                      color: AppColors.greySubtle,
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        size: sw * 0.05,
+                        color: AppColors.grey,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(width: sw * 0.028),
+              SizedBox(width: sw * 0.028),
 
-            // 2. Compact Info Column
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Title + Remove Button
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: _openProductDetails,
-                          child: Text(
-                            widget.item.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.outfit(
-                              fontSize: sw * 0.033,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.charcoal,
+              // 2. Compact Info Column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Title + Remove Button
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: _openProductDetails,
+                            child: Text(
+                              item.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.outfit(
+                                fontSize: sw * 0.033,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.charcoal,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(width: sw * 0.01),
-                      Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: _onRemove,
-                          borderRadius: BorderRadius.circular(sw * 0.02),
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Icon(
-                              Icons.close_rounded,
-                              size: sw * 0.036,
-                              color: AppColors.grey.withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: sw * 0.006),
-
-                  // Variants & AI badge
-                  Row(
-                    children: [
-                      if (hasSize || hasColor)
-                        Text(
-                          "${hasSize ? 'Size: ${widget.item.size}' : ''}${hasSize && hasColor ? '  •  ' : ''}${hasColor ? widget.item.color : ''}",
-                          style: GoogleFonts.outfit(
-                            fontSize: sw * 0.025,
-                            color: AppColors.grey,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      if (widget.item.isAiSizeMatched) ...[
-                        SizedBox(width: sw * 0.015),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: sw * 0.014,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            "AI Fit",
-                            style: GoogleFonts.outfit(
-                              fontSize: sw * 0.02,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.success,
+                        SizedBox(width: sw * 0.01),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: _onRemove,
+                            borderRadius: BorderRadius.circular(sw * 0.02),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: sw * 0.036,
+                                color: AppColors.grey.withValues(alpha: 0.7),
+                              ),
                             ),
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                  SizedBox(height: sw * 0.014),
+                    ),
+                    SizedBox(height: sw * 0.006),
 
-                  // Price, Wishlist, and Stepper Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Price
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
+                    // Variants & AI badge
+                    Row(
+                      children: [
+                        if (hasSize || hasColor)
                           Text(
-                            "\$${(widget.item.price * widget.item.quantity).toStringAsFixed(2)}",
+                            "${hasSize ? 'Size: ${item.size}' : ''}${hasSize && hasColor ? '  •  ' : ''}${hasColor ? item.color : ''}",
                             style: GoogleFonts.outfit(
-                              fontSize: sw * 0.038,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.camel,
+                              fontSize: sw * 0.025,
+                              color: AppColors.grey,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          if (widget.item.quantity > 1) ...[
-                            SizedBox(width: sw * 0.01),
-                            Text(
-                              "(\$${widget.item.price.toStringAsFixed(2)})",
+                        if (item.isAiSizeMatched) ...[
+                          SizedBox(width: sw * 0.015),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: sw * 0.014,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              "AI Fit",
                               style: GoogleFonts.outfit(
-                                fontSize: sw * 0.022,
-                                color: AppColors.grey,
+                                fontSize: sw * 0.02,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.success,
                               ),
                             ),
-                          ],
+                          ),
                         ],
-                      ),
+                      ],
+                    ),
+                    SizedBox(height: sw * 0.014),
 
-                      // Wishlist + Stepper
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () =>
-                                  widget.controller.moveToWishlist(widget.item),
-                              borderRadius: BorderRadius.circular(sw * 0.02),
-                              child: Padding(
-                                padding: EdgeInsets.all(sw * 0.01),
-                                child: Icon(
-                                  Icons.favorite_border_rounded,
-                                  size: sw * 0.038,
+                    // Price, Wishlist, and Stepper Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Price
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              "\$${(item.price * item.quantity).toStringAsFixed(2)}",
+                              style: GoogleFonts.outfit(
+                                fontSize: sw * 0.038,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.camel,
+                              ),
+                            ),
+                            if (item.quantity > 1) ...[
+                              SizedBox(width: sw * 0.01),
+                              Text(
+                                "(\$${item.price.toStringAsFixed(2)})",
+                                style: GoogleFonts.outfit(
+                                  fontSize: sw * 0.022,
                                   color: AppColors.grey,
                                 ),
                               ),
+                            ],
+                          ],
+                        ),
+
+                        // Wishlist + Stepper
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () =>
+                                    controller.moveToWishlist(item),
+                                borderRadius: BorderRadius.circular(sw * 0.02),
+                                child: Padding(
+                                  padding: EdgeInsets.all(sw * 0.01),
+                                  child: Icon(
+                                    Icons.favorite_border_rounded,
+                                    size: sw * 0.038,
+                                    color: AppColors.grey,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                          SizedBox(width: sw * 0.015),
-                          CustomStepper(
-                            size: sw * 0.065,
-                            value: widget.item.quantity,
-                            onChanged: (newQty) => widget.controller
-                                .updateQuantity(widget.item.id, newQty),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                            SizedBox(width: sw * 0.015),
+                            CustomStepper(
+                              size: sw * 0.065,
+                              value: item.quantity,
+                              onChanged: (newQty) => controller
+                                  .updateQuantity(item.id, newQty),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -451,16 +443,16 @@ class _RetailCartItemTileState extends State<RetailCartItemTile> {
 
   void _openProductDetails() {
     final productMap = {
-      'id': widget.item.baseProductId,
-      'name': widget.item.name,
-      'price': widget.item.price,
-      'image': widget.item.imageUrl,
-      'image_url': widget.item.imageUrl,
-      'isB2B': widget.item.isB2B,
-      'vendor': widget.item.vendorName,
-      'sizes': widget.item.size != null ? [widget.item.size!] : ['S', 'M', 'L'],
-      'colors': widget.item.color != null
-          ? [widget.item.color!]
+      'id': item.baseProductId,
+      'name': item.name,
+      'price': item.price,
+      'image': item.imageUrl,
+      'image_url': item.imageUrl,
+      'isB2B': item.isB2B,
+      'vendor': item.vendorName,
+      'sizes': item.size != null ? [item.size!] : ['S', 'M', 'L'],
+      'colors': item.color != null
+          ? [item.color!]
           : ['Camel', 'White'],
     };
     Get.toNamed('/product-details', arguments: productMap);

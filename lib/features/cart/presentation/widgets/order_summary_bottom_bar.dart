@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../controllers/cart_controller.dart';
 
 class OrderSummaryBottomBar extends StatelessWidget {
@@ -121,12 +122,9 @@ class OrderSummaryBottomBar extends StatelessWidget {
                 onPressed: controller.cartItems.isEmpty
                     ? null
                     : () {
-                        Get.snackbar(
-                          'Checkout',
-                          'Navigating to Safepay...',
-                          backgroundColor: AppColors.camel,
-                          colorText: AppColors.white,
-                          snackPosition: .TOP,
+                        AppSnackbar.info(
+                          title: 'Checkout',
+                          message: 'Navigating to secure payment gateway...',
                         );
                       },
               ),

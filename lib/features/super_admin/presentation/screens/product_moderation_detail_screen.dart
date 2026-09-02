@@ -92,31 +92,19 @@ class _DesktopLayout extends StatelessWidget {
   }
 }
 
-class _ProductImageGallery extends StatefulWidget {
-  const _ProductImageGallery({required this.product});
+class _ProductImageGallery extends StatelessWidget {
+  _ProductImageGallery({required this.product});
   final PendingProductEntity product;
-
-  @override
-  State<_ProductImageGallery> createState() => _ProductImageGalleryState();
-}
-
-class _ProductImageGalleryState extends State<_ProductImageGallery> {
-  late List<String> allImages;
-  int _currentIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    allImages = [widget.product.imageUrl, ...widget.product.additionalImages];
-  }
+  final RxInt _currentIndex = 0.obs;
 
   @override
   Widget build(BuildContext context) {
     final isMobile = context.isMobileView;
     final galleryHeight = isMobile ? context.hp(35) : double.infinity;
+    final allImages = [product.imageUrl, ...product.additionalImages];
 
     return Hero(
-      tag: 'product-${widget.product.id}',
+      tag: 'product-${product.id}',
       child: Stack(
         children: [
           SizedBox(
@@ -124,10 +112,10 @@ class _ProductImageGalleryState extends State<_ProductImageGallery> {
             width: double.infinity,
             child: PageView.builder(
               itemCount: allImages.length,
-              onPageChanged: (i) => setState(() => _currentIndex = i),
+              onPageChanged: (i) => _currentIndex.value = i,
               itemBuilder: (_, i) => CachedNetworkImage(
                 imageUrl: allImages[i],
-                fit: .cover,
+                fit: BoxFit.cover,
                 placeholder: (_, _) => Container(color: AppColors.greySubtle),
               ),
             ),
@@ -137,19 +125,21 @@ class _ProductImageGalleryState extends State<_ProductImageGallery> {
               bottom: 12,
               left: 0,
               right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  allImages.length,
-                  (index) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: _currentIndex == index ? 12 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: _currentIndex == index
-                          ? AppColors.charcoal
-                          : AppColors.white.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(3),
+              child: Obx(
+                () => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    allImages.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: _currentIndex.value == index ? 12 : 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: _currentIndex.value == index
+                            ? AppColors.charcoal
+                            : AppColors.white.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(3),
+                      ),
                     ),
                   ),
                 ),
@@ -158,11 +148,13 @@ class _ProductImageGalleryState extends State<_ProductImageGallery> {
           Positioned(
             top: 12,
             right: 12,
-            child: AppDownloader(
-              url: allImages[_currentIndex],
-              fileName: '${widget.product.name}_${_currentIndex + 1}',
-              size: 32,
-              iconSize: 18,
+            child: Obx(
+              () => AppDownloader(
+                url: allImages[_currentIndex.value],
+                fileName: '${product.name}_${_currentIndex.value + 1}',
+                size: 32,
+                iconSize: 18,
+              ),
             ),
           ),
           Positioned(
@@ -175,7 +167,7 @@ class _ProductImageGalleryState extends State<_ProductImageGallery> {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                widget.product.category.toUpperCase(),
+                product.category.toUpperCase(),
                 style: GoogleFonts.outfit(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,

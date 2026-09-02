@@ -7,6 +7,7 @@ import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_stepper.dart';
 import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/navigation/presentation/controllers/main_navigation_controller.dart';
 import '../controllers/b2b_cart_controller.dart';
 
@@ -684,20 +685,14 @@ class _B2BCartScreenState extends State<B2BCartScreen> {
               final success = controller.importCsvData(textController.text);
               Navigator.pop(ctx);
               if (success) {
-                Get.snackbar(
-                  "CSV Imported",
-                  "Bulk order items added to procurement cart.",
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: AppColors.camel,
-                  colorText: AppColors.white,
+                AppSnackbar.success(
+                  title: "CSV Imported",
+                  message: "Bulk order items added to procurement cart.",
                 );
               } else {
-                Get.snackbar(
-                  "Import Failed",
-                  "Please check CSV format.",
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: AppColors.error.withValues(alpha: 0.1),
-                  colorText: AppColors.error,
+                AppSnackbar.error(
+                  title: "Import Failed",
+                  message: "Please check CSV format and headers.",
                 );
               }
             },

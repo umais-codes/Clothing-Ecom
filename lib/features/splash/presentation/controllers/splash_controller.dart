@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
+import 'package:ecom_app/core/supabase/supabase_client.dart';
 
 class SplashController extends GetxController {
   Timer? _timer;
@@ -14,7 +16,7 @@ class SplashController extends GetxController {
   }
 
   void _startInitTimer() {
-    _timer = Timer(const Duration(milliseconds: 2500), () {
+    _timer = Timer(const Duration(milliseconds: 2000), () {
       _navigateToNextScreen();
     });
   }
@@ -22,8 +24,27 @@ class SplashController extends GetxController {
   Future<void> _navigateToNextScreen() async {
     try {
       final authRepo = Get.find<AuthRepository>();
+      final supabaseService = Get.find<SupabaseService>();
+      final supabase = supabaseService.client;
+
       final user = authRepo.currentUser;
       if (user != null) {
+        // Proactively refresh expired JWT token
+        final session = supabase.auth.currentSession;
+        if (session == null || session.isExpired) {
+          try {
+            debugPrint('Refreshing expired Supabase auth session token...');
+            final refreshRes = await supabase.auth.refreshSession();
+            if (refreshRes.session == null) {
+              throw Exception('No valid session returned from Supabase refresh');
+            }
+          } catch (refreshErr) {
+            debugPrint('Session refresh failed: $refreshErr. Logging out.');
+            await SupabaseService.handleSessionExpired('Session refresh failed');
+            return;
+          }
+        }
+
         final box = Hive.box('settings');
         final loginTimeMs = box.get('login_time') as int?;
         bool isSessionValid = true;
@@ -31,11 +52,10 @@ class SplashController extends GetxController {
         if (loginTimeMs != null) {
           final loginTime = DateTime.fromMillisecondsSinceEpoch(loginTimeMs);
           final diff = DateTime.now().difference(loginTime).inDays;
-          if (diff >= 7) {
+          if (diff >= 14) {
             isSessionValid = false;
           }
         } else {
-          // Initialize for existing active sessions to prevent abrupt logout
           box.put('login_time', DateTime.now().millisecondsSinceEpoch);
         }
 
@@ -43,17 +63,25 @@ class SplashController extends GetxController {
           // 1. Respect user's explicit perspective choice saved in Hive settings
           String? roleStr = box.get('lastSelectedRole')?.toString();
 
-          // 2. Fallback to online profile role from database
-          if (roleStr == null || roleStr.isEmpty) {
-            try {
-              final data = await authRepo.getProfile(user.id);
-              if (data != null) {
-                roleStr = data['role']?.toString();
-              }
-            } catch (e) {
-              Get.printInfo(
-                info: 'Failed to fetch online profile (offline?): $e',
-              );
+          // 2. Validate online profile role from database
+          try {
+            final data = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .maybeSingle();
+            if (data != null && data['role'] != null) {
+              roleStr = data['role'].toString();
+            }
+          } catch (e) {
+            final errStr = e.toString().toLowerCase();
+            if (errStr.contains('jwt') ||
+                errStr.contains('unauthorized') ||
+                errStr.contains('pgrst303') ||
+                errStr.contains('401')) {
+              debugPrint('Auth check failed on startup (JWT expired): $e');
+              await SupabaseService.handleSessionExpired('JWT expired on profile check');
+              return;
             }
           }
 
@@ -83,13 +111,13 @@ class SplashController extends GetxController {
             }
           }
         } else {
-          // Session expired (7 days or more)
+          // Session expired after 14 days
           await authRepo.signOut();
           box.delete('login_time');
         }
       }
     } catch (e) {
-      Get.printInfo(info: 'Splash session verification failed: $e');
+      debugPrint('Splash session verification failed: $e');
     }
     Get.offAllNamed('/onboarding');
   }

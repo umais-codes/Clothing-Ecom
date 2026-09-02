@@ -3,8 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/material.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class AssetDownloaderUtil {
   static final Dio _dio = Dio();
@@ -45,29 +44,16 @@ class AssetDownloaderUtil {
   }
 
   static void _showSuccess(String fileName) {
-    Get.snackbar(
-      'Saved to Gallery',
-      'Asset "$fileName" has been saved successfully.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.charcoal,
-      colorText: AppColors.white,
-      icon: const Icon(Icons.check_circle_outline_rounded, color: AppColors.white),
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
+    AppSnackbar.success(
+      title: 'Saved to Gallery',
+      message: 'Asset "$fileName" has been saved successfully.',
     );
   }
 
   static void _showError(String message) {
-    Get.snackbar(
-      'Download Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.error,
-      colorText: AppColors.white,
-      icon: const Icon(Icons.error_outline_rounded, color: AppColors.white),
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
+    AppSnackbar.error(
+      title: 'Download Error',
+      message: message,
     );
   }
 }

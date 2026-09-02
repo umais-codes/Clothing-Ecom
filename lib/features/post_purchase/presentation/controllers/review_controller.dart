@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class ReviewController extends GetxController {
   final SupabaseClient _supabase = Get.find<SupabaseService>().client;
@@ -65,11 +65,9 @@ class ReviewController extends GetxController {
         reviewImages.add(pickedFile);
       }
     } catch (e) {
-      Get.snackbar(
-        'Upload Error',
-        'Failed to select image: $e',
-        backgroundColor: AppColors.error.withValues(alpha: 0.1),
-        colorText: AppColors.error,
+      AppSnackbar.error(
+        title: 'Upload Error',
+        message: 'Failed to select image: $e',
       );
     }
   }
@@ -82,12 +80,9 @@ class ReviewController extends GetxController {
 
   Future<void> submitReview(String orderId, String productId) async {
     if (rating.value == 0.0) {
-      Get.snackbar(
-        'Rating Required',
-        'Please select at least 1 star to rate this product.',
-        backgroundColor: AppColors.error.withValues(alpha: 0.1),
-        colorText: AppColors.error,
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.warning(
+        title: 'Rating Required',
+        message: 'Please select at least 1 star to rate this product.',
       );
       return;
     }
@@ -98,133 +93,114 @@ class ReviewController extends GetxController {
     try {
       // 1. Upload review photos to Supabase Storage (product-reviews bucket)
       for (var imageFile in reviewImages) {
-        final file = File(imageFile.path);
+        final bytes = await imageFile.readAsBytes();
+        final fileExt = imageFile.name.split('.').last;
         final fileName =
-            '${DateTime.now().millisecondsSinceEpoch}_${imageFile.name}';
-        final path = '$productId/$fileName';
+            'review_${DateTime.now().millisecondsSinceEpoch}_${imageFile.name}';
+        final filePath = 'reviews/$fileName';
 
-        try {
-          await _supabase.storage.from('product-reviews').upload(path, file);
-          final String publicUrl = _supabase.storage
-              .from('product-reviews')
-              .getPublicUrl(path);
-          uploadedUrls.add(publicUrl);
-        } catch (storageError) {
-          debugPrint('Supabase review storage upload failed: $storageError');
-          // Fallback simulation URL
-          uploadedUrls.add(
-            'https://picsum.photos/seed/${imageFile.name}/800/600',
-          );
-        }
+        await _supabase.storage.from('product-reviews').uploadBinary(
+              filePath,
+              bytes,
+              fileOptions: FileOptions(
+                contentType: 'image/$fileExt',
+                upsert: true,
+              ),
+            );
+
+        final publicUrl = _supabase.storage
+            .from('product-reviews')
+            .getPublicUrl(filePath);
+        uploadedUrls.add(publicUrl);
       }
 
-      // 2. Write review record to PostgreSQL Supabase database
-      try {
-        final currentUser = _supabase.auth.currentUser;
-        await _supabase.from('reviews').insert({
-          'order_id': orderId,
-          'product_id': productId,
-          'customer_id': currentUser?.id,
-          'customer_name': currentUser?.userMetadata?['full_name'] ?? 'Verified Buyer',
-          'rating': rating.value,
-          'fit_rating': fitRating.value,
-          'review_text': reviewTextController.text.trim(),
-          'images': uploadedUrls,
-        });
-      } catch (dbError) {
-        debugPrint('Supabase review insert failed: $dbError');
-        // Proceed with simulated success
-      }
+      // 2. Insert into Supabase reviews table
+      await _supabase.from('reviews').insert({
+        'order_id': orderId,
+        'product_id': productId,
+        'rating': rating.value,
+        'fit_rating': fitRating.value,
+        'review_text': reviewTextController.text.trim(),
+        'image_urls': uploadedUrls,
+        'created_at': DateTime.now().toIso8601String(),
+      });
 
       isLoading.value = false;
 
-      // Close bottom sheet if open
-      if (Get.isBottomSheetOpen == true) {
-        Get.back();
-      }
-
-      // Show beautiful success dialog with a premium scale-up design
+      // 3. Show Celebration / Confetti Dialog
       Get.generalDialog(
-        pageBuilder: (context, animation, secondaryAnimation) {
+        barrierDismissible: true,
+        barrierLabel: 'Review Submitted',
+        barrierColor: Colors.black54,
+        pageBuilder: (context, anim1, anim2) {
           return Center(
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.charcoal.withValues(alpha: 0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.stars_rounded,
+                    size: 70,
+                    color: AppColors.camel,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Thank You!',
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.charcoal,
                     ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: const BoxDecoration(
-                        color: AppColors.camelLight,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_circle_outline_rounded,
-                        color: AppColors.camel,
-                        size: 48,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Your verified feedback helps our artisan community improve and guides future shoppers.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 14,
+                      color: AppColors.grey,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.back(); // Dismiss Dialog
+                      Get.back(); // Return to previous screen
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.camel,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Thank You!',
+                    child: const Text(
+                      'Back to Orders',
                       style: TextStyle(
                         fontFamily: 'Outfit',
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.charcoal,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Your review has been successfully submitted. It helps other shoppers in the Velvet Maison community find their perfect fit.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Outfit',
-                        fontSize: 13,
-                        color: AppColors.ink,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.camel,
-                          foregroundColor: AppColors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        onPressed: () {
-                          Get.back(); // Close dialog
-                        },
-                        child: const Text(
-                          'Close',
-                          style: TextStyle(
-                            fontFamily: 'Outfit',
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -245,12 +221,9 @@ class ReviewController extends GetxController {
       reviewImages.clear();
     } catch (e) {
       isLoading.value = false;
-      Get.snackbar(
-        'Submission Failed',
-        'Could not submit review: $e',
-        backgroundColor: AppColors.error.withValues(alpha: 0.1),
-        colorText: AppColors.error,
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Submission Failed',
+        message: 'Could not submit review: $e',
       );
     }
   }

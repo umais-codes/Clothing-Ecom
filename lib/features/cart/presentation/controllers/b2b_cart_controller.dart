@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../domain/models/cart_item_model.dart';
 import '../../data/repositories/cart_repository.dart';
 
@@ -341,12 +341,9 @@ class B2BCartController extends GetxController {
     ];
 
     addBatchItems(sampleItems);
-    Get.snackbar(
-      'Bulk Sample Loaded',
-      'Loaded 135 units across 2 corporate apparel lines.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.camel,
-      colorText: AppColors.white,
+    AppSnackbar.info(
+      title: 'Bulk Sample Loaded',
+      message: 'Loaded 135 units across 2 corporate apparel lines.',
     );
   }
 }

@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart';
 import 'package:hive/hive.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 enum AuthRole { shopper, vendor, corporate, admin }
 
@@ -252,10 +253,9 @@ class AuthController extends GetxController {
         }
 
         _handleAuthSuccess(AuthRole.shopper);
-        Get.snackbar(
-          'Success',
-          'Welcome back!',
-          backgroundColor: const Color(0xFFFAF9F6),
+        AppSnackbar.success(
+          title: 'Welcome Back',
+          message: 'You have signed in successfully.',
         );
       }
     } catch (e) {
@@ -286,10 +286,9 @@ class AuthController extends GetxController {
           email: shopperEmailController.text.trim(),
         );
         _handleAuthSuccess(AuthRole.shopper);
-        Get.snackbar(
-          'Success',
-          'Account created successfully!',
-          backgroundColor: const Color(0xFFFAF9F6),
+        AppSnackbar.success(
+          title: 'Account Created',
+          message: 'Welcome to Valvet Maison!',
         );
       }
     } catch (e) {
@@ -611,10 +610,9 @@ class AuthController extends GetxController {
         }
 
         _handleAuthSuccess(AuthRole.vendor);
-        Get.snackbar(
-          'Success',
-          'Welcome back to the Brand Portal',
-          backgroundColor: const Color(0xFFFAF9F6),
+        AppSnackbar.success(
+          title: 'Brand Portal',
+          message: 'Welcome back to your Brand Dashboard',
         );
       }
     } catch (e) {
@@ -855,10 +853,9 @@ class AuthController extends GetxController {
         }
 
         _handleAuthSuccess(AuthRole.corporate);
-        Get.snackbar(
-          'Success',
-          'Welcome to Corporate Access',
-          backgroundColor: const Color(0xFFFAF9F6),
+        AppSnackbar.success(
+          title: 'Corporate Access',
+          message: 'Welcome to Corporate Wholesale Portal',
         );
       }
     } catch (e) {
@@ -869,14 +866,9 @@ class AuthController extends GetxController {
   void _showError(String message) {
     status.value = AuthStatus.error;
     errorMessage.value = message;
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFFFAF9F6),
-      colorText: const Color(0xFF1A1A1A),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 12,
+    AppSnackbar.error(
+      title: 'Authentication Error',
+      message: message,
     );
   }
 

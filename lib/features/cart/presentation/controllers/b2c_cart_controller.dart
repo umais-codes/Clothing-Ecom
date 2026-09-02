@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
 import 'package:ecom_app/features/wishlist/presentation/controllers/wishlist_controller.dart';
 import '../../domain/models/cart_item_model.dart';
@@ -82,13 +82,9 @@ class B2CCartController extends GetxController {
         wishlistCtrl.addToWishlist(product);
       }
       removeItem(item.id);
-      Get.snackbar(
-        'Moved to Wishlist',
-        '${item.name} has been moved to your wishlist.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.charcoal,
-        colorText: AppColors.white,
-        duration: const Duration(seconds: 2),
+      AppSnackbar.success(
+        title: 'Saved to Wishlist',
+        message: '${item.name} has been moved to your saved list.',
       );
     } catch (e) {
       debugPrint('Error moving item to wishlist: $e');

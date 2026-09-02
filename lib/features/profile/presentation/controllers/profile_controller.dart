@@ -9,6 +9,7 @@ import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 
 class ProfileController extends GetxController {
@@ -266,6 +267,12 @@ class ProfileController extends GetxController {
       }
     } catch (e) {
       debugPrint('Error loading user profile: $e');
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('jwt') ||
+          errStr.contains('pgrst303') ||
+          errStr.contains('401')) {
+        SupabaseService.handleSessionExpired('JWT expired in profile controller');
+      }
     }
   }
 
@@ -284,14 +291,20 @@ class ProfileController extends GetxController {
         profileImagePath.value = image.path;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to pick image: $e');
+      AppSnackbar.error(
+        title: 'Image Error',
+        message: 'Failed to pick image: $e',
+      );
     }
   }
 
   void updateBodyMetrics() {
     final user = _authRepository.currentUser;
     if (user == null) {
-      Get.snackbar('Error', 'No user logged in.');
+      AppSnackbar.warning(
+        title: 'Authentication Required',
+        message: 'No user is currently signed in.',
+      );
       return;
     }
 
@@ -497,11 +510,9 @@ class ProfileController extends GetxController {
                         weight.value = '${tempWeight.value.round()}kg';
                         fitPreference.value = tempFit.value;
 
-                        Get.snackbar(
-                          'Success',
-                          'Fit profile updated successfully.',
-                          backgroundColor: const Color(0xFFFAF9F6),
-                          snackPosition: SnackPosition.BOTTOM,
+                        AppSnackbar.success(
+                          title: 'Profile Updated',
+                          message: 'Fit profile updated successfully.',
                         );
                       },
                       loadingWidget: const Center(
@@ -511,11 +522,9 @@ class ProfileController extends GetxController {
                       ),
                     );
                   } catch (e) {
-                    Get.snackbar(
-                      'Error',
-                      'Failed to update fit profile: $e',
-                      backgroundColor: const Color(0xFFFAF9F6),
-                      snackPosition: SnackPosition.BOTTOM,
+                    AppSnackbar.error(
+                      title: 'Update Failed',
+                      message: 'Failed to update fit profile: $e',
                     );
                   }
                 },

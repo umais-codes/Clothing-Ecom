@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import '../controllers/profile_controller.dart';
 
@@ -103,24 +104,14 @@ class EditProfileView extends GetView<ProfileController> {
                             ntn: isCorporate ? ntnController.text.trim() : null,
                           );
                           Get.back();
-                          Get.snackbar(
-                            'Success',
-                            'Profile updated successfully',
-                            snackPosition: SnackPosition.TOP,
-                            backgroundColor: AppColors.offWhite,
-                            colorText: AppColors.charcoal,
-                            margin: const EdgeInsets.all(16),
-                            borderRadius: 12,
+                          AppSnackbar.success(
+                            title: 'Profile Saved',
+                            message: 'Profile details updated successfully.',
                           );
                         } catch (e) {
-                          Get.snackbar(
-                            'Error',
-                            'Failed to update profile: $e',
-                            snackPosition: SnackPosition.TOP,
-                            backgroundColor: AppColors.error,
-                            colorText: AppColors.white,
-                            margin: const EdgeInsets.all(16),
-                            borderRadius: 12,
+                          AppSnackbar.error(
+                            title: 'Update Error',
+                            message: 'Failed to update profile: $e',
                           );
                         }
                       },

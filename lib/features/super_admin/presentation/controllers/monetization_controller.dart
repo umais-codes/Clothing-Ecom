@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../domain/models/subscription_plan.dart';
 import '../../domain/models/commission_rule.dart';
 import '../../domain/models/vendor_billing.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class MonetizationController extends GetxController {
   // === Plan Builder State ===
@@ -147,8 +148,10 @@ class MonetizationController extends GetxController {
       plans.add(plan);
     }
     
-    Get.snackbar('Success', 'Plan saved successfully',
-      snackPosition: SnackPosition.BOTTOM);
+    AppSnackbar.success(
+      title: 'Plan Saved',
+      message: 'Subscription plan saved successfully.',
+    );
   }
 
   void updateGlobalCommission(double value) {
@@ -157,8 +160,10 @@ class MonetizationController extends GetxController {
 
   void changeVendorBillingAction(String vendorId, String action) {
     // Handle action: Upgrade, Downgrade, Extend
-    Get.snackbar('Action', '\$action applied to Vendor \$vendorId',
-      snackPosition: SnackPosition.BOTTOM);
+    AppSnackbar.info(
+      title: 'Billing Updated',
+      message: '$action applied to vendor $vendorId.',
+    );
   }
 
 

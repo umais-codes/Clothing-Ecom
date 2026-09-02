@@ -6,6 +6,7 @@ import 'package:ecom_app/app/utils/responsive.dart';
 import '../../domain/entities/vendor_order.dart';
 import '../controllers/vendor_order_controller.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'rma_handling_card.dart';
 
 class OrderDetailsSheet extends StatelessWidget {
@@ -614,12 +615,9 @@ class OrderDetailsSheet extends StatelessWidget {
               text: "Print Slip",
               variant: ButtonVariant.outlined,
               onPressed: () {
-                Get.snackbar(
-                  'Slip Generated',
-                  'Fulfillment slip for ${order.id} sent to cloud printer.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: AppColors.success.withValues(alpha: 0.1),
-                  colorText: AppColors.success,
+                AppSnackbar.info(
+                  title: 'Slip Generated',
+                  message: 'Fulfillment slip for ${order.id} sent to cloud printer.',
                 );
               },
             ),

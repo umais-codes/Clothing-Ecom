@@ -1,118 +1,118 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../../app/theme/app_colors.dart';
+import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
-class BulkUploadSheet extends StatefulWidget {
+class BulkUploadSheet extends StatelessWidget {
   final double sw;
-  const BulkUploadSheet({super.key, required this.sw});
+  BulkUploadSheet({super.key, required this.sw});
 
-  @override
-  State<BulkUploadSheet> createState() => _BulkUploadSheetState();
-}
-
-class _BulkUploadSheetState extends State<BulkUploadSheet> {
-  bool isUploading = false;
-  double progress = 0.0;
+  final RxBool isUploading = false.obs;
+  final RxDouble progress = 0.0.obs;
 
   void simulateUpload() async {
-    setState(() {
-      isUploading = true;
-    });
+    isUploading.value = true;
 
     for (int i = 0; i <= 100; i += 10) {
       await Future.delayed(const Duration(milliseconds: 200));
-      setState(() {
-        progress = i / 100;
-      });
+      progress.value = i / 100;
     }
 
-    setState(() {
-      isUploading = false;
-    });
+    isUploading.value = false;
     Get.back();
-    Get.snackbar('Success', 'CSV uploaded successfully');
+    AppSnackbar.success(
+      title: 'Upload Complete',
+      message: 'Bulk inventory CSV data imported successfully.',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: .symmetric(
-        horizontal: widget.sw * 0.04,
-        vertical: widget.sw * 0.02,
+      padding: EdgeInsets.symmetric(
+        horizontal: sw * 0.04,
+        vertical: sw * 0.02,
       ),
       decoration: const BoxDecoration(
         color: AppColors.white,
-        borderRadius: .vertical(top: .circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
-        mainAxisSize: .min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: widget.sw * 0.15,
+            width: sw * 0.15,
             height: 5,
             decoration: BoxDecoration(
               color: AppColors.greyLight,
-              borderRadius: .circular(10),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-          SizedBox(height: widget.sw * 0.03),
+          SizedBox(height: sw * 0.03),
           Text(
             'Bulk Upload CSV',
             style: GoogleFonts.outfit(
-              fontSize: widget.sw * 0.05,
-              fontWeight: .w600,
+              fontSize: sw * 0.05,
+              fontWeight: FontWeight.w600,
               color: AppColors.charcoal,
             ),
           ),
-          SizedBox(height: widget.sw * 0.04),
-          GestureDetector(
-            onTap: isUploading ? null : simulateUpload,
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: widget.sw * 0.1),
-              decoration: BoxDecoration(
-                color: AppColors.offWhite,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: AppColors.camel,
-                  style: BorderStyle.solid,
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.cloud_upload_outlined,
-                    size: widget.sw * 0.12,
+          SizedBox(height: sw * 0.04),
+          Obx(
+            () => GestureDetector(
+              onTap: isUploading.value ? null : simulateUpload,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: sw * 0.1),
+                decoration: BoxDecoration(
+                  color: AppColors.offWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
                     color: AppColors.camel,
+                    style: BorderStyle.solid,
+                    width: 1.5,
                   ),
-                  SizedBox(height: widget.sw * 0.02),
-                  Text(
-                    'Tap to select CSV file',
-                    style: GoogleFonts.outfit(
-                      color: AppColors.charcoal,
-                      fontWeight: FontWeight.w500,
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.cloud_upload_outlined,
+                      size: sw * 0.12,
+                      color: AppColors.camel,
                     ),
-                  ),
-                ],
+                    SizedBox(height: sw * 0.02),
+                    Text(
+                      'Tap to select CSV file',
+                      style: GoogleFonts.outfit(
+                        color: AppColors.charcoal,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          if (isUploading) ...[
-            SizedBox(height: widget.sw * 0.06),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.camelLight,
-              color: AppColors.camel,
-            ),
-            SizedBox(height: widget.sw * 0.02),
-            Text(
-              '${(progress * 100).toInt()}% uploaded',
-              style: GoogleFonts.outfit(color: AppColors.grey),
-            ),
-          ],
-          SizedBox(height: widget.sw * 0.06),
+          Obx(() {
+            if (!isUploading.value) return const SizedBox.shrink();
+            return Column(
+              children: [
+                SizedBox(height: sw * 0.06),
+                LinearProgressIndicator(
+                  value: progress.value,
+                  backgroundColor: AppColors.camelLight,
+                  color: AppColors.camel,
+                ),
+                SizedBox(height: sw * 0.02),
+                Text(
+                  '${(progress.value * 100).toInt()}% uploaded',
+                  style: GoogleFonts.outfit(color: AppColors.grey),
+                ),
+              ],
+            );
+          }),
+          SizedBox(height: sw * 0.06),
         ],
       ),
     );

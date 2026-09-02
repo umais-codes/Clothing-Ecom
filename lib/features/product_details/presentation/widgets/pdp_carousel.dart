@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_network_image.dart';
 
-class PdpCarousel extends StatefulWidget {
+class PdpCarousel extends StatelessWidget {
   final double sw;
   final List<String> images;
 
-  const PdpCarousel({
+  PdpCarousel({
     super.key,
     required this.sw,
     required this.images,
   });
 
-  @override
-  State<PdpCarousel> createState() => _PdpCarouselState();
-}
-
-class _PdpCarouselState extends State<PdpCarousel> {
-  int _currentIndex = 0;
+  final RxInt currentIndex = 0.obs;
 
   @override
   Widget build(BuildContext context) {
-    final images = widget.images.isNotEmpty
-        ? widget.images
+    final imageList = images.isNotEmpty
+        ? images
         : [
             'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop'
           ];
@@ -33,47 +29,47 @@ class _PdpCarouselState extends State<PdpCarousel> {
       children: [
         CarouselSlider(
           options: CarouselOptions(
-            height: widget.sw * 0.70,
+            height: sw * 0.70,
             viewportFraction: 1.0,
-            enableInfiniteScroll: images.length > 1,
+            enableInfiniteScroll: imageList.length > 1,
             onPageChanged: (index, reason) {
-              setState(() {
-                _currentIndex = index;
-              });
+              currentIndex.value = index;
             },
           ),
-          items: images.map((url) {
+          items: imageList.map((url) {
             return Builder(
               builder: (BuildContext context) {
                 return CustomNetworkImage(
                   imageUrl: url,
-                  width: widget.sw,
+                  width: sw,
                   fit: BoxFit.cover,
                 );
               },
             );
           }).toList(),
         ),
-        if (images.length > 1)
+        if (imageList.length > 1)
           Positioned(
-            bottom: widget.sw * 0.03,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(images.length, (i) {
-                final bool isActive = _currentIndex == i;
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  width: isActive ? widget.sw * 0.045 : widget.sw * 0.015,
-                  height: widget.sw * 0.015,
-                  margin: EdgeInsets.symmetric(horizontal: widget.sw * 0.008),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(widget.sw * 0.01),
-                    color: isActive
-                        ? AppColors.camel
-                        : AppColors.charcoal.withValues(alpha: 0.3),
-                  ),
-                );
-              }),
+            bottom: sw * 0.03,
+            child: Obx(
+              () => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(imageList.length, (i) {
+                  final bool isActive = currentIndex.value == i;
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    width: isActive ? sw * 0.045 : sw * 0.015,
+                    height: sw * 0.015,
+                    margin: EdgeInsets.symmetric(horizontal: sw * 0.008),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(sw * 0.01),
+                      color: isActive
+                          ? AppColors.camel
+                          : AppColors.charcoal.withValues(alpha: 0.3),
+                    ),
+                  );
+                }),
+              ),
             ),
           ),
       ],

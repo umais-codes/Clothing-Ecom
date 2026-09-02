@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 enum UserRole { shopper, corporateBuyer, fashionBrand }
 
@@ -209,14 +210,9 @@ class OnboardingController extends GetxController {
 
   Future<void> sendOtp() async {
     if (phoneController.text.length < 10) {
-      Get.snackbar(
-        'Invalid Number',
-        'Please enter a valid mobile number.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFFAF9F6),
-        colorText: const Color(0xFF1A1A1A),
-        margin: const EdgeInsets.all(16),
-        borderRadius: 12,
+      AppSnackbar.warning(
+        title: 'Invalid Phone Number',
+        message: 'Please enter a valid mobile number to receive OTP.',
       );
       return;
     }
@@ -229,14 +225,9 @@ class OnboardingController extends GetxController {
 
   Future<void> verifyOtp() async {
     if (otpController.text.length < 6) {
-      Get.snackbar(
-        'Invalid OTP',
-        'Please enter the 6-digit OTP.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFFAF9F6),
-        colorText: const Color(0xFF1A1A1A),
-        margin: const EdgeInsets.all(16),
-        borderRadius: 12,
+      AppSnackbar.warning(
+        title: 'Invalid OTP',
+        message: 'Please enter the complete 6-digit OTP code.',
       );
       return;
     }

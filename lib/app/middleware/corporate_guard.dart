@@ -1,6 +1,7 @@
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class CorporateGuard extends GetMiddleware {
   @override
@@ -17,12 +18,9 @@ class CorporateGuard extends GetMiddleware {
     }
     if (authCtrl.selectedRole.value != AuthRole.corporate &&
         authCtrl.selectedRole.value != AuthRole.admin) {
-      Get.snackbar(
-        'Access Restricted',
-        'Corporate client authorization required to access this portal.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFFAF9F6),
-        colorText: const Color(0xFF1A1A1A),
+      AppSnackbar.warning(
+        title: 'Access Restricted',
+        message: 'Corporate client authorization required to access this portal.',
       );
       return const RouteSettings(name: '/main-navigation');
     }

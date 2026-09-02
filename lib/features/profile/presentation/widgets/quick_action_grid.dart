@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import '../controllers/profile_controller.dart';
 
@@ -46,12 +47,9 @@ class QuickActionGrid extends GetView<ProfileController> {
                 icon: Icons.confirmation_number_outlined,
                 label: 'Vouchers',
                 onTap: () {
-                  Get.snackbar(
-                    'Promo Vouchers',
-                    'No active vouchers available at the moment.',
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.camelLight,
-                    colorText: AppColors.camel,
+                  AppSnackbar.info(
+                    title: 'Promo Vouchers',
+                    message: 'No active vouchers available at the moment.',
                   );
                 },
               ),
@@ -60,12 +58,9 @@ class QuickActionGrid extends GetView<ProfileController> {
                   icon: Icons.cases_outlined,
                   label: 'Uniform Allowance',
                   onTap: () {
-                    Get.snackbar(
-                      'Allowance Balance',
-                      'Your remaining uniform allowance is \$450.00',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: AppColors.camelLight,
-                      colorText: AppColors.camel,
+                    AppSnackbar.info(
+                      title: 'Allowance Balance',
+                      message: 'Your remaining uniform allowance is \$450.00',
                     );
                   },
                 ),

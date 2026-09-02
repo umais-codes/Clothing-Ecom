@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/cart/domain/models/cart_item_model.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/b2c_cart_controller.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_controller.dart';
 import 'package:ecom_app/features/wishlist/domain/models/product_model.dart';
 import 'package:get/get.dart';
 import 'package:ecom_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class PdpController extends GetxController {
   late final Map<String, dynamic> product;
@@ -455,12 +455,9 @@ class PdpController extends GetxController {
 
     Get.toNamed(isB2B ? '/b2b-cart' : '/cart');
 
-    Get.snackbar(
-      'Added to Cart',
-      '$pName has been added to your cart.',
-      backgroundColor: AppColors.camel,
-      colorText: AppColors.white,
-      snackPosition: SnackPosition.TOP,
+    AppSnackbar.success(
+      title: 'Added to Cart',
+      message: '$pName has been added to your shopping cart.',
     );
   }
 }

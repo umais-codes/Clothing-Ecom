@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 
 class AdminLoginScreen extends StatefulWidget {
@@ -50,14 +51,9 @@ class _AdminLoginScreenState extends State<AdminLoginScreen>
   Future<void> _login() async {
     if (_emailCtrl.text.trim() != _adminEmail ||
         _passCtrl.text != _adminPassword) {
-      Get.snackbar(
-        'Access Denied',
-        'Invalid admin credentials. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: AppColors.error,
-        colorText: AppColors.white,
-        borderRadius: 12,
-        margin: const EdgeInsets.all(16),
+      AppSnackbar.error(
+        title: 'Access Denied',
+        message: 'Invalid administrative credentials. Access restricted.',
       );
       return;
     }

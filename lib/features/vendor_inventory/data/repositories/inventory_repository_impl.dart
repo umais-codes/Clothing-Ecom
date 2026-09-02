@@ -122,6 +122,12 @@ class InventoryRepositoryImpl implements InventoryRepository {
       }
     } catch (e) {
       debugPrint('Error getting products from Supabase: $e');
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('jwt') ||
+          errStr.contains('pgrst303') ||
+          errStr.contains('401')) {
+        SupabaseService.handleSessionExpired('JWT expired in inventory repository');
+      }
     }
 
     return [];

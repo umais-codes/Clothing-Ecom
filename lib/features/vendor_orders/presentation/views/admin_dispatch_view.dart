@@ -7,6 +7,7 @@ import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:ecom_app/app/widgets/custom_dropdown_field.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
 import 'package:ecom_app/app/widgets/custom_app_bar.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../controllers/dispatch_controller.dart';
 
 class AdminDispatchView extends GetView<DispatchController> {
@@ -313,14 +314,9 @@ class AdminDispatchView extends GetView<DispatchController> {
                         buttonColor: AppColors.camel,
                         textColor: AppColors.white,
                         onPressed: () {
-                          Get.snackbar(
-                            'Label Generating',
-                            'Downloading shipping PDF label for ${controller.generatedAwb.value}...',
-                            snackPosition: SnackPosition.BOTTOM,
-                            backgroundColor: AppColors.success.withValues(
-                              alpha: 0.15,
-                            ),
-                            colorText: AppColors.success,
+                          AppSnackbar.info(
+                            title: 'Label Generating',
+                            message: 'Downloading shipping PDF label for ${controller.generatedAwb.value}...',
                           );
                         },
                       ),

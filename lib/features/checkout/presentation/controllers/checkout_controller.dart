@@ -10,6 +10,7 @@ import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_control
 import 'package:ecom_app/features/vendor_orders/presentation/controllers/vendor_order_controller.dart';
 import 'package:ecom_app/features/vendor_orders/domain/entities/vendor_order.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/checkout/presentation/views/safepay_payment_gateway_screen.dart';
 
 class CheckoutController extends GetxController {
@@ -321,12 +322,9 @@ class CheckoutController extends GetxController {
       _showSuccessDialog(orderIdStr, sw);
     } catch (e) {
       isProcessing.value = false;
-      Get.snackbar(
-        'Order Error',
-        'Could not complete checkout flow: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.error.withValues(alpha: 0.1),
-        colorText: AppColors.error,
+      AppSnackbar.error(
+        title: 'Checkout Error',
+        message: 'Could not complete checkout flow: $e',
       );
     }
   }

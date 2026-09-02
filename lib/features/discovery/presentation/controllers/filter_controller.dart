@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../auth/controllers/auth_controller.dart';
 import '../../../wishlist/domain/models/product_model.dart';
 import '../../domain/repositories/discovery_repository.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class FilterController extends GetxController {
   final DiscoveryRepository _repository;
@@ -82,7 +83,10 @@ class FilterController extends GetxController {
       final products = await _repository.getProducts(isB2B: isB2B);
       allProducts.assignAll(products);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load apparel products: $e');
+      AppSnackbar.error(
+        title: 'Catalog Error',
+        message: 'Failed to load apparel products: $e',
+      );
     } finally {
       isLoading.value = false;
     }

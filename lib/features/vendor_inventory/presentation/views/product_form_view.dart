@@ -8,6 +8,7 @@ import '../../../../app/widgets/custom_button.dart';
 import '../../../../app/widgets/custom_text_field.dart';
 import '../../../../app/widgets/custom_dropdown_field.dart';
 import 'package:ecom_app/app/widgets/custom_app_bar.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../../../app/utils/constants.dart';
 import '../controllers/product_crud_controller.dart';
 
@@ -35,7 +36,10 @@ class ProductFormView extends StatelessWidget {
                 onPressed: () {
                   controller.saveDraft();
                   Get.back();
-                  Get.snackbar('Draft Saved', 'Your progress has been saved.');
+                  AppSnackbar.info(
+                    title: 'Draft Saved',
+                    message: 'Your product form draft has been preserved.',
+                  );
                 },
                 variant: ButtonVariant.ghost,
                 textColor: AppColors.camel,

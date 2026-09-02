@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/app/utils/asset_downloader_util.dart';
 import 'package:ecom_app/features/super_admin/domain/entities/admin_entities.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'admin_crud_controller.dart';
 
 class AdminController extends GetxController {
@@ -336,15 +336,9 @@ class AdminController extends GetxController {
         time: 'Just now',
       ),
     );
-    Get.snackbar(
-      'Account Approved',
-      'The partner account has been activated successfully.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.success,
-      colorText: AppColors.white,
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
+    AppSnackbar.success(
+      title: 'Account Approved',
+      message: 'The partner account has been activated successfully.',
     );
   }
 
@@ -370,15 +364,9 @@ class AdminController extends GetxController {
         time: 'Just now',
       ),
     );
-    Get.snackbar(
-      'Application Rejected',
-      'Vendor has been notified to resubmit documents.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.error,
-      colorText: AppColors.white,
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
+    AppSnackbar.error(
+      title: 'Application Rejected',
+      message: 'Vendor has been notified to resubmit documents.',
     );
   }
 
@@ -499,15 +487,9 @@ class AdminController extends GetxController {
       }
     }
 
-    Get.snackbar(
-      'Product Approved',
-      'The item is now live on the catalogue.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.success,
-      colorText: AppColors.white,
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 2),
+    AppSnackbar.success(
+      title: 'Product Approved',
+      message: 'The item is now live on the catalogue.',
     );
   }
 
@@ -534,15 +516,9 @@ class AdminController extends GetxController {
       }
     }
 
-    Get.snackbar(
-      'Product Rejected',
-      'Vendor notified to fix and resubmit.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.error,
-      colorText: AppColors.white,
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 2),
+    AppSnackbar.error(
+      title: 'Product Rejected',
+      message: 'Vendor notified to fix and resubmit.',
     );
   }
 
@@ -572,14 +548,9 @@ class AdminController extends GetxController {
       crud.allProducts.refresh();
     }
 
-    Get.snackbar(
-      'All Products Approved',
-      'Catalogue cleared — all items are now live.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: AppColors.success,
-      colorText: AppColors.white,
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
+    AppSnackbar.success(
+      title: 'All Products Approved',
+      message: 'Catalogue cleared — all items are now live.',
     );
   }
 

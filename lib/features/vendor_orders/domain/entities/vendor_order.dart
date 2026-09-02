@@ -83,6 +83,8 @@ class VendorOrder {
     String? status,
     String? trackingNumber,
     List<OrderTimelineStep>? timeline,
+    String? shippingAddress,
+    String? customerPhone,
     double? packageWeight,
     String? courierPartner,
     String? returnReason,

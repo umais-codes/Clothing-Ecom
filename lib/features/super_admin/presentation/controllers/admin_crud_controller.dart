@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/features/vendor_inventory/data/models/vendor_product_model.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../domain/entities/admin_entities.dart';
 
 class AdminCrudController extends GetxController {
@@ -232,11 +233,9 @@ class AdminCrudController extends GetxController {
   }
 
   void impersonateUser(String userId) {
-    Get.snackbar(
-      'Impersonation Active',
-      'Now viewing platform from user $userId perspective.',
-      backgroundColor: const Color(0xFFC19A6B),
-      colorText: Colors.white,
+    AppSnackbar.info(
+      title: 'Impersonation Active',
+      message: 'Now viewing platform from user $userId perspective.',
     );
   }
 

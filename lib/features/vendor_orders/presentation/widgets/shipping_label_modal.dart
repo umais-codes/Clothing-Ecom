@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 import 'package:ecom_app/app/widgets/custom_button.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../domain/entities/vendor_order.dart';
 
 class ShippingLabelModal extends StatelessWidget {
@@ -395,12 +396,9 @@ class ShippingLabelModal extends StatelessWidget {
                     height: sw * 0.11,
                     textColor: AppColors.charcoal,
                     onPressed: () {
-                      Get.snackbar(
-                        'AWB Shared',
-                        'Shipping label link generated for courier portal.',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: AppColors.camelLight,
-                        colorText: AppColors.charcoal,
+                      AppSnackbar.info(
+                        title: 'AWB Shared',
+                        message: 'Shipping label link generated for courier portal.',
                       );
                     },
                   ),
@@ -413,12 +411,9 @@ class ShippingLabelModal extends StatelessWidget {
                     textColor: AppColors.white,
                     height: sw * 0.11,
                     onPressed: () {
-                      Get.snackbar(
-                        'Sent to Printer',
-                        'Airway Bill $activeAwb queued on thermal label printer.',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: AppColors.successBg,
-                        colorText: AppColors.success,
+                      AppSnackbar.success(
+                        title: 'Sent to Printer',
+                        message: 'Airway Bill $activeAwb queued on thermal label printer.',
                       );
                     },
                   ),

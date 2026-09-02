@@ -357,7 +357,7 @@ class PerspectiveSwitcher extends StatelessWidget {
         ),
         textAlign: TextAlign.center,
       ),
-      grantText: 'Sign In',
+      grantText: 'Sign in to $cleanTargetName',
       denyText: 'Stay on Account',
       onGrant: () async {
         await authController.signOut();

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_app_bar.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/account_menu_section.dart';
@@ -220,12 +221,9 @@ class CorporateProfileView extends GetView<ProfileController> {
               'Bulk Quotations',
               'Request bulk volume quotes',
               () {
-                Get.snackbar(
-                  'Bulk Quote',
-                  'Quotations features can be accessed on B2B product checkout.',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: AppColors.camelLight,
-                  colorText: AppColors.camel,
+                AppSnackbar.info(
+                  title: 'Bulk Quote',
+                  message: 'Quotations features can be accessed on B2B product checkout.',
                 );
               },
             ),

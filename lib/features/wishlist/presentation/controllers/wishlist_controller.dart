@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../../../cart/presentation/controllers/b2c_cart_controller.dart';
 import '../../../cart/presentation/controllers/b2b_cart_controller.dart';
 import '../../domain/models/product_model.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class WishlistController extends GetxController {
   static const String _boxName = 'wishlist_box';
@@ -45,10 +46,9 @@ class WishlistController extends GetxController {
       wishlistItems.add(product);
       wishlistQuantities[product.id] = 1;
       _box.put(product.id, product);
-      Get.snackbar(
-        'Added to Wishlist',
-        '${product.name} has been saved.',
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.success(
+        title: 'Saved to Wishlist',
+        message: '${product.name} has been added to your saved list.',
       );
     }
   }
@@ -87,11 +87,9 @@ class WishlistController extends GetxController {
     cartController.addItem(cartItem);
     removeFromWishlist(product.id);
 
-    Get.snackbar(
-      'Moved to Cart',
-      '${product.name} is now in your shopping bag.',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
+    AppSnackbar.success(
+      title: 'Moved to Cart',
+      message: '${product.name} is now in your shopping bag.',
     );
   }
 

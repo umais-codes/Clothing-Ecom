@@ -98,8 +98,8 @@ class MainNavigationController extends GetxController {
           key: ValueKey('shopper_page_wishlist'),
           child: WishlistScreen(),
         ),
-        const KeyedSubtree(
-          key: ValueKey('shopper_page_cart'),
+        KeyedSubtree(
+          key: const ValueKey('shopper_page_cart'),
           child: B2CCartScreen(),
         ),
         const KeyedSubtree(

@@ -106,7 +106,7 @@ abstract class AppPages {
     ),
     GetPage(
       name: AppRoutes.cart,
-      page: () => const B2CCartScreen(),
+      page: () => B2CCartScreen(),
       transition: Transition.rightToLeft,
     ),
     GetPage(

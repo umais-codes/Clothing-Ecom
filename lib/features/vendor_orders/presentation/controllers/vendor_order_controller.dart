@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../domain/entities/vendor_order.dart';
 
 class VendorOrderController extends GetxController {
@@ -146,6 +146,12 @@ class VendorOrderController extends GetxController {
       orders.assignAll(loadedOrders);
     } catch (e) {
       debugPrint('Error fetching orders in VendorOrderController: $e');
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('jwt') ||
+          errStr.contains('pgrst303') ||
+          errStr.contains('401')) {
+        SupabaseService.handleSessionExpired('JWT expired in vendor orders');
+      }
     }
   }
 
@@ -241,12 +247,9 @@ class VendorOrderController extends GetxController {
             });
       }
 
-      Get.snackbar(
-        'Order Accepted',
-        'Order $orderId has been moved to Processing.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.camelLight,
-        colorText: AppColors.charcoal,
+      AppSnackbar.success(
+        title: 'Order Accepted',
+        message: 'Order $orderId has been moved to Processing.',
       );
 
       // Close the bottom sheet modal if it is currently open
@@ -309,13 +312,9 @@ class VendorOrderController extends GetxController {
         }
       }
 
-      Get.snackbar(
-        'Order Declined',
-        'Order $orderId has been declined. Customer refund initiated.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.errorBg,
-        colorText: AppColors.error,
-        duration: const Duration(seconds: 4),
+      AppSnackbar.error(
+        title: 'Order Declined',
+        message: 'Order $orderId has been declined. Customer refund initiated.',
       );
     }
   }
@@ -363,12 +362,9 @@ class VendorOrderController extends GetxController {
             });
       }
 
-      Get.snackbar(
-        'Order Shipped',
-        'Order $orderId marked as Shipped. Tracking ID added.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.successBg,
-        colorText: AppColors.success,
+      AppSnackbar.success(
+        title: 'Order Shipped',
+        message: 'Order $orderId marked as Shipped. Tracking ID added.',
       );
     }
   }
@@ -419,12 +415,9 @@ class VendorOrderController extends GetxController {
         }
       }
 
-      Get.snackbar(
-        'Delivery Confirmed',
-        'Order $orderId marked as Delivered. Customer notified.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.successBg,
-        colorText: AppColors.success,
+      AppSnackbar.success(
+        title: 'Delivery Confirmed',
+        message: 'Order $orderId marked as Delivered. Customer notified.',
       );
     }
   }
@@ -445,12 +438,10 @@ class VendorOrderController extends GetxController {
             });
       }
 
-      Get.snackbar(
-        'Refund Completed',
-        'RMA for order $orderId completed successfully. Refund initiated.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.errorBg,
-        colorText: AppColors.error,
+      AppSnackbar.success(
+        title: 'Refund Completed',
+        message:
+            'RMA for order $orderId completed successfully. Refund initiated.',
       );
     }
   }
@@ -493,12 +484,9 @@ class VendorOrderController extends GetxController {
         courierPartner: courier,
       );
 
-      Get.snackbar(
-        'Database Sync (Real-time)',
-        'Order $orderId status updated to: $status',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.successBg,
-        colorText: AppColors.success,
+      AppSnackbar.info(
+        title: 'Real-time Sync',
+        message: 'Order $orderId status updated to: $status',
       );
     }
   }

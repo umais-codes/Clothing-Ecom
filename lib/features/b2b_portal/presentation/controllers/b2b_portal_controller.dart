@@ -1,8 +1,8 @@
-import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/features/cart/domain/models/cart_item_model.dart';
 import 'package:ecom_app/features/cart/presentation/controllers/b2b_cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../domain/entities/line_sheet_entity.dart';
 
 class B2BPortalController extends GetxController {
@@ -19,46 +19,55 @@ class B2BPortalController extends GetxController {
     ),
     const LineSheetEntity(
       id: 'LS-002',
-      name: 'EXECUTIVE OXFORD SHIRT',
-      price: 38.00,
-      minQty: 25,
-      composition: 'Egyptian Cotton Blend',
+      name: 'OXFORD BUTTON-DOWN SHIRT',
+      price: 32.00,
+      minQty: 30,
+      composition: '80% Cotton, 20% Linen',
       imageUrl:
-          'https://images.unsplash.com/photo-1594932224828-b4b059b6f6f9?auto=format&fit=crop&q=80&w=800',
+          'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=800',
     ),
     const LineSheetEntity(
       id: 'LS-003',
-      name: 'STRETCH CHINO TROUSER',
-      price: 42.00,
-      minQty: 30,
+      name: 'TAILORED CHINO TROUSERS',
+      price: 45.00,
+      minQty: 25,
       composition: '98% Cotton, 2% Elastane',
       imageUrl:
-          'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&q=80&w=800',
+          'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&q=80&w=800',
     ),
     const LineSheetEntity(
       id: 'LS-004',
-      name: 'TAILORED CORPORATE BLAZER',
-      price: 85.00,
-      minQty: 10,
-      composition: 'Wool Silk Blend',
+      name: 'MERINO WOOL CREWNECK',
+      price: 58.00,
+      minQty: 20,
+      composition: '100% Extra-fine Merino',
       imageUrl:
-          'https://images.unsplash.com/photo-1591369822096-ffd140ec948f?auto=format&fit=crop&q=80&w=800',
+          'https://images.unsplash.com/photo-1614975058789-41316d0e2e9c?auto=format&fit=crop&q=80&w=800',
     ),
   ].obs;
 
-  // Matrix Ordering State
-  final sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-  final colors = [
-    {'name': 'Navy Blue', 'hex': 0xFF000080},
-    {'name': 'Charcoal', 'hex': 0xFF36454F},
-    {'name': 'Stone', 'hex': 0xFF87794E},
-  ];
+  // Active Category Selection
+  final RxString selectedCategory = 'All Categories'.obs;
 
+  // Matrix Ordering State
+  final List<String> sizes = ['S', 'M', 'L', 'XL', '2XL'];
+  final List<Map<String, dynamic>> colors = [
+    {'name': 'White', 'hex': 0xFFFFFFFF},
+    {'name': 'Navy', 'hex': 0xFF001F3F},
+    {'name': 'Camel', 'hex': 0xFFC19A6B},
+    {'name': 'Black', 'hex': 0xFF1A1A1A},
+  ];
+  List<String> get matrixSizes => sizes;
+  List<String> get matrixColors => colors.map((c) => c['name'] as String).toList();
   final RxMap<String, int> matrixQuantities = <String, int>{}.obs;
 
-  void updateMatrixQuantity(String size, String color, int qty) {
+  void updateMatrixQuantity(String color, String size, int qty) {
     final key = '$color-$size';
-    matrixQuantities[key] = qty;
+    if (qty <= 0) {
+      matrixQuantities.remove(key);
+    } else {
+      matrixQuantities[key] = qty;
+    }
   }
 
   int get totalMatrixQuantity {
@@ -71,12 +80,9 @@ class B2BPortalController extends GetxController {
 
   void addMatrixToCart() {
     if (totalMatrixQuantity <= 0) {
-      Get.snackbar(
-        'Empty Matrix',
-        'Please enter quantities for at least one size/color in the matrix.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.warning.withValues(alpha: 0.1),
-        colorText: AppColors.charcoal,
+      AppSnackbar.warning(
+        title: 'Empty Matrix',
+        message: 'Please enter quantities for at least one size/color in the matrix.',
       );
       return;
     }
@@ -113,12 +119,9 @@ class B2BPortalController extends GetxController {
     matrixQuantities.clear();
 
     Get.toNamed('/b2b-cart');
-    Get.snackbar(
-      'Bulk Matrix Added',
-      'Added $addedCount units to Corporate Procurement Cart.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.camel,
-      colorText: AppColors.white,
+    AppSnackbar.success(
+      title: 'Bulk Matrix Added',
+      message: 'Added $addedCount units to Corporate Procurement Cart.',
     );
   }
 
@@ -130,19 +133,15 @@ class B2BPortalController extends GetxController {
   void submitRFQ() {
     if (companyNameController.text.isEmpty ||
         rfqQuantityController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please fill in required fields',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Get.theme.colorScheme.error.withValues(alpha: 0.1),
+      AppSnackbar.error(
+        title: 'Form Incomplete',
+        message: 'Please fill in all required RFQ fields.',
       );
       return;
     }
-    Get.snackbar(
-      'Quote Requested',
-      'Our team will contact ${companyNameController.text} shortly.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Get.theme.colorScheme.secondary.withValues(alpha: 0.1),
+    AppSnackbar.success(
+      title: 'Quote Requested',
+      message: 'Our corporate team will contact ${companyNameController.text} shortly.',
     );
   }
 }

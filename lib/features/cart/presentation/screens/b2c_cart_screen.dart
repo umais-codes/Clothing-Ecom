@@ -5,26 +5,16 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ecom_app/app/widgets/custom_app_bar.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../controllers/b2c_cart_controller.dart';
 import '../widgets/retail_cart_view.dart';
 
-class B2CCartScreen extends StatefulWidget {
-  const B2CCartScreen({super.key});
+class B2CCartScreen extends StatelessWidget {
+  B2CCartScreen({super.key});
 
-  @override
-  State<B2CCartScreen> createState() => _B2CCartScreenState();
-}
-
-class _B2CCartScreenState extends State<B2CCartScreen> {
   final TextEditingController _promoController = TextEditingController();
-  bool _isPromoExpanded = false;
-
-  @override
-  void dispose() {
-    _promoController.dispose();
-    super.dispose();
-  }
+  final RxBool _isPromoExpanded = false.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -224,20 +214,21 @@ class _B2CCartScreenState extends State<B2CCartScreen> {
             children: [
               InkWell(
                 onTap: () {
-                  setState(() {
-                    _isPromoExpanded = !_isPromoExpanded;
-                  });
+                  _isPromoExpanded.toggle();
                 },
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.discount_outlined,
-                      size: sw * 0.04,
+                      _isPromoExpanded.value
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.confirmation_number_outlined,
+                      size: sw * 0.038,
                       color: AppColors.camel,
                     ),
                     SizedBox(width: sw * 0.015),
                     Text(
-                      _isPromoExpanded ? "Hide Promo Code" : "Have a promo code?",
+                      _isPromoExpanded.value ? "Hide Promo Code" : "Have a promo code?",
                       style: GoogleFonts.outfit(
                         fontSize: sw * 0.03,
                         fontWeight: FontWeight.w600,
@@ -247,7 +238,7 @@ class _B2CCartScreenState extends State<B2CCartScreen> {
                   ],
                 ),
               ),
-              if (!_isPromoExpanded)
+              if (!_isPromoExpanded.value)
                 Wrap(
                   spacing: sw * 0.015,
                   children: [
@@ -257,7 +248,7 @@ class _B2CCartScreenState extends State<B2CCartScreen> {
                 ),
             ],
           ),
-          if (_isPromoExpanded) ...[
+          if (_isPromoExpanded.value) ...[
             SizedBox(height: sw * 0.02),
             Row(
               children: [
@@ -300,18 +291,13 @@ class _B2CCartScreenState extends State<B2CCartScreen> {
                   onPressed: () {
                     final success = controller.applyPromoCode(_promoController.text);
                     if (!success) {
-                      Get.snackbar(
-                        "Invalid Code",
-                        "Please try 'VELVET10', 'VIP20', or 'FREESHIP'",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: AppColors.error.withValues(alpha: 0.1),
-                        colorText: AppColors.error,
+                      AppSnackbar.warning(
+                        title: "Invalid Voucher",
+                        message: "Please try 'VELVET10', 'VIP20', or 'FREESHIP'",
                       );
                     } else {
                       _promoController.clear();
-                      setState(() {
-                        _isPromoExpanded = false;
-                      });
+                      _isPromoExpanded.value = false;
                     }
                   },
                 ),

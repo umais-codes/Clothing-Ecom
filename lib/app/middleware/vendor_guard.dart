@@ -1,6 +1,7 @@
 import 'package:ecom_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class VendorGuard extends GetMiddleware {
   @override
@@ -16,12 +17,9 @@ class VendorGuard extends GetMiddleware {
       return const RouteSettings(name: '/onboarding');
     }
     if (authCtrl.selectedRole.value != AuthRole.vendor) {
-      Get.snackbar(
-        'Access Restricted',
-        'Vendor authorization required to access this portal.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFFAF9F6),
-        colorText: const Color(0xFF1A1A1A),
+      AppSnackbar.warning(
+        title: 'Access Restricted',
+        message: 'Vendor authorization required to access this portal.',
       );
       return const RouteSettings(name: '/main-navigation');
     }

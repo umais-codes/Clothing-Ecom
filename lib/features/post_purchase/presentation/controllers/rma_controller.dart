@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import 'package:ecom_app/features/vendor_orders/domain/entities/vendor_order.dart';
 import 'package:ecom_app/features/vendor_orders/presentation/controllers/vendor_order_controller.dart';
 
@@ -74,12 +75,9 @@ class RmaController extends GetxController {
   void nextStep() {
     if (currentStep.value < 3) {
       if (currentStep.value == 1 && selectedReason.value.isEmpty) {
-        Get.snackbar(
-          'Reason Required',
-          'Please select a reason for your return request.',
-          backgroundColor: AppColors.error.withValues(alpha: 0.1),
-          colorText: AppColors.error,
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.warning(
+          title: 'Reason Required',
+          message: 'Please select a reason for your return request.',
         );
         return;
       }
@@ -87,12 +85,9 @@ class RmaController extends GetxController {
           evidenceImages.isEmpty &&
           (selectedReason.value == 'Damaged or defective' ||
               selectedReason.value == 'Not as pictured / Incorrect item')) {
-        Get.snackbar(
-          'Evidence Required',
-          'Photo evidence is required for damaged or incorrect items.',
-          backgroundColor: AppColors.error.withValues(alpha: 0.1),
-          colorText: AppColors.error,
-          snackPosition: SnackPosition.BOTTOM,
+        AppSnackbar.warning(
+          title: 'Evidence Required',
+          message: 'Photo evidence is required for damaged or incorrect items.',
         );
         return;
       }
@@ -117,11 +112,9 @@ class RmaController extends GetxController {
         evidenceImages.add(pickedFile);
       }
     } catch (e) {
-      Get.snackbar(
-        'Upload Error',
-        'Failed to access camera/gallery: $e',
-        backgroundColor: AppColors.error.withValues(alpha: 0.1),
-        colorText: AppColors.error,
+      AppSnackbar.error(
+        title: 'Upload Error',
+        message: 'Failed to access camera/gallery: $e',
       );
     }
   }
@@ -236,12 +229,9 @@ class RmaController extends GetxController {
       );
     } catch (e) {
       isLoading.value = false;
-      Get.snackbar(
-        'Submission Failed',
-        'Could not submit request: $e',
-        backgroundColor: AppColors.error.withValues(alpha: 0.1),
-        colorText: AppColors.error,
-        snackPosition: SnackPosition.BOTTOM,
+      AppSnackbar.error(
+        title: 'Submission Failed',
+        message: 'Could not submit return request: $e',
       );
     }
   }

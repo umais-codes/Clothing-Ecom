@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../domain/entities/vendor_order.dart';
 import 'vendor_order_controller.dart';
 
@@ -156,12 +156,9 @@ class FulfillmentController extends GetxController {
 
   Future<void> confirmShipment() async {
     if (!isFormValid) {
-      Get.snackbar(
-        'Validation Error',
-        'Please enter a valid weight (kg) and tracking number.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.errorBg,
-        colorText: AppColors.error,
+      AppSnackbar.error(
+        title: 'Validation Error',
+        message: 'Please enter a valid weight (kg) and tracking number.',
       );
       return;
     }
@@ -215,13 +212,9 @@ class FulfillmentController extends GetxController {
         }
       }
 
-      Get.snackbar(
-        'Shipment Confirmed',
-        'Order ${order.id} has been dispatched via $courier (AWB: $tracking).',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.successBg,
-        colorText: AppColors.success,
-        duration: const Duration(seconds: 4),
+      AppSnackbar.success(
+        title: 'Shipment Confirmed',
+        message: 'Order ${order.id} has been dispatched via $courier (AWB: $tracking).',
       );
 
       // Close sheets and navigate back
@@ -232,12 +225,9 @@ class FulfillmentController extends GetxController {
       Get.until((route) => Get.currentRoute == '/vendor-orders' || Get.currentRoute == '/main-navigation');
     } catch (e) {
       debugPrint('Error confirming shipment: $e');
-      Get.snackbar(
-        'Dispatch Error',
-        'Failed to confirm shipment: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.errorBg,
-        colorText: AppColors.error,
+      AppSnackbar.error(
+        title: 'Dispatch Error',
+        message: 'Failed to confirm shipment: $e',
       );
     } finally {
       isSubmitting.value = false;

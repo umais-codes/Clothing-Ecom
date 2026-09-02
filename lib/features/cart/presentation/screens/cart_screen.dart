@@ -19,6 +19,6 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const B2CCartScreen();
+    return  B2CCartScreen();
   }
 }

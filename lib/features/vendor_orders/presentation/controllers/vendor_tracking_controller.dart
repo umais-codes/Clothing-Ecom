@@ -1,6 +1,6 @@
-import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 
 class VendorTrackingController extends GetxController {
   final RxInt activeStepIndex = 1.obs;
@@ -48,21 +48,15 @@ class VendorTrackingController extends GetxController {
   void simulateWebhookUpdate() {
     if (activeStepIndex.value < steps.length - 1) {
       activeStepIndex.value++;
-      Get.snackbar(
-        'Webhook Simulation Triggered',
-        'Status updated to: "${steps[activeStepIndex.value]['title']}"',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.camel.withValues(alpha: 0.15),
-        colorText: AppColors.charcoal,
+      AppSnackbar.info(
+        title: 'Webhook Simulation',
+        message: 'Status updated to: "${steps[activeStepIndex.value]['title']}"',
       );
     } else {
       activeStepIndex.value = 0;
-      Get.snackbar(
-        'Webhook Reset',
-        'Logistics timeline reset to label generation.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.camel.withValues(alpha: 0.1),
-        colorText: AppColors.charcoal,
+      AppSnackbar.info(
+        title: 'Webhook Reset',
+        message: 'Logistics timeline reset to label generation.',
       );
     }
   }

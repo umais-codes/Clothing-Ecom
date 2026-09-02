@@ -1,62 +1,47 @@
 import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:ecom_app/app/utils/responsive.dart';
 
-class PinInputField extends StatefulWidget {
+class PinInputField extends StatelessWidget {
   final int length;
   final TextEditingController controller;
   final Function(String)? onCompleted;
 
-  const PinInputField({
+  PinInputField({
     super.key,
     this.length = 6,
     required this.controller,
     this.onCompleted,
-  });
+  }) {
+    _focusNodes = List.generate(length, (_) => FocusNode());
+    _controllers = List.generate(length, (_) => TextEditingController());
+    _focusedStates = List.generate(length, (_) => false.obs);
 
-  @override
-  State<PinInputField> createState() => _PinInputFieldState();
-}
+    for (int i = 0; i < length; i++) {
+      final index = i;
+      _focusNodes[index].addListener(() {
+        _focusedStates[index].value = _focusNodes[index].hasFocus;
+      });
 
-class _PinInputFieldState extends State<PinInputField> {
-  late List<FocusNode> _focusNodes;
-  late List<TextEditingController> _controllers;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNodes = List.generate(widget.length, (_) => FocusNode());
-    _controllers = List.generate(widget.length, (_) => TextEditingController());
-
-    for (int i = 0; i < widget.length; i++) {
-      // Rebuild when focus changes to update border color
-      _focusNodes[i].addListener(() => setState(() {}));
-
-      _controllers[i].addListener(() {
+      _controllers[index].addListener(() {
         final pin = _controllers.map((c) => c.text).join();
-        widget.controller.text = pin;
-        if (pin.length == widget.length && widget.onCompleted != null) {
-          widget.onCompleted!(pin);
+        controller.text = pin;
+        if (pin.length == length && onCompleted != null) {
+          onCompleted!(pin);
         }
       });
     }
   }
 
-  @override
-  void dispose() {
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
-    super.dispose();
-  }
+  late final List<FocusNode> _focusNodes;
+  late final List<TextEditingController> _controllers;
+  late final List<RxBool> _focusedStates;
 
   void _onChanged(String value, int index) {
     if (value.isNotEmpty) {
-      if (index < widget.length - 1) {
+      if (index < length - 1) {
         _focusNodes[index + 1].requestFocus();
       } else {
         _focusNodes[index].unfocus();
@@ -72,26 +57,36 @@ class _PinInputFieldState extends State<PinInputField> {
   Widget build(BuildContext context) {
     final sw = context.screenWidth;
     return Row(
-      mainAxisAlignment: .spaceBetween,
-      children: List.generate(widget.length, (index) {
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: List.generate(length, (index) {
         return SizedBox(
           width: sw * 0.12,
           height: sw * 0.12,
-          child: CustomTextField(
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
-            onChanged: (v) => _onChanged(v, index),
-            keyboardType: .number,
-            textAlign: .center,
-            maxLength: 1,
-            margin: .zero,
-            contentPadding: .zero,
-            fillColor: AppColors.white,
-            borderRadius: sw * 0.02,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: .w700,
-              color: AppColors.charcoal,
-              fontSize: sw * 0.035,
+          child: Obx(
+            () => Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(sw * 0.02),
+                border: _focusedStates[index].value
+                    ? Border.all(color: AppColors.camel, width: 1.5)
+                    : null,
+              ),
+              child: CustomTextField(
+                controller: _controllers[index],
+                focusNode: _focusNodes[index],
+                onChanged: (v) => _onChanged(v, index),
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                maxLength: 1,
+                margin: EdgeInsets.zero,
+                contentPadding: EdgeInsets.zero,
+                fillColor: AppColors.white,
+                borderRadius: sw * 0.02,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.charcoal,
+                  fontSize: sw * 0.035,
+                ),
+              ),
             ),
           ),
         );

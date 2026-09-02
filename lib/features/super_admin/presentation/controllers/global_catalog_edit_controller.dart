@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:ecom_app/app/theme/app_colors.dart';
 import 'package:ecom_app/app/utils/constants.dart';
 import 'package:ecom_app/core/supabase/supabase_client.dart';
 import 'package:ecom_app/features/vendor_inventory/data/models/vendor_product_model.dart';
@@ -14,6 +13,7 @@ import '../../domain/entities/admin_entities.dart';
 import 'admin_crud_controller.dart';
 import 'admin_controller.dart';
 import 'package:ecom_app/app/widgets/custom_permission_dialog.dart';
+import 'package:ecom_app/app/widgets/custom_snackbar.dart';
 import '../../../home/presentation/controllers/home_controller.dart';
 
 class GlobalCatalogEditController extends GetxController {
@@ -67,11 +67,9 @@ class GlobalCatalogEditController extends GetxController {
     if (isPickingImage.value) return;
 
     if (galleryImages.length >= 5) {
-      Get.snackbar(
-        'Limit Reached',
-        'You can only add up to 5 images.',
-        backgroundColor: AppColors.warning,
-        colorText: AppColors.white,
+      AppSnackbar.warning(
+        title: 'Limit Reached',
+        message: 'You can only add up to 5 images for a single item.',
       );
       return;
     }
@@ -120,11 +118,9 @@ class GlobalCatalogEditController extends GetxController {
 
   Future<void> saveProduct() async {
     if (nameController.text.isEmpty || priceController.text.isEmpty) {
-      Get.snackbar(
-        'Validation Error',
-        'Required fields are missing.',
-        backgroundColor: AppColors.error,
-        colorText: AppColors.white,
+      AppSnackbar.warning(
+        title: 'Validation Error',
+        message: 'Please fill in product name and base price.',
       );
       return;
     }
@@ -317,11 +313,9 @@ class GlobalCatalogEditController extends GetxController {
 
     isLoading.value = false;
     Get.back();
-    Get.snackbar(
-      isEditing ? 'Catalog Updated' : 'Product Added',
-      '${updatedProduct.name} successfully added to catalog and published.',
-      backgroundColor: AppColors.success,
-      colorText: AppColors.white,
+    AppSnackbar.success(
+      title: isEditing ? 'Catalog Updated' : 'Product Added',
+      message: '${updatedProduct.name} successfully updated in global catalog.',
     );
   }
 }
